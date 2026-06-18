@@ -1,3 +1,5 @@
+// At the root of every TypeScript project
+
 {
 	"compilerOptions": {
 		"module": "commonjs",

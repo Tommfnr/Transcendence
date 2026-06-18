@@ -57,7 +57,7 @@ services:
     container_name: orm
     restart: unless-stopped
     ports:
-      - "4983:4983"
+      - "4983:4983" # If you need to access Drizzle Studio just go to local.drizzle.studio
     env_file:
       - ../.env
     depends_on:

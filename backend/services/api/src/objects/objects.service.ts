@@ -1,3 +1,6 @@
+// Service files defines the functions used in backend
+// See : https://docs.nestjs.com/providers#services
+
 import { Inject, Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
