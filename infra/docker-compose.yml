@@ -50,6 +50,21 @@ services:
       postgres:
         condition: service_healthy
 
+  orm:
+    build:
+      context: ../backend/services/orm
+      dockerfile: ../../../infra/services/orm/Dockerfile
+    container_name: orm
+    restart: unless-stopped
+    ports:
+      - "4983:4983"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
 volumes:
     frontend_node_modules:
     postgres_data:
