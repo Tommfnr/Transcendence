@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS objects (
+	id 					SERIAL PRIMARY KEY,
+	brand				VARCHAR(20) NOT NULL,
+	owner				VARCHAR(20) NOT NULL,
+	type				VARCHAR(20) NOT NULL
+);
