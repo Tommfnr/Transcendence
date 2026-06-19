@@ -9,3 +9,5 @@
 		reverse_proxy frontend:5173
 	}
 }
+
+# Example : the backend is reachable at localhost:8080/api/

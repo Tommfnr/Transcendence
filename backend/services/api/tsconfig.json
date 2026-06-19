@@ -1,4 +1,5 @@
-// At the root of every TypeScript project
+// At the root of every TypeScript project, defines global settings
+// See : https://www.typescriptlang.org/tsconfig/
 
 {
 	"compilerOptions": {

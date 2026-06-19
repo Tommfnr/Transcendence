@@ -10,4 +10,5 @@ COPY . .
 
 EXPOSE 4983
 
+# You can reach Drizzle Studio at local.drizzle.studio
 CMD ["npx", "drizzle-kit", "studio", "--port", "4983", "--host", "0.0.0.0"]
