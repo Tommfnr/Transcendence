@@ -14,13 +14,13 @@ services:
 
   frontend:
     build:
-      context: ../frontend/base_page
+      context: ../frontend/login_page
       dockerfile: ../../infra/services/frontend/Dockerfile
-    container_name: frontend-vite
+    container_name: frontend-angular
     restart: unless-stopped
     volumes:
-      - ../frontend/base_page:/app
-      - frontend_node_modules:/app/node_modules
+      - ../frontend/login_page:/app
+      #- frontend_node_modules:/app/node_modules
 
 volumes:
     frontend_node_modules:
