@@ -6,3 +6,9 @@ export const objects = pgTable('objects', {
 	owner:	varchar('owner', { length:20 }).notNull(),
 	type:		varchar('type', { length:20 }).notNull()
 })
+
+export const users = pgTable('users', {
+	id:	serial('id').primaryKey(),
+	username: varchar('username').notNull(),
+	h_password: varchar('h_password', { length: 255 }).notNull()
+})

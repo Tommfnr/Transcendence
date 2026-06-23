@@ -3,8 +3,9 @@
 import { Module } from '@nestjs/common'
 import { DatabaseModule } from './database/database.module'
 import { ObjectsModule } from './objects/objects.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
-	imports: [DatabaseModule, ObjectsModule],
+	imports: [DatabaseModule, ObjectsModule, UsersModule],
 })
 export class AppModule {}
