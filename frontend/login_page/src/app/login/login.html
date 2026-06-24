@@ -1,31 +1,31 @@
-<form (submit)="onSubmit($event)">
-  <div>
-    <label>
-      username
-      <input type="username" [formField]="loginForm.username"/>
-    </label>
+  <form (submit)="onSubmit($event)">
+    <div>
+      <label>
+        Email
+        <input type="email" [formField]="loginForm.email"/>
+      </label>
+    </div>
+
+    <div>
+      <label>
+        Password
+        <input type="password" [formField]="loginForm.password"/>
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" [formField]="loginForm.rememberMe"/>
+        Remember me
+      </label>
+    </div>
+
+    <button type="submit">Log in</button>
+  </form>
+
+  <div class="form-debug">
+    <h3>Current Form Values:</h3>
+    <p>Email: {{ loginForm.email().value() }}</p>
+    <p>Password: {{ loginForm.password().value() ? '••••••••' : '(empty)' }}</p>
+    <p>Remember me: {{ loginForm.rememberMe().value() ? 'Yes' : 'No' }}</p>
   </div>
-
-  <div>
-    <label>
-      password
-      <input type="password" [formField]="loginForm.password"/>
-    </label>
-  </div>
-
-  <div>
-    <label>
-      <input type="checkbox" [formField]="loginForm.rememberMe"/>
-      Remember me
-    </label>
-  </div>
-
-  <button type="submit">Log in</button>
-</form>
-
-<div class="form-debug">
-  <h3>Current Form Values:</h3>
-  <p>Email: {{ loginForm.username().value() }}</p>
-  <p>Password: {{ loginForm.password().value() ? '••••••••' : '(empty)' }}</p>
-  <p>Remember me: {{ loginForm.rememberMe().value() ? 'Yes' : 'No' }}</p>
-</div>

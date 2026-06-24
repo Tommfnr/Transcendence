@@ -3,7 +3,7 @@ import { form, FormField, submit } from '@angular/forms/signals';
 import { HttpClient } from '@angular/common/http';
 
 interface LoginData {
-  username: string;
+  email: string;
   password: string;
   rememberMe: boolean;
 }
@@ -17,7 +17,7 @@ interface LoginData {
 })
 export class Login {
   loginModel = signal<LoginData>({
-    username: '',
+    email: '',
     password: '',
     rememberMe: false,
   });
