@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, signal} from '@angular/core';
-import { form, FormField, submit } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { HttpClient } from '@angular/common/http';
 
 interface LoginData {
@@ -21,9 +21,14 @@ export class Login {
     password: '',
     rememberMe: false,
   });
-  loginForm = form(this.loginModel);
 
-  constructor(private http: HttpClient) {}
+  loginForm = form(this.loginModel, (fieldPath) => {
+    required(fieldPath.email, { message: 'Email is required' });
+    email(fieldPath.email, { message: 'Enter a valid email address' });
+    required(fieldPath.password, { message: 'Password is required' });
+  });
+
+  constructor(private http: HttpClient) { }
 
   onSubmit(event: Event) {
     event.preventDefault();
@@ -32,11 +37,11 @@ export class Login {
       const credentials = this.loginModel();
 
       this.http.post('http://localhost:8080/api/auth/login', credentials)
-      .subscribe({
-        next: (response) => console.log('Logged in!', response),
-        error: (err) => console.log('Invalid credentials', err),
+        .subscribe({
+          next: (response) => console.log('Logged in!', response),
+          error: (err) => console.log('Invalid credentials', err),
         });
-     })
+    });
   }
 }
 
