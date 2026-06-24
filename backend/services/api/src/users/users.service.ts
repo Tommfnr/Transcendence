@@ -14,6 +14,10 @@ export class UsersService {
 		return (this.db.select().from(users).orderBy(users.id))
 	}
 
+	findOne(username: string) {
+		return (this.db.select().from(users).where(eq(users.username, username)))
+	}
+
 	async create(dto: CreateUserDto) {
 		const h_password = await argon2.hash(dto.h_password)
 		const [user] = await this.db.insert(users).values({ ...dto, h_password }).returning()		
