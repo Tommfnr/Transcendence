@@ -25,8 +25,11 @@ logs:
 # 	@docker compose -f $(D_COMPOSE_DEV) logs -f
 
 fclean: down
-	@docker system prune -a -f --volumes
+	@docker system prune -a -f
+
+hclean: down fclean
+	@docker volume prune -a -f 
 
 re: fclean all
 
-.PHONY: all down fclean re dev logs
+.PHONY: all down fclean hclean re dev logs
