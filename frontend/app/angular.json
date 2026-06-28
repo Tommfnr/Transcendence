@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "login-page": {
+    "transcendence": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "login-page:build:production"
+              "buildTarget": "transcendence:build:production"
             },
             "development": {
-              "buildTarget": "login-page:build:development"
+              "buildTarget": "transcendence:build:development"
             }
           },
           "defaultConfiguration": "development"
