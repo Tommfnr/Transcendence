@@ -1,0 +1,1 @@
+This folder contains TypeScript interfaces and types (e.g. User, Item, ApiResponse).

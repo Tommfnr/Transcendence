@@ -1,0 +1,1 @@
+This folder contains Angular route guards (e.g. auth guard to protect private routes).
