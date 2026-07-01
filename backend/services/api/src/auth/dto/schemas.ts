@@ -8,8 +8,7 @@ export const usernameSchema = z
 
 export const passwordSchema = z
 	.string()
-	.min(8, 'Min 8 characters')
-	.max(128, 'Max 128 characters')
-	.regex(/[A-Z]/, 'Need at least one uppercase character')
-	.regex(/[0-9]/, 'Need at least one digit')
-	.regex(/[^a-zA-Z0-9]/, 'Need at least one special character')
+	.regex(
+			/^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,128}$/,
+			'Password must be 8-128 chars and include an uppercase letter, a digit, and a special character'
+		)
