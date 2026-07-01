@@ -1,0 +1,1 @@
+This folder contains Angular services responsible for HTTP calls to the NestJS backend API.
