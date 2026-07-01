@@ -1,4 +1,7 @@
-:80 {
+pep.localhost {
+
+	tls internal
+
 	# This will handle correct reverse proxying to the backend
 	handle /api/* {
 		reverse_proxy api:3000

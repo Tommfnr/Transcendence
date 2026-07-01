@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { usernameSchema } from './zod.schemas'
+import { loginIdentifierSchema } from './zod.schemas'
 
 const signInSchema = z.object({
-	username: usernameSchema,
-	password: z.string().min(1),
+	username: loginIdentifierSchema,
+	password: z.string().min(1, 'Password required'),	
 })
 
 export class SignInDto extends createZodDto(signInSchema) {}

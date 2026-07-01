@@ -2,14 +2,15 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { UsersService } from '../users/users.service'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
+import { RegisterDto } from '../users/dto/register.dto'
 
 @Injectable()
 export class AuthService {
 	constructor(private readonly usersService: UsersService,
 	 						private jwtService: JwtService) {}
 
-	async signIn(username: string, pass: string): Promise<{ access_token: string}> {
-		const [user] = await this.usersService.findOne(username)
+	async signIn(loginIdentifier: string, pass: string): Promise<{ access_token: string }> {
+		const [user] = await this.usersService.findOne(loginIdentifier)
 
 		if (!user) {
 			throw new UnauthorizedException('Invalid credentials')
@@ -24,5 +25,9 @@ export class AuthService {
 	
 		const payload	= { sub: user.id, username: user.username }
 		return {access_token: await this.jwtService.signAsync(payload)}
+	}
+
+		async register(dto: RegisterDto) {
+			return (this.usersService.create(dto))
 	}
 }

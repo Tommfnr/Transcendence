@@ -1,12 +1,12 @@
 <form (submit)="onSubmit($event)">
   <div>
     <label>
-      Email
-      <input type="email" [formField]="loginForm.email"/>
+      Username or Email
+      <input type="text" [formField]="loginForm.identifier"/>
     </label>
-    @if (loginForm.email().invalid() && loginForm.email().touched()) {
+    @if (loginForm.identifier().invalid() && loginForm.identifier().touched()) {
       <div class="error">
-        @for (error of loginForm.email().errors(); track error.kind) {
+        @for (error of loginForm.identifier().errors(); track error.kind) {
           <span>{{ error.message }}</span>
         }
       </div>
@@ -39,7 +39,7 @@
 
 <div class="form-debug">
   <h3>Current Form Values:</h3>
-  <p>Email: {{ loginForm.email().value() }}</p>
+  <p>Username or Email: {{ loginForm.identifier().value() }}</p>
   <p>Password: {{ loginForm.password().value() ? '••••••••' : '(empty)' }}</p>
   <p>Remember me: {{ loginForm.rememberMe().value() ? 'Yes' : 'No' }}</p>
 </div>

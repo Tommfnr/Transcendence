@@ -3,7 +3,7 @@ import { form, FormField, required, email, submit } from '@angular/forms/signals
 import { HttpClient } from '@angular/common/http';
 
 interface LoginData {
-  email: string;
+  identifier: string;
   password: string;
   rememberMe: boolean;
 }
@@ -17,14 +17,19 @@ interface LoginData {
 })
 export class Login {
   loginModel = signal<LoginData>({
-    email: '',
+    identifier: '',
     password: '',
     rememberMe: false,
   });
 
   loginForm = form(this.loginModel, (fieldPath) => {
-    required(fieldPath.email, { message: 'Email is required' });
-    email(fieldPath.email, { message: 'Enter a valid email address' });
+    required(fieldPath.identifier, { message: 'Username or email is required' });
+    
+    const currentIdentifier = this.loginModel().identifier;
+    if (currentIdentifier.includes('@')) {
+      email(fieldPath.identifier, { message: 'Enter a valid email address' });
+    }
+
     required(fieldPath.password, { message: 'Password is required' });
   });
 
@@ -34,12 +39,20 @@ export class Login {
     event.preventDefault();
 
     submit(this.loginForm, async () => {
-      const credentials = this.loginModel();
+      const { identifier, password, rememberMe } = this.loginModel();
 
-      this.http.post('http://localhost:8080/api/auth/login', credentials)
+      const isEmail = identifier.includes('@');
+
+      const body = {
+        ...(isEmail ? {email: identifier } : { username: identifier }),
+        password,
+        rememberMe
+      };
+
+      this.http.post('/api/auth/login', body)
         .subscribe({
           next: (response) => console.log('Logged in!', response),
-          error: (err) => console.log('Invalid credentials', err),
+          error: (err) => console.log('Invalid credentials (FRONTEND)', err),
         });
     });
   }
