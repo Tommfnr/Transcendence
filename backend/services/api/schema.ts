@@ -3,7 +3,13 @@
 // but I think it's great to keep init.sql to create the tables before runtime, during the containers startup
 
 import { isNotNull } from 'drizzle-orm'
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, customType } from 'drizzle-orm/pg-core'
+
+const citext = customType<{ data: string }>({
+	dataType() {
+		return ('citext');
+	},
+})
 
 export const objects = pgTable('objects', {
 	id:			serial('id').primaryKey(),
@@ -15,5 +21,6 @@ export const objects = pgTable('objects', {
 export const users = pgTable('users', {
 	id:	serial('id').primaryKey(),
 	username: varchar('username').notNull(),
+	email: citext('email').notNull(),
 	h_password: varchar('h_password', { length: 255 }).notNull()
 })
