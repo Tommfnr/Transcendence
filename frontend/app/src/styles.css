@@ -1,7 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import "tailwindcss";
 
+
 @theme {
+	/* Colors*/
 	--color-primary: #FF9D2E;
 	--color-background: #F8F9FA;
 	--color-card: #FFFFFF;
@@ -9,4 +12,7 @@
 	--color-text-secondary: #6B7280;
 	--color-success: #3FCD6E;
 	--color-complementary: #7043C3;
+
+	/* Font */
+	--font-sans: 'Nunito', sans-serif;
 }
