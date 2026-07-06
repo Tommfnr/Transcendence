@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
-import { Home2 } from './pages/home2/home2';
+import { Landing } from './pages/landing/landing';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 
@@ -19,7 +19,7 @@ export const routes: Routes = [
   },
   {
 	path: '',
-	component: Home2
+	component: Landing
   },
 
 //   {
