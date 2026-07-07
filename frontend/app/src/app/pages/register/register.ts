@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 interface registerData {
   email: string;
@@ -30,7 +30,7 @@ export class Register {
     required(fieldPath.h_password, { message: 'Password is required' });
   });
 
-  constructor(private http: HttpClient) { }
+  constructor(private authService: AuthService) { }
 
   onSubmit(event: Event) {
     event.preventDefault();
@@ -44,7 +44,7 @@ export class Register {
         h_password,
       };
 
-      this.http.post('/api/auth/register', body)
+      this.authService.register(body)
         .subscribe({
           next: (response) => console.log('Logged in!', response),
           error: (err) => console.log('Invalid credentials (FRONTEND)', err),
