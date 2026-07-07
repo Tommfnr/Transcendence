@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { AuthService } from '../../services/auth.service';
-
-interface LoginData {
-  identifier: string;
-  password: string;
-  rememberMe: boolean;
-}
+import { LoginData } from '../../models/login-data.model';
 
 @Component({
   selector: 'app-login',

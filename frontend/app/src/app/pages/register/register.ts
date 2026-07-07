@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { AuthService } from '../../services/auth.service';
-
-interface registerData {
-  email: string;
-  username: string;
-  h_password: string;
-}
+import { RegisterData } from '../../models/register-data.model';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +11,7 @@ interface registerData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
-  registerModel = signal<registerData>({
+  registerModel = signal<RegisterData>({
     email: '',
     username: '',
     h_password: '',
