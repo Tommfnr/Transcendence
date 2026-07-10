@@ -4,6 +4,8 @@ import { Home } from './pages/home/home';
 import { Landing } from './pages/landing/landing';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
+import { AppLayout } from './layouts/app-layout/app-layout';
+import { Dashboard } from './pages/dashboard/dashboard';
 
 export const routes: Routes = [
   {
@@ -23,6 +25,20 @@ export const routes: Routes = [
         component: Register
       },
     ],
+  },
+  {
+	path: 'app',
+	component: AppLayout,
+	children: [
+		{
+			path: '',
+			component: Dashboard
+		},
+		{
+			path: 'dashboard',
+			component: Dashboard
+		}
+	]
   },
   {
     path: 'home',
