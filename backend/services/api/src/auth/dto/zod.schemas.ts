@@ -35,3 +35,11 @@ export const loginIdentifierSchema = z
 				return (usernameSchema.safeParse(value).success)
 			},
 	)
+
+export const groupNameSchema = z
+	.string()
+	.min(1, 'Group name required')
+	.max(50)
+	.regex(/^[a-zA-Z ]{1,}$/,
+			'No special characters allowed for group name'
+	)
