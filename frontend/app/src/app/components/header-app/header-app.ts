@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-header-app',
@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   templateUrl: './header-app.html',
   styleUrl: './header-app.css',
 })
-export class HeaderApp {}
+export class HeaderApp {
+  readonly userName = input('Steve');
+}

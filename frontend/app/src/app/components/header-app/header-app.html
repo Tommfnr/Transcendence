@@ -1,1 +1,14 @@
-<p>header-app works!</p>
+<header class="mx-auto flex h-12 w-full max-w-[390px] items-center gap-4 px-4">
+  <img src="/icons/logo.svg" alt="" class="size-10 shrink-0" />
+
+  <div class="min-w-0 flex-1">
+    <p class="truncate text-lg font-bold text-black">Bonjour {{ userName() }}</p>
+    <p class="truncate text-[0.625rem] text-black">Ensemble, rendons service à nos proches</p>
+  </div>
+
+  <button type="button" aria-label="Notifications" class="shrink-0">
+    <img src="/icons/notification.svg" alt="" class="h-6 w-5.75" />
+  </button>
+
+  <div class="size-10 shrink-0 rounded-full bg-primary/50"></div>
+</header>
