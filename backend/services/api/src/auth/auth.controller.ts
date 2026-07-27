@@ -13,6 +13,12 @@ export class AuthController {
 		return (this.authService.signIn(dto.username, dto.password))
 	}
 
+	@HttpCode(HttpStatus.OK)
+	@Post('register')
+	refresh(@Body('refresh_token') refreshToken: string) {
+		return (this.authService.refresh(refreshToken))
+	}
+
 	@Post('register')
 	register(@Body() dto: RegisterDto) {
 		return (this.authService.register(dto))
