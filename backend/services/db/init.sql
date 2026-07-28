@@ -17,4 +17,18 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS groups (
 	id					SERIAL PRIMARY KEY,
 	NAME				VARCHAR(50) NOT NULL
-)
+);
+
+DO $$
+BEGIN
+	CREATE TYPE role AS ENUM ('admin', 'member');
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS group_members (
+	id SERIAL PRIMARY KEY,
+	group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	role role NOT NULL DEFAULT 'member'
+);

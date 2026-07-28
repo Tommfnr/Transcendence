@@ -14,6 +14,11 @@ export class GroupsController {
 		return (this.groupsService.create(dto, req.user.sub))
 	}
 
+	@Get('debug')
+	debug(@Req() req: AuthenticatedRequest) {
+		return { user : req.user }
+	}
+
 	@Get()
 	findAll() {
 		return (this.groupsService.findAll())

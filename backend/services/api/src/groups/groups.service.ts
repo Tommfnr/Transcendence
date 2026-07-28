@@ -18,7 +18,7 @@ export class GroupsService {
 
 		const [group] = await this.db.insert(groups).values({ name: dto.name }).returning()
 
-		// await this.db.insert(groupMembers).values({ groupId: group.id, userId: adminId, role: 'admin' })
+		await this.db.insert(groupMembers).values({ groupId: group.id, userId: adminId, role: 'admin' })
 	
 		return (group)
 	}
