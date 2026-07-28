@@ -10,6 +10,12 @@ export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	async create(dto: CreateGroupDto, adminId: number) {
+
+		const [existing_group] = await this.db.select().from(groups).where(eq(groups.name, dto.name))
+
+		if (existing_group)
+				throw new ForbiddenException('Already a group with the same name')
+
 		const [group] = await this.db.insert(groups).values({ name: dto.name }).returning()
 
 		await this.db.insert(groupMembers).values({ groupId: group.id, userId: adminId, role: 'admin' })
