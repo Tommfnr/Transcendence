@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS groups (
 	NAME				VARCHAR(50) NOT NULL
 );
 
+ALTER TABLE groups ADD CONSTRAINT groups_name_unique UNIQUE (name);
+
 DO $$
 BEGIN
 	CREATE TYPE role AS ENUM ('admin', 'member');
