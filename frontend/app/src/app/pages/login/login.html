@@ -1,8 +1,8 @@
 <form (submit)="onSubmit($event)">
   <div>
-    <label>
+    <label class="block">
       Username or Email
-      <input type="text" [formField]="loginForm.identifier"/>
+      <input type="text" [formField]="loginForm.identifier" class="block w-full border border-primary rounded-lg p-2"/>
     </label>
     @if (loginForm.identifier().invalid() && loginForm.identifier().touched()) {
       <div class="error">
@@ -14,9 +14,9 @@
   </div>
 
   <div>
-    <label>
+    <label class="block">
       Password
-      <input type="password" [formField]="loginForm.password"/>
+      <input type="password" [formField]="loginForm.password" class="block w-full border border-primary rounded-lg p-2"/>
     </label>
     @if (loginForm.password().invalid() && loginForm.password().touched()) {
       <div class="error">
