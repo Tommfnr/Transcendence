@@ -7,7 +7,6 @@ import { LoginData } from '../../models/login-data.model';
   selector: 'app-login',
   imports: [FormField],
   templateUrl: './login.html',
-  styleUrl: './login.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {

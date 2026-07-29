@@ -7,6 +7,5 @@ import { FooterApp } from '../../components/footer-app/footer-app';
   selector: 'app-app-layout',
   imports: [RouterOutlet, HeaderApp, FooterApp],
   templateUrl: './app-layout.html',
-  styleUrl: './app-layout.css',
 })
 export class AppLayout {}

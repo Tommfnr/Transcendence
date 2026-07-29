@@ -7,7 +7,6 @@ import { RegisterData } from '../../models/register-data.model';
   selector: 'app-register',
   imports: [FormField],
   templateUrl: './register.html',
-  styleUrl: './register.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {

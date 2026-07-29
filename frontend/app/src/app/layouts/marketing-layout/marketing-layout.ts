@@ -7,6 +7,5 @@ import { FooterMarketing } from '../../components/footer-marketing/footer-market
   selector: 'app-marketing-layout',
   imports: [RouterOutlet, HeaderMarketing, FooterMarketing],
   templateUrl: './marketing-layout.html',
-  styleUrl: './marketing-layout.css',
 })
 export class MarketingLayout {}

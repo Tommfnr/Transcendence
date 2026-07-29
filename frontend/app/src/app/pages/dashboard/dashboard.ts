@@ -9,7 +9,6 @@ type DashboardTab = 'requests' | 'offers';
   selector: 'app-dashboard',
   imports: [NgClass, RequestCard],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
 })
 export class Dashboard {
   readonly activeTab = signal<DashboardTab>('requests');
