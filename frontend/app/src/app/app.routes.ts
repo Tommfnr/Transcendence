@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { MarketingLayout } from './layouts/marketing-layout/marketing-layout';
-import { Home } from './pages/home/home';
 import { Landing } from './pages/landing/landing';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
@@ -27,34 +26,31 @@ export const routes: Routes = [
     ],
   },
   {
-	path: 'app',
-	component: AppLayout,
-	children: [
-		{
-			path: '',
-			component: Dashboard
-		},
-		{
-			path: 'dashboard',
-			component: Dashboard
-		}
-	]
-  },
-  {
-    path: 'home',
-    component: Home
+    path: 'app',
+    component: AppLayout,
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        component: Dashboard
+      }
+    ]
   },
 
-//   {
-//     path: 'items',
-//     component: ItemListPageComponent
-//   },
-//   {
-//     path: 'items/:id',
-//     component: ItemDetailPageComponent
-//   },
-//   {
-//     path: 'profile',
-//     component: ProfilePageComponent
-//   },
+  //   {
+  //     path: 'items',
+  //     component: ItemListPageComponent
+  //   },
+  //   {
+  //     path: 'items/:id',
+  //     component: ItemDetailPageComponent
+  //   },
+  //   {
+  //     path: 'profile',
+  //     component: ProfilePageComponent
+  //   },
 ];
