@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { HelpRequest } from '../../models/help-request';
+import { HelpRequest } from '../../models/help-request.model';
 
 @Component({
   selector: 'app-request-card',

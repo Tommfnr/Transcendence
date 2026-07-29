@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RequestCard } from '../../components/request-card/request-card';
-import { HelpRequest } from '../../models/help-request';
+import { HelpRequest } from '../../models/help-request.model';
 
 type DashboardTab = 'requests' | 'offers';
 
