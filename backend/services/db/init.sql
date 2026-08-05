@@ -1,17 +1,22 @@
 CREATE EXTENSION IF NOT EXISTS citext;
 
-CREATE TABLE IF NOT EXISTS objects (
-	id 					SERIAL PRIMARY KEY,
-	brand				VARCHAR(20) NOT NULL,
-	owner				VARCHAR(20) NOT NULL,
-	type				VARCHAR(20) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS users (
 	id					SERIAL PRIMARY KEY,
 	USERNAME			VARCHAR NOT NULL,
 	EMAIL				CITEXT NOT NULL UNIQUE,
 	H_PASSWORD			VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS objects (
+	id                     SERIAL PRIMARY KEY,
+	brand                VARCHAR(20) NOT NULL,
+	owner_id             INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	type                VARCHAR(20) NOT NULL,
+	description          VARCHAR(500),
+	condition            VARCHAR(50),
+	is_available         BOOLEAN DEFAULT true,
+	created_at           TIMESTAMP DEFAULT NOW(),
+	updated_at           TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS groups (
