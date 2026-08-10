@@ -42,6 +42,8 @@ services:
     build:
       context: ../backend/services/api
       dockerfile: ../../../infra/services/api/Dockerfile
+      additional_contexts:
+        shared: ../backend
     container_name: api
     restart: unless-stopped
     env_file:
@@ -54,6 +56,8 @@ services:
     build:
       context: ../backend/services/orm
       dockerfile: ../../../infra/services/orm/Dockerfile
+      additional_contexts:
+        shared: ../backend
     container_name: orm
     restart: unless-stopped
     ports:

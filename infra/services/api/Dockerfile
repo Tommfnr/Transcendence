@@ -7,6 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+COPY --from=shared schema.ts .
 
 EXPOSE 3000
 
