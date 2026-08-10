@@ -11,7 +11,7 @@ export class UsersService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	findAll() {
-		return (this.db.select().from(users).orderBy(users.id))
+		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).orderBy(users.id))
 	}
 
 	findOne(loginIdentifier: string) {
@@ -22,7 +22,7 @@ export class UsersService {
 	}
 
 	findById(id: number) {
-		return (this.db.select().from(users).where(eq(users.id, id)))
+		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).where(eq(users.id, id)))
 	}
 
 	async create(dto: RegisterDto) {
