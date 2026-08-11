@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
 import { GroupsService } from './groups.service'
-import { CreateGroupDto } from './dto/creategroup.dto'
+import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { AuthGuard } from '../auth/guard'
@@ -10,11 +10,6 @@ import { GroupRoleGuard } from './guards/group-role.guard'
 @Controller('groups')
 export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
-
-	@Post()
-	create(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.create(dto, req.user.sub))
-	}
 
 	@Get('debug')
 	debug(@Req() req: AuthenticatedRequest) {
@@ -29,6 +24,11 @@ export class GroupsController {
 	@Get(':id/members')
 	findMembers(@Param('id') id: string) {
 		return (this.groupsService.findMembers(Number(id)))
+	}
+
+	@Post()
+	create(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.create(dto, req.user.sub))
 	}
 
 	@Post(':id/members/:userId')

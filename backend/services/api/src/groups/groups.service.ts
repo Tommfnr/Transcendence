@@ -3,11 +3,19 @@ import { eq, and } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groupObjectGrants, groups, objects } from '../../schema'
 import { DB } from '../database/database.module'
-import { CreateGroupDto } from './dto/creategroup.dto'
+import { CreateGroupDto } from './dto/create-group.dto'
 
 @Injectable()
 export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+
+	findAll() {
+		return (this.db.select().from(groups).orderBy(groups.id))
+	}
+
+	findMembers(gId: number) {
+		return (this.db.select().from(groupMembers).where(eq(groupMembers.groupId, gId)))
+	}
 
 	async create(dto: CreateGroupDto, adminId: number) {
 		return (this.db.transaction(async (t) => {
@@ -29,17 +37,9 @@ export class GroupsService {
 				userId: adminId,
 				role: 'admin',
 			})
-			
+
 			return (group)
 		}))
-	}
-
-	findAll() {
-		return (this.db.select().from(groups).orderBy(groups.id))
-	}
-
-	findMembers(gId: number) {
-		return (this.db.select().from(groupMembers).where(eq(groupMembers.groupId, gId)))
 	}
 
 	async addMember(gId: number, targetUserId: number) {
@@ -47,30 +47,13 @@ export class GroupsService {
 			.select().from(groupMembers).where(
 				and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
 			)
-		
+
 		if (existing_user)
 			throw new ForbiddenException('User already in group')
 
 		const [member] = await this.db.insert(groupMembers).values({ groupId: gId, userId: targetUserId, role: 'member' }).returning()
 
 		return (member)
-	}
-
-	async removeMember(gId: number, targetUserId: number) {
-		const [target] = await this.db.select().from(groupMembers).where(
-			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
-		)
-
-		if (!target)
-			throw new NotFoundException('Target user not in group')
-		if (target.role == 'admin')
-			throw new ForbiddenException('Cannot remove an admin')
-
-		await this.db.delete(groupMembers).where(
-			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
-		)
-
-		return ( { message: 'Member successfully removed' } )
 	}
 
 	async grantObject(gId: number, objectId: number, requesterId: number) {
@@ -155,9 +138,26 @@ export class GroupsService {
 		}))
 	}
 
+	async removeMember(gId: number, targetUserId: number) {
+		const [target] = await this.db.select().from(groupMembers).where(
+			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
+		)
+
+		if (!target)
+			throw new NotFoundException('Target user not in group')
+		if (target.role == 'admin')
+			throw new ForbiddenException('Cannot remove an admin')
+
+		await this.db.delete(groupMembers).where(
+			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
+		)
+
+		return ( { message: 'Member successfully removed' } )
+	}
+
 	async deleteGroup(gId: number) {
 		await this.db.delete(groups).where(eq(groups.id, gId))
-		
+
 		return ( { message: "Group successfully deleted" } )
 	}
 }
