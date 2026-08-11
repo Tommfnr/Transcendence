@@ -5,6 +5,7 @@ import { UsersModule } from '../users/users.module'
 import { JwtModule } from '@nestjs/jwt'
 import * as dotenv from 'dotenv'
 import { AuthGuard } from './guard'
+import { RefreshTokensService } from './refreshtokens.service'
 
 dotenv.config()
 
@@ -12,7 +13,7 @@ dotenv.config()
 	imports: [UsersModule,
 						JwtModule.register({ global: true, secret: process.env.JWT_SECRET, signOptions: { expiresIn: '60s' }}),
 						JwtModule.register({ global: true, secret: process.env.JWT_REFRESH_SECRET, signOptions: { expiresIn: '7d' }})],
-	providers: [AuthService, AuthGuard],
+	providers: [AuthService, AuthGuard, RefreshTokensService],
 	controllers: [AuthController],
 	exports: [AuthGuard],
 })

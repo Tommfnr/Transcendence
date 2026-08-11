@@ -2,7 +2,7 @@
 // We could forget init.sql (used by DB) and just use this to create the tables,
 // but I think it's great to keep init.sql to create the tables before runtime, during the containers startup
 
-import { pgTable, serial, varchar, customType, integer, pgEnum, boolean, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, customType, integer, pgEnum, boolean, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 const citext = customType<{ data: string }>({
 	dataType() {
@@ -11,10 +11,10 @@ const citext = customType<{ data: string }>({
 })
 
 export const objects = pgTable('objects', {
-	id:				serial('id').primaryKey(),
-	brand:			varchar('brand', { length:20 }).notNull(),
-    ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-	type:			varchar('type', { length:20 }).notNull(),
+	id:						serial('id').primaryKey(),
+	brand:				varchar('brand', { length:20 }).notNull(),
+  ownerId:			integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	type:					varchar('type', { length:20 }).notNull(),
 	description:	varchar('description', { length:500 }),
 	condition:		varchar('condition', { length:50 }),
 	isAvailable:	boolean('is_available').default(true),
@@ -23,9 +23,9 @@ export const objects = pgTable('objects', {
 })
 
 export const users = pgTable('users', {
-	id:			serial('id').primaryKey(),
-	username:	varchar('username').notNull(),
-	email:		citext('email').notNull(),
+	id:					serial('id').primaryKey(),
+	username:		varchar('username').notNull(),
+	email:			citext('email').notNull(),
 	h_password: varchar('h_password', { length: 255 }).notNull()
 })
 
@@ -37,8 +37,17 @@ export const groups = pgTable('groups', {
 })
 
 export const groupMembers = pgTable('group_members', {
-	id:			serial('id').primaryKey(),
+	id:				serial('id').primaryKey(),
 	groupId:	integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
 	userId:		integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-	role:		groupRoleEnum('role').notNull().default('member'),
+	role:			groupRoleEnum('role').notNull().default('member'),
+})
+
+export const refreshTokens = pgTable('refresh_tokens', {
+	id: 				serial('id').primaryKey(),
+	jti: 				uuid('jti').notNull().unique(),
+	userId: 		integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	revoked: 		boolean('revoked').notNull().default(false),
+	expiresAt: timestamp('expires_at').notNull(),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
 })

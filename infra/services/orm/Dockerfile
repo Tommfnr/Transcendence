@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-COPY --from=shared schema.ts .
+COPY --from=shared services/api/src/database/schema.ts .
 
 EXPOSE 4983
 

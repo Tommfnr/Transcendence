@@ -10,5 +10,5 @@
 		"baseUrl": ".",
 		"strict": true
 	},
-	"include": ["src/**/*", "schema.ts"]
+	"include": ["src/**/*"]
 }

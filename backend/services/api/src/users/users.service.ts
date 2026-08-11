@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { users } from '../../schema'
+import { users } from '../database/schema'
 import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
 import * as argon2 from 'argon2'

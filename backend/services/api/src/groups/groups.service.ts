@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { groupMembers, groups } from '../../schema'
+import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateGroupDto } from './dto/creategroup.dto'
 

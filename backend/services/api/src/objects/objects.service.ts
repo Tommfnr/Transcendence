@@ -4,7 +4,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eq, and } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { objects } from '../../schema'
+import { objects } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateObjectDto } from './dto/create-object.dto'
 import { UpdateObjectDto } from './dto/update-object.dto'
