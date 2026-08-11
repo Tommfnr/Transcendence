@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/creategroup.dto'
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { AuthGuard } from '../auth/guard'
 
@@ -37,6 +38,11 @@ export class GroupsController {
 	@Post(':id/objects/:objectId/grant')
 	grantObject(@Param('id') id: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
 		return (this.groupsService.grantObject(Number(id), Number(objectId), req.user.sub))
+	}
+
+	@Patch(':id/members/:userId/role')
+	updateMemberRole(@Param('id') id: string, @Param('userId') userId: string, @Body() dto: UpdateMemberRoleDto) {
+		return (this.groupsService.updateMemberRole(Number(id), Number(userId), dto.role))
 	}
 
 	@Delete(':id/members/:userId')

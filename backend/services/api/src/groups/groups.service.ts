@@ -115,6 +115,31 @@ export class GroupsService {
 		return (grant)
 	}
 
+	async updateMemberRole(gId: number, targetUserId: number, role: 'admin' | 'member') {
+		const [target] = await this.db.select().from(groupMembers).where(
+			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
+		)
+
+		if (!target)
+			throw new NotFoundException('Target user not in group')
+
+		if (target.role === 'admin' && role === 'member') {
+			const admins = await this.db.select().from(groupMembers).where(
+				and(eq(groupMembers.groupId, gId), eq(groupMembers.role, 'admin'),),
+			)
+
+			if (admins.length <= 1)
+				throw new ForbiddenException('Cannot demote the only remaining admin')
+		}
+
+		const [updated] = await this.db.update(groupMembers)
+			.set({ role })
+			.where(and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),))
+			.returning()
+
+		return (updated)
+	}
+
 	async deleteGroup(gId: number, requesterId: number) {
 		const [requester] = await this.db.select().from(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
