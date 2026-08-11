@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { usernameSchema, passwordSchema, emailSchema } from '../../auth/dto/zod.schemas'
+import { usernameSchema, passwordSchema, emailSchema } from '../../zod/zod.schemas'
 
 const registerSchema = z.object({
 	username: usernameSchema,
