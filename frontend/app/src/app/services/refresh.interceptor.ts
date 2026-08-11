@@ -32,7 +32,7 @@ export const refreshInterceptor: HttpInterceptorFn = (
 						return (next(retryreq))
 					}),
 					catchError((refreshErr) => {
-						refreshService.clearTokens()
+						refreshService.clearAccessToken()
 						router.navigate(['/login'])
 						return (throwError(() => refreshErr))
 					})

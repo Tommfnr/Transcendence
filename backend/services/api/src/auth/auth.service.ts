@@ -92,4 +92,19 @@ export class AuthService {
 	async register(dto: RegisterDto) {
 			return (this.usersService.create(dto))
 	}
+
+	async logout(refreshToken: string) : Promise<void> {
+		try {
+			const payload = await this.jwtService.verifyAsync(refreshToken, {
+				secret: process.env.JWT_REFRESH_SECRET
+			})
+
+			if (payload?.jti) { // If payload is null, don't look for payload.jti
+				await this.refreshTokensServices.revoke(payload.jti)
+			}
+		} catch {
+			// Need try/catch even if empty because verifyAsync throws in case of bad token
+		}
+	}
+
 }

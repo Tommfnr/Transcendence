@@ -7,38 +7,40 @@ import { LoginResponse, RefreshResponse } from '../models/refresh.types'
 export class RefreshService {
 	private http = inject(HttpClient)
 
-	login(username: string, password: string): Observable<LoginResponse> {
+	private accessToken: string | null = null
+
+	login(username: string, password: string, rememberMe?: boolean ): Observable<LoginResponse> {
 		return (this.http
-		.post<LoginResponse>('/api/auth/login', { username, password })
-		.pipe(tap(({ access_token, refresh_token }) => {
-			localStorage.setItem('access_token', access_token)
-			localStorage.setItem('refresh_token', refresh_token)
+		.post<LoginResponse>('/api/auth/login', { username, password, rememberMe })
+		.pipe(tap(({ access_token }) => {
+			this.accessToken = access_token
 		}))
 		)
 	}
 
-	refreshToken(): Observable<RefreshResponse> {
-		const refresh_token = this.getRefreshToken()
-		
+	refreshToken(): Observable<RefreshResponse> {		
 		return (this.http
-			.post<RefreshResponse>('/api/auth/refresh', { refresh_token })
+			.post<RefreshResponse>('/api/auth/refresh', {})
 			.pipe(tap(({ access_token }) => {
-					localStorage.setItem('access_token', access_token)
+				this.accessToken = access_token
 			}))
 		)
-	
+	}
+
+	logout(): Observable<unknown> {
+		return (this.http
+			.post('/api/auth/logout', {})
+			.pipe(tap(() => {
+				this.accessToken = null
+			}))
+		)
 	}
 
 	getAccessToken(): string | null {
-		return (localStorage.getItem('access_token'))
+		return (this.accessToken)
 	}
 
-	getRefreshToken(): string | null {
-		return (localStorage.getItem('refresh_token'))
-	}
-
-	clearTokens(): void {
-		localStorage.removeItem('access_token')
-		localStorage.removeItem('refresh_token')
+	clearAccessToken(): void {
+		this.accessToken = null
 	}
 }
