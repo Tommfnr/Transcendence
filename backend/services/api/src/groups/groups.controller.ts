@@ -63,7 +63,7 @@ export class GroupsController {
 
 	@Delete(':id')
 	@UseGuards(GroupRoleGuard)
-	deleteGroup(@Param('id') id: string) {
-		return (this.groupsService.deleteGroup(Number(id)))
+	deleteGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.deleteGroup(Number(id), req.user.sub))
 	}
 }

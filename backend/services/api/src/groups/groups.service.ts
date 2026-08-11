@@ -155,7 +155,14 @@ export class GroupsService {
 		return ( { message: 'Member successfully removed' } )
 	}
 
-	async deleteGroup(gId: number) {
+	async deleteGroup(gId: number, requesterId: number) {
+		const [group] = await this.db.select().from(groups).where(eq(groups.id, gId))
+
+		if (!group)
+			throw new NotFoundException('Group not found')
+		if (group.ownerId !== requesterId)
+			throw new ForbiddenException('Only the group owner can delete this group')
+
 		await this.db.delete(groups).where(eq(groups.id, gId))
 
 		return ( { message: "Group successfully deleted" } )
