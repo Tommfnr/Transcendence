@@ -42,16 +42,7 @@ export class GroupsService {
 		return (this.db.select().from(groupMembers).where(eq(groupMembers.groupId, gId)))
 	}
 
-	async addMember(gId: number, targetUserId: number, requesterId: number) {
-		const [requester] = await this.db.select().from(groupMembers).where(
-			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
-		)
-
-		if (!requester)
-			throw new NotFoundException('Group not found or not a member')
-		if (requester.role != 'admin')
-			throw new ForbiddenException('Admin role needed for this action')
-	
+	async addMember(gId: number, targetUserId: number) {
 		const [existing_user] = await this.db // Needed to check if user already in group
 			.select().from(groupMembers).where(
 				and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
@@ -65,16 +56,7 @@ export class GroupsService {
 		return (member)
 	}
 
-	async removeMember(gId: number, targetUserId: number, requesterId: number) {
-		const [requester] = await this.db.select().from(groupMembers).where(
-			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
-		)
-
-		if (!requester)
-			throw new NotFoundException('Group not found or not a member')
-		if (requester.role != 'admin')
-			throw new ForbiddenException('Admin role needed for this action')
-
+	async removeMember(gId: number, targetUserId: number) {
 		const [target] = await this.db.select().from(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
 		)
@@ -173,16 +155,7 @@ export class GroupsService {
 		}))
 	}
 
-	async deleteGroup(gId: number, requesterId: number) {
-		const [requester] = await this.db.select().from(groupMembers).where(
-			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
-		)
-
-		if (!requester)
-			throw new NotFoundException('Group not found or not a member')
-		if (requester.role != 'admin')
-			throw new ForbiddenException('Admin role needed for this action')
-
+	async deleteGroup(gId: number) {
 		await this.db.delete(groups).where(eq(groups.id, gId))
 		
 		return ( { message: "Group successfully deleted" } )
