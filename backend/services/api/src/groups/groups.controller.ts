@@ -45,6 +45,11 @@ export class GroupsController {
 		return (this.groupsService.updateMemberRole(Number(id), Number(userId), dto.role))
 	}
 
+	@Patch(':id/owner/:userId')
+	transferOwnership(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.transferOwnership(Number(id), Number(userId), req.user.sub))
+	}
+
 	@Delete(':id/members/:userId')
 	removeMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
 		return (this.groupsService.removeMember(Number(id), Number(userId), req.user.sub))
