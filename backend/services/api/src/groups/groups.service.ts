@@ -22,14 +22,14 @@ export class GroupsService {
 			const [existing_group] = await t
 				.select()
 				.from(groups)
-				.where(eq(groups.name, dto.name))
+				.where(and(eq(groups.name, dto.name), eq(groups.ownerId, adminId)))
 
 			if (existing_group)
 				throw new ForbiddenException('Already a group with the same name')
 
 			const [group] = await t
 				.insert(groups)
-				.values({ name: dto.name })
+				.values({ name: dto.name, ownerId: adminId })
 				.returning()
 
 			await t.insert(groupMembers).values({

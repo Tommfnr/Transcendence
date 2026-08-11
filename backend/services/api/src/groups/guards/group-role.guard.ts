@@ -3,14 +3,13 @@ import { and, eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers } from '../../../schema'
 import { DB } from '../../database/database.module'
-import { AuthenticatedRequest } from '../../auth/types/authenticated-request'
 
 @Injectable()
 export class GroupRoleGuard implements CanActivate {
 	constructor(@Inject(DB) private db: PostgresJsDatabase) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
-		const req = context.switchToHttp().getRequest<AuthenticatedRequest>()
+		const req = context.switchToHttp().getRequest()
 		const groupId = Number(req.params.id)
 
 		const [membership] = await this.db
