@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { groupMembers, groups } from '../../schema'
+import { groupMembers, groupObjectGrants, groups, objects } from '../../schema'
 import { DB } from '../database/database.module'
 import { CreateGroupDto } from './dto/creategroup.dto'
 
@@ -89,6 +89,30 @@ export class GroupsService {
 		)
 
 		return ( { message: 'Member successfully removed' } )
+	}
+
+	async grantObject(gId: number, objectId: number, requesterId: number) {
+		const [object] = await this.db.select().from(objects).where(eq(objects.id, objectId))
+
+		if (!object)
+			throw new NotFoundException('Object not found')
+		if (object.ownerId !== requesterId)
+			throw new ForbiddenException('Only the object owner can grant it to a group')
+
+		const [existing_grant] = await this.db.select().from(groupObjectGrants).where(
+			and(eq(groupObjectGrants.groupId, gId), eq(groupObjectGrants.objectId, objectId),),
+		)
+
+		if (existing_grant)
+			throw new ForbiddenException('Object already granted to this group')
+
+		const [grant] = await this.db.insert(groupObjectGrants).values({
+			groupId: gId,
+			objectId,
+			grantedBy: requesterId,
+		}).returning()
+
+		return (grant)
 	}
 
 	async deleteGroup(gId: number, requesterId: number) {

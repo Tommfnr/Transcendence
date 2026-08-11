@@ -34,6 +34,11 @@ export class GroupsController {
 		return (this.groupsService.addMember(Number(id), Number(userId), req.user.sub))
 	}
 
+	@Post(':id/objects/:objectId/grant')
+	grantObject(@Param('id') id: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.grantObject(Number(id), Number(objectId), req.user.sub))
+	}
+
 	@Delete(':id/members/:userId')
 	removeMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
 		return (this.groupsService.removeMember(Number(id), Number(userId), req.user.sub))
