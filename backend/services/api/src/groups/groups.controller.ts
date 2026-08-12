@@ -21,6 +21,11 @@ export class GroupsController {
 		return (this.groupsService.findAll())
 	}
 
+	@Get('my')
+	findMy(@Req() req: AuthenticatedRequest) {
+		return (this.groupsService.findMy(req.user.sub))
+	}
+
 	@Get(':id/members')
 	findMembers(@Param('id') id: string) {
 		return (this.groupsService.findMembers(Number(id)))

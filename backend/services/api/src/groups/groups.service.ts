@@ -17,6 +17,15 @@ export class GroupsService {
 		return (this.db.select().from(groupMembers).where(eq(groupMembers.groupId, gId)))
 	}
 
+	findMy(userId: number) {
+		return (this.db
+			.select({ id: groups.id, name: groups.name, ownerId: groups.ownerId, role: groupMembers.role })
+			.from(groupMembers)
+			.innerJoin(groups, eq(groupMembers.groupId, groups.id))
+			.where(eq(groupMembers.userId, userId))
+			.orderBy(groups.id))
+	}
+
 	async create(dto: CreateGroupDto, adminId: number) {
 		return (this.db.transaction(async (t) => {
 			const [existing_group] = await t
