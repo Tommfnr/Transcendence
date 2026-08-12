@@ -90,6 +90,13 @@ export class GroupsService {
 	}
 
 	async updateMemberRole(gId: number, targetUserId: number, role: 'admin' | 'member') {
+		const [group] = await this.db.select().from(groups).where(eq(groups.id, gId))
+
+		if (!group)
+			throw new NotFoundException('Group not found')
+		if (group.ownerId === targetUserId)
+			throw new ForbiddenException('Cannot change the role of the group owner')
+
 		const [target] = await this.db.select().from(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
 		)
