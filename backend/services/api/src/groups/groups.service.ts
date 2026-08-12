@@ -89,6 +89,28 @@ export class GroupsService {
 		return (grant)
 	}
 
+	async revokeObject(gId: number, objectId: number, requesterId: number) {
+		const [object] = await this.db.select().from(objects).where(eq(objects.id, objectId))
+
+		if (!object)
+			throw new NotFoundException('Object not found')
+		if (object.ownerId !== requesterId)
+			throw new ForbiddenException('Only the object owner can revoke it from a group')
+
+		const [existing_grant] = await this.db.select().from(groupObjectGrants).where(
+			and(eq(groupObjectGrants.groupId, gId), eq(groupObjectGrants.objectId, objectId),),
+		)
+
+		if (!existing_grant)
+			throw new NotFoundException('Object not granted to this group')
+
+		await this.db.delete(groupObjectGrants).where(
+			and(eq(groupObjectGrants.groupId, gId), eq(groupObjectGrants.objectId, objectId),),
+		)
+
+		return ( { message: 'Object grant revoked' } )
+	}
+
 	async updateMemberRole(gId: number, targetUserId: number, role: 'admin' | 'member') {
 		const [group] = await this.db.select().from(groups).where(eq(groups.id, gId))
 

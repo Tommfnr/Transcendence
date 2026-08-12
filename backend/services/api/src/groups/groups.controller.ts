@@ -48,6 +48,12 @@ export class GroupsController {
 		return (this.groupsService.grantObject(Number(id), Number(objectId), req.user.sub))
 	}
 
+	@Delete(':id/objects/:objectId/grant')
+	@UseGuards(GroupRoleGuard)
+	revokeObject(@Param('id') id: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.revokeObject(Number(id), Number(objectId), req.user.sub))
+	}
+
 	@Patch(':id/members/:userId/role')
 	@UseGuards(GroupRoleGuard)
 	updateMemberRole(@Param('id') id: string, @Param('userId') userId: string, @Body() dto: UpdateMemberRoleDto) {
