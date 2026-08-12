@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, ne } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groupObjectGrants, groups, objects } from '../../schema'
 import { DB } from '../database/database.module'
@@ -153,6 +153,58 @@ export class GroupsService {
 		)
 
 		return ( { message: 'Member successfully removed' } )
+	}
+
+	async leaveGroup(gId: number, userId: number) {
+		return (this.db.transaction(async (t) => {
+			const [group] = await t.select().from(groups).where(eq(groups.id, gId))
+
+			if (!group)
+				throw new NotFoundException('Group not found')
+
+			const [membership] = await t.select().from(groupMembers).where(
+				and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, userId),),
+			)
+
+			if (!membership)
+				throw new NotFoundException('Not a member of this group')
+
+			if (group.ownerId !== userId) {
+				await t.delete(groupMembers).where(
+					and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, userId),),
+				)
+
+				return ( { message: 'Left group successfully' } )
+			}
+
+			const otherMembers = await t.select().from(groupMembers).where(
+				and(eq(groupMembers.groupId, gId), ne(groupMembers.userId, userId),),
+			)
+
+			if (otherMembers.length === 0) {
+				await t.delete(groups).where(eq(groups.id, gId))
+
+				return ( { message: 'Group deleted, you were the last member' } )
+			}
+
+			const admins = otherMembers.filter((m) => m.role === 'admin')
+			const successor = (admins.length > 0 ? admins : otherMembers)
+				.reduce((oldest, m) => (m.id < oldest.id ? m : oldest))
+
+			await t.update(groups).set({ ownerId: successor.userId }).where(eq(groups.id, gId))
+
+			if (successor.role !== 'admin') {
+				await t.update(groupMembers)
+					.set({ role: 'admin' })
+					.where(and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, successor.userId),))
+			}
+
+			await t.delete(groupMembers).where(
+				and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, userId),),
+			)
+
+			return ( { message: 'Left group successfully' } )
+		}))
 	}
 
 	async deleteGroup(gId: number, requesterId: number) {

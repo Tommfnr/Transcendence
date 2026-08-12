@@ -61,6 +61,11 @@ export class GroupsController {
 		return (this.groupsService.removeMember(Number(id), Number(userId)))
 	}
 
+	@Delete(':id/leave')
+	leaveGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.leaveGroup(Number(id), req.user.sub))
+	}
+
 	@Delete(':id')
 	@UseGuards(GroupRoleGuard)
 	deleteGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
