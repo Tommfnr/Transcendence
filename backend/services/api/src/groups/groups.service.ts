@@ -4,6 +4,7 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groupObjectGrants, groups, objects } from '../../schema'
 import { DB } from '../database/database.module'
 import { CreateGroupDto } from './dto/create-group.dto'
+import { UpdateGroupDto } from './dto/update-group.dto'
 
 @Injectable()
 export class GroupsService {
@@ -13,8 +14,33 @@ export class GroupsService {
 		return (this.db.select().from(groups).orderBy(groups.id))
 	}
 
+	async findOne(gId: number) {
+		const [group] = await this.db.select().from(groups).where(eq(groups.id, gId))
+
+		if (!group)
+			throw new NotFoundException('Group not found')
+
+		return (group)
+	}
+
 	findMembers(gId: number) {
 		return (this.db.select().from(groupMembers).where(eq(groupMembers.groupId, gId)))
+	}
+
+	findGrantedObjects(gId: number) {
+		return (this.db
+			.select({
+				id: objects.id,
+				brand: objects.brand,
+				type: objects.type,
+				description: objects.description,
+				ownerId: objects.ownerId,
+				isAvailable: objects.isAvailable,
+				grantedBy: groupObjectGrants.grantedBy,
+			})
+			.from(groupObjectGrants)
+			.innerJoin(objects, eq(groupObjectGrants.objectId, objects.id))
+			.where(eq(groupObjectGrants.groupId, gId)))
 	}
 
 	findMy(userId: number) {
@@ -48,6 +74,31 @@ export class GroupsService {
 			})
 
 			return (group)
+		}))
+	}
+
+	async update(gId: number, dto: UpdateGroupDto) {
+		return (this.db.transaction(async (t) => {
+			const [group] = await t.select().from(groups).where(eq(groups.id, gId))
+
+			if (!group)
+				throw new NotFoundException('Group not found')
+
+			const [existing_group] = await t
+				.select()
+				.from(groups)
+				.where(and(eq(groups.ownerId, group.ownerId), eq(groups.name, dto.name), ne(groups.id, gId)))
+
+			if (existing_group)
+				throw new ForbiddenException('Already a group with the same name')
+
+			const [updated] = await t
+				.update(groups)
+				.set({ name: dto.name })
+				.where(eq(groups.id, gId))
+				.returning()
+
+			return (updated)
 		}))
 	}
 
