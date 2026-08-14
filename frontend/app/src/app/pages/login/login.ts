@@ -11,6 +11,7 @@ import { RefreshService } from '../../services/refresh.service';
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class Login {
   private refreshService = inject(RefreshService)
   private router = inject(Router)
@@ -35,17 +36,16 @@ export class Login {
   onSubmit(event: Event) {
     event.preventDefault();
 
-      submit(this.loginForm, async () => {
-        const { identifier, password, rememberMe } = this.loginModel()
+    	submit(this.loginForm, async () => {
+        	const { identifier, password, rememberMe } = this.loginModel()
 
-        this.refreshService.login(identifier, password, rememberMe)
-          .subscribe({
+        	this.refreshService.login(identifier, password, rememberMe).subscribe({
             next: () => this.router.navigate(['/']),
             error: (err) => console.log('Invalid creds (FRONTEND)', err)
           })
       })
-    });
-  }
+    };
+  
 }
 
 
