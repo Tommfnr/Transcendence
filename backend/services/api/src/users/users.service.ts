@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { users } from '../../schema'
+import { users } from '../database/schema'
 import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
 import * as argon2 from 'argon2'
@@ -11,7 +11,7 @@ export class UsersService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	findAll() {
-		return (this.db.select().from(users).orderBy(users.id))
+		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).orderBy(users.id))
 	}
 
 	findOne(loginIdentifier: string) {
@@ -22,7 +22,7 @@ export class UsersService {
 	}
 
 	findById(id: number) {
-		return (this.db.select().from(users).where(eq(users.id, id)))
+		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).where(eq(users.id, id)))
 	}
 
 	async create(dto: RegisterDto) {

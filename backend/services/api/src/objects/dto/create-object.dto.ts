@@ -3,6 +3,7 @@
 
 export class CreateObjectDto {
 	brand!: string
-	owner!: string
 	type!: string
+	description?: string
+	condition?: string
 }

@@ -3,7 +3,7 @@
 import { Module, Global } from '@nestjs/common'
 import postgres = require('postgres')
 import { drizzle } from 'drizzle-orm/postgres-js'
-import { objects } from '../../schema'
+import * as schema from './schema'
 
 const client = postgres({ // PostgreSQL Client
 	host: process.env.POSTGRES_HOST ?? 'postgres',
@@ -19,7 +19,7 @@ export const DB = 'DB'
 @Module({
 	providers: [{
 		provide: DB,
-		useValue: drizzle(client, { schema: { objects } }), // Drizzle Client
+		useValue: drizzle(client, { schema }), // Drizzle Client
 	},],
 	exports: [DB],
 })

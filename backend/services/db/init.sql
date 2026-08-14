@@ -1,15 +1,50 @@
 CREATE EXTENSION IF NOT EXISTS citext;
 
-CREATE TABLE IF NOT EXISTS objects (
-	id 					SERIAL PRIMARY KEY,
-	brand				VARCHAR(20) NOT NULL,
-	owner				VARCHAR(20) NOT NULL,
-	type				VARCHAR(20) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS users (
 	id					SERIAL PRIMARY KEY,
-	USERNAME		VARCHAR NOT NULL,
+	USERNAME			VARCHAR NOT NULL,
 	EMAIL				CITEXT NOT NULL UNIQUE,
-	H_PASSWORD	VARCHAR(255) NOT NULL
+	H_PASSWORD			VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS objects (
+	id                     SERIAL PRIMARY KEY,
+	brand                VARCHAR(20) NOT NULL,
+	owner_id             INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	type                VARCHAR(20) NOT NULL,
+	description          VARCHAR(500),
+	condition            VARCHAR(50),
+	is_available         BOOLEAN DEFAULT true,
+	created_at           TIMESTAMP DEFAULT NOW(),
+	updated_at           TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS groups (
+	id					SERIAL PRIMARY KEY,
+	NAME				VARCHAR(50) NOT NULL
+);
+
+ALTER TABLE groups ADD CONSTRAINT groups_name_unique UNIQUE (name);
+
+DO $$
+BEGIN
+	CREATE TYPE role AS ENUM ('admin', 'member');
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS group_members (
+	id SERIAL PRIMARY KEY,
+	group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	role role NOT NULL DEFAULT 'member'
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+	id					SERIAL PRIMARY KEY,
+	jti					UUID NOT NULL UNIQUE,
+	user_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	revoked 		BOOLEAN NOT NULL DEFAULT false,
+	expires_at	TIMESTAMP NOT NULL,
+	created_at	TIMESTAMP NOT NULL DEFAULT NOW()
 );

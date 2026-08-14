@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
-import { AuthService } from '../../services/auth.service';
 import { LoginData } from '../../models/login-data.model';
+import { Router } from '@angular/router'
+import { RefreshService } from '../../services/refresh.service';
+
 
 @Component({
   selector: 'app-login',
@@ -10,6 +12,9 @@ import { LoginData } from '../../models/login-data.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {
+  private refreshService = inject(RefreshService)
+  private router = inject(Router)
+
   loginModel = signal<LoginData>({
     identifier: '',
     password: '',
@@ -27,27 +32,21 @@ export class Login {
     required(fieldPath.password, { message: 'Password is required' });
   });
 
-  constructor(private authService: AuthService) { }
-
   onSubmit(event: Event) {
     event.preventDefault();
 
     submit(this.loginForm, async () => {
       const { identifier, password, rememberMe } = this.loginModel();
+      
+      submit(this.loginForm, async () => {
+        const { identifier, password, rememberMe } = this.loginModel()
 
-      const isEmail = identifier.includes('@');
-
-      const body = {
-        ...(isEmail ? {email: identifier } : { username: identifier }),
-        password,
-        rememberMe
-      };
-
-      this.authService.login(body)
-        .subscribe({
-          next: (response) => console.log('Logged in!', response),
-          error: (err) => console.log('Invalid credentials (FRONTEND)', err),
-        });
+        this.refreshService.login(identifier, password, rememberMe)
+          .subscribe({
+            next: () => this.router.navigate(['/']),
+            error: (err) => console.log('Invalid creds (FRONTEND)', err)
+          })
+      })
     });
   }
 }
