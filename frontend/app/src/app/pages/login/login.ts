@@ -35,9 +35,6 @@ export class Login {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    submit(this.loginForm, async () => {
-      const { identifier, password, rememberMe } = this.loginModel();
-      
       submit(this.loginForm, async () => {
         const { identifier, password, rememberMe } = this.loginModel()
 
