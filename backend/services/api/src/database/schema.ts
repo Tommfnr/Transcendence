@@ -10,6 +10,8 @@ const citext = customType<{ data: string }>({
 	},
 })
 
+const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
+
 export const objects = pgTable('objects', {
 	id:						serial('id').primaryKey(),
 	brand:				varchar('brand', { length:20 }).notNull(),
@@ -50,4 +52,26 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	revoked: 		boolean('revoked').notNull().default(false),
 	expiresAt: timestamp('expires_at').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+export const lendingStatusEnum = pgEnum('lending_status', 
+	['pending', 'accepted', 'active', 'awaiting_confirmation',
+		'returned', 'disputed', 'rejected', 'cancelled', 'overdue',
+		'created'
+	],
+)
+
+export const lending = pgTable('lending', {
+	id:													serial('id').primaryKey(),
+	objectId: 									integer('object_id').notNull().references(() => objects.id, { onDelete: 'cascade' }),
+	lenderId: 									integer('lender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	borrowerId:									integer('borrower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	status:											lendingStatusEnum('status').notNull().default('created'),
+	lendedFrom: 								timestamptz('lended_from'),
+	lendedTo:										timestamptz('lended_to'),
+	pickedUpAt:									timestamptz('picked_up_at'),
+	borrowerReturnedAt: 				timestamptz('borrower_returned_at'),
+	lenderConfirmedReturnedAt:	timestamptz('lender_confirmed_returned_at'),
+	createdAt:									timestamptz('created_at').defaultNow(),
+	updatedAt:									timestamptz('updated_at').defaultNow(),
 })
