@@ -48,6 +48,27 @@ export const groupMembers = pgTable('group_members', {
 	uniqueMembership: unique().on(table.groupId, table.userId),
 }));
 
+export const postStatusEnum = pgEnum('post_status', ['open', 'closed'])
+
+export const posts = pgTable('posts', {
+	id: 			serial('id').primaryKey(),
+	requesterId: 	integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	description: 	varchar('description', { length:500 }),
+	status: 		postStatusEnum('status').notNull().default('open'),
+	createdAt: 		timestamp('created_at').defaultNow(),
+	updatedAt: 		timestamp('updated_at').defaultNow(),
+	fromDate: 		timestamp('from_date').notNull(),
+	toDate: 		timestamp('to_date').notNull(),
+})
+
+export const postGroups = pgTable('post_groups', {
+	id:			serial('id').primaryKey(),
+	postId:		integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+	groupId:	integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
+}, (table) => ({
+	uniquePostGroup: unique().on(table.postId, table.groupId),
+}));
+
 export const refreshTokens = pgTable('refresh_tokens', {
 	id: 				serial('id').primaryKey(),
 	jti: 				uuid('jti').notNull().unique(),
