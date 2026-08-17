@@ -1,18 +1,16 @@
-import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
 import { GroupsService } from './groups.service'
-import { CreateGroupDto } from './dto/creategroup.dto'
+import { CreateGroupDto } from './dto/create-group.dto'
+import { UpdateGroupDto } from './dto/update-group.dto'
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { AuthGuard } from '../auth/guard'
+import { GroupRoleGuard } from './guards/group-role.guard'
 
 @UseGuards(AuthGuard)
 @Controller('groups')
 export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
-
-	@Post()
-	create(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.create(dto, req.user.sub))
-	}
 
 	@Get('debug')
 	debug(@Req() req: AuthenticatedRequest) {
@@ -24,22 +22,80 @@ export class GroupsController {
 		return (this.groupsService.findAll())
 	}
 
+	@Get('my')
+	findMy(@Req() req: AuthenticatedRequest) {
+		return (this.groupsService.findMy(req.user.sub))
+	}
+
 	@Get(':id/members')
 	findMembers(@Param('id') id: string) {
 		return (this.groupsService.findMembers(Number(id)))
 	}
 
+	@Get(':id/objects')
+	findGrantedObjects(@Param('id') id: string) {
+		return (this.groupsService.findGrantedObjects(Number(id)))
+	}
+
+	@Get(':id')
+	findOne(@Param('id') id: string) {
+		return (this.groupsService.findOne(Number(id)))
+	}
+
+	@Post()
+	create(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.create(dto, req.user.sub))
+	}
+
+	@Patch(':id')
+	@UseGuards(GroupRoleGuard)
+	update(@Param('id') id: string, @Body() dto: UpdateGroupDto) {
+		return (this.groupsService.update(Number(id), dto))
+	}
+
 	@Post(':id/members/:userId')
-	addMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.addMember(Number(id), Number(userId), req.user.sub))
+	@UseGuards(GroupRoleGuard)
+	addMember(@Param('id') id: string, @Param('userId') userId: string) {
+		return (this.groupsService.addMember(Number(id), Number(userId)))
+	}
+
+	@Post(':id/objects/:objectId/grant')
+	@UseGuards(GroupRoleGuard)
+	grantObject(@Param('id') id: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.grantObject(Number(id), Number(objectId), req.user.sub))
+	}
+
+	@Delete(':id/objects/:objectId/grant')
+	@UseGuards(GroupRoleGuard)
+	revokeObject(@Param('id') id: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.revokeObject(Number(id), Number(objectId), req.user.sub))
+	}
+
+	@Patch(':id/members/:userId/role')
+	@UseGuards(GroupRoleGuard)
+	updateMemberRole(@Param('id') id: string, @Param('userId') userId: string, @Body() dto: UpdateMemberRoleDto) {
+		return (this.groupsService.updateMemberRole(Number(id), Number(userId), dto.role))
+	}
+
+	@Patch(':id/owner/:userId')
+	@UseGuards(GroupRoleGuard)
+	transferOwnership(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.transferOwnership(Number(id), Number(userId), req.user.sub))
 	}
 
 	@Delete(':id/members/:userId')
-	removeMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.removeMember(Number(id), Number(userId), req.user.sub))
+	@UseGuards(GroupRoleGuard)
+	removeMember(@Param('id') id: string, @Param('userId') userId: string) {
+		return (this.groupsService.removeMember(Number(id), Number(userId)))
+	}
+
+	@Delete(':id/leave')
+	leaveGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+		return (this.groupsService.leaveGroup(Number(id), req.user.sub))
 	}
 
 	@Delete(':id')
+	@UseGuards(GroupRoleGuard)
 	deleteGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
 		return (this.groupsService.deleteGroup(Number(id), req.user.sub))
 	}
