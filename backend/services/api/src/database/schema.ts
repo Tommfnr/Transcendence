@@ -52,7 +52,9 @@ export const postStatusEnum = pgEnum('post_status', ['open', 'closed'])
 
 export const posts = pgTable('posts', {
 	id: 			serial('id').primaryKey(),
-	requesterId: 	integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	ownerId:	 	integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	title:			varchar('title', { length:50 }).notNull(),
+	type:			varchar('type', { length:20 }),
 	description: 	varchar('description', { length:500 }),
 	status: 		postStatusEnum('status').notNull().default('open'),
 	createdAt: 		timestamp('created_at').defaultNow(),

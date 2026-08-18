@@ -61,7 +61,9 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS posts (
 	id					SERIAL PRIMARY KEY,
-	requester_id		INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	title				VARCHAR(50) NOT NULL,
+	type				VARCHAR(20),
 	description			VARCHAR(500),
 	status				post_status NOT NULL DEFAULT 'open',
 	created_at			TIMESTAMP DEFAULT NOW(),
