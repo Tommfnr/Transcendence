@@ -44,4 +44,18 @@ export class LendingService {
 		}
 	}
 
+	async findOne(id: string) {
+		const t_id = Number(id)
+
+		return (this.db.select().from(lending).where(eq(lending.id, t_id)))
+	}
+
+	async acceptLend(transactionId: string) {
+		const t_id = Number(transactionId)
+
+		const updated = await this.db.update(lending).set({ status: 'accepted', updatedAt: new Date() }).where(eq(lending.id, t_id)).returning()
+		
+		return (updated[0])
+	}
+
 }

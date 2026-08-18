@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards, Patch } from '@nestjs/common'
 import { LendingService } from './lending.service'
 import { AuthGuard } from '../auth/guard'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
@@ -19,4 +19,14 @@ export class LendingController {
 		return (this.lendingService.newTransaction(dto, req.user.sub))
 	}
 	
+	@Get(':id')
+	async findOne(@Param('id') id: string) {
+		const [t] = await this.lendingService.findOne(id) 
+		return (t)
+	}
+
+	@Patch(':id/accept')
+	async acceptLend(@Param('id') transactionId: string) {
+		return (this.lendingService.acceptLend(transactionId))
+	}
 }
