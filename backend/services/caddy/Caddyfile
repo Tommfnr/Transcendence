@@ -1,3 +1,7 @@
+http://pep.localhost {
+	redir https://pep.localhost:8443{uri} permanent
+}
+
 pep.localhost {
 
 	tls internal
