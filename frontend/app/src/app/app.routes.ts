@@ -5,6 +5,11 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AppLayout } from './layouts/app-layout/app-layout';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Profile } from './pages/profile/profile';
+import { Catalog } from './pages/catalog/catalog';
+import { EditAddObject } from './pages/editAddObject/editAddObject';
+import { GroupParameter } from './pages/groupParameter/groupParameter';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -28,6 +33,7 @@ export const routes: Routes = [
   {
     path: 'app',
     component: AppLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -37,6 +43,22 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: Dashboard
+      },
+      {
+        path: 'profile',
+        component: Profile
+      },
+      {
+        path: 'catalog',
+        component: Catalog
+      },
+      {
+        path: 'editAddObject',
+        component: EditAddObject
+      },
+      {
+        path: 'groupParameter',
+        component: GroupParameter
       }
     ]
   },
