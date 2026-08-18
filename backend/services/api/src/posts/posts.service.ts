@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts, postGroups, groupMembers, groups } from '../database/schema'
@@ -21,11 +21,13 @@ export class PostsService {
 				.where(eq(posts.ownerId, userId)))
 	}
 
-	findOne(id: number) {
-		return (this.db
-				.select()
-				.from(posts)
-				.where(eq(posts.id, id)))
+	async findOne(id: number) {
+		const [post] = await this.db.select().from(posts).where(eq(posts.id, id))
+
+		if (!post)
+			throw new NotFoundException('Post not found')
+
+		return (post)
 	}
 
 	findGroups(postId: number) {
@@ -67,6 +69,13 @@ export class PostsService {
 		const groupIds = rawGroupIds ? [...new Set(rawGroupIds)] : undefined
 
 		return (this.db.transaction(async (t) => {
+			const [existing] = await t.select().from(posts).where(eq(posts.id, id))
+
+			if (!existing)
+				throw new NotFoundException('Post not found')
+			if (existing.ownerId !== userId)
+				throw new ForbiddenException('Only the post owner can update this post')
+
 			if (groupIds) {
 				const memberships = await t
 						.select({ groupId: groupMembers.groupId })
@@ -77,23 +86,15 @@ export class PostsService {
 					throw new ForbiddenException('You can only post to groups you belong to')
 			}
 
-			let post
+			let post = existing
 
 			if (Object.keys(postFields).length > 0) {
 				[post] = await t
 						.update(posts)
 						.set(postFields)
-						.where(and(eq(posts.id, id), eq(posts.ownerId, userId)))
+						.where(eq(posts.id, id))
 						.returning()
-			} else {
-				[post] = await t
-						.select()
-						.from(posts)
-						.where(and(eq(posts.id, id), eq(posts.ownerId, userId)))
 			}
-
-			if (!post)
-				return (undefined)
 
 			if (groupIds) {
 				await t.delete(postGroups).where(eq(postGroups.postId, id))
@@ -106,9 +107,16 @@ export class PostsService {
 		}))
 	}
 
-	remove(id: number, userId: number) {
-		return (this.db
-				.delete(posts)
-				.where(and(eq(posts.id, id), eq(posts.ownerId, userId))))
+	async remove(id: number, userId: number) {
+		const [existing] = await this.db.select().from(posts).where(eq(posts.id, id))
+
+		if (!existing)
+			throw new NotFoundException('Post not found')
+		if (existing.ownerId !== userId)
+			throw new ForbiddenException('Only the post owner can delete this post')
+
+		await this.db.delete(posts).where(eq(posts.id, id))
+
+		return ({ message: 'Post successfully deleted' })
 	}
 }
