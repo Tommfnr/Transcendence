@@ -38,15 +38,16 @@ export class PostsService {
 
 	async create(userId: number, dto: CreatePostDto) {
 		return (this.db.transaction(async (t) => {
+			const { groupIds: rawGroupIds, ...postFields } = dto
+			const groupIds = [...new Set(rawGroupIds)]
+
 			const memberships = await t
 					.select({ groupId: groupMembers.groupId })
 					.from(groupMembers)
-					.where(and(eq(groupMembers.userId, userId), inArray(groupMembers.groupId, dto.groupIds)))
+					.where(and(eq(groupMembers.userId, userId), inArray(groupMembers.groupId, groupIds)))
 
-			if (memberships.length !== dto.groupIds.length)
+			if (memberships.length !== groupIds.length)
 				throw new ForbiddenException('You can only post to groups you belong to')
-
-			const { groupIds, ...postFields } = dto
 
 			const [post] = await t
 					.insert(posts)
@@ -62,7 +63,8 @@ export class PostsService {
 	}
 
 	async update(id: number, userId: number, dto: UpdatePostDto) {
-		const { groupIds, ...postFields } = dto
+		const { groupIds: rawGroupIds, ...postFields } = dto
+		const groupIds = rawGroupIds ? [...new Set(rawGroupIds)] : undefined
 
 		return (this.db.transaction(async (t) => {
 			if (groupIds) {
