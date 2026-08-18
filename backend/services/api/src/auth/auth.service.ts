@@ -35,7 +35,7 @@ export class AuthService {
 			expiresIn: '60s',
 		})
 
-		const jti = await this.refreshTokensServices.issue(user.id)
+		const  { jti } = await this.refreshTokensServices.issue(user.id)
 
 		const refresh_token = await this.jwtService.signAsync({ sub: user.id, type: 'refresh', jti }, {
 			secret: process.env.JWT_REFRESH_SECRET,
@@ -70,7 +70,7 @@ export class AuthService {
 		}
 
 		await this.refreshTokensServices.revoke(payload.jti)
-		const newJti = await this.refreshTokensServices.issue(payload.sub)
+		const { jti: newJti } = await this.refreshTokensServices.issue(payload.sub)
 
 		const newPayload = { sub: payload.sub, username: payload.username }
 		
