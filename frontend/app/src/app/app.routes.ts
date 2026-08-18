@@ -8,6 +8,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Profile } from './pages/profile/profile';
 import { Catalog } from './pages/catalog/catalog';
 import { EditAddObject } from './pages/editAddObject/editAddObject';
+import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -54,6 +55,10 @@ export const routes: Routes = [
       {
         path: 'editAddObject',
         component: EditAddObject
+      },
+      {
+        path: 'groupParameter',
+        component: GroupParameter
       }
     ]
   },
