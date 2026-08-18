@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { AuthService } from '../../services/auth.service';
 import { RegisterData } from '../../models/register-data.model';
+import { ButtonComponent } from "../../components/button/button";
 
 @Component({
   selector: 'app-register',
-  imports: [FormField],
+  imports: [FormField, ButtonComponent],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
