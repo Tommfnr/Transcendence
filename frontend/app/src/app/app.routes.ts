@@ -6,6 +6,7 @@ import { Register } from './pages/register/register';
 import { AppLayout } from './layouts/app-layout/app-layout';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Profile } from './pages/profile/profile';
+import { Catalog } from './pages/catalog/catalog';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -44,6 +45,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: Profile
+      },
+      {
+        path: 'catalog',
+        component: Catalog
       }
     ]
   },
