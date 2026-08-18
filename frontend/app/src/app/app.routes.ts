@@ -7,6 +7,7 @@ import { AppLayout } from './layouts/app-layout/app-layout';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Profile } from './pages/profile/profile';
 import { Catalog } from './pages/catalog/catalog';
+import { EditAddObject } from './pages/editAddObject/editAddObject';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -49,6 +50,10 @@ export const routes: Routes = [
       {
         path: 'catalog',
         component: Catalog
+      },
+      {
+        path: 'editAddObject',
+        component: EditAddObject
       }
     ]
   },
