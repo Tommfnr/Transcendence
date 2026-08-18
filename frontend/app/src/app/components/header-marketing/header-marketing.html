@@ -4,9 +4,11 @@
 
     <nav class="">
       <ul class="flex gap-8 items-center">
-        <li>
-          <a routerLink="/app" class="hover:opacity-80 transition">App</a>
-        </li>
+        @if (isLoggedIn()) {
+          <li>
+            <a routerLink="/app" class="hover:opacity-80 transition">App</a>
+          </li>
+        }
         <li>
           <a routerLink="/" class="hover:opacity-80 transition">Home</a>
         </li>

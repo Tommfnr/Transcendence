@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 
@@ -7,7 +8,7 @@ type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RequestCard],
+  imports: [NgClass, RouterLink, RequestCard],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
