@@ -26,6 +26,11 @@ export class PostsController {
 		return (this.postsService.findOne(Number(id)))
 	}
 
+	@Get(':id/groups')
+	findGroups(@Param('id') id: string) {
+		return (this.postsService.findGroups(Number(id)))
+	}
+
 	@Post()
 	create(@Req() req: AuthenticatedRequest, @Body() dto: CreatePostDto) {
 		const userId = req.user.sub

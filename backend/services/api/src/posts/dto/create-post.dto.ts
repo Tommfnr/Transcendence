@@ -7,6 +7,7 @@ const createPostSchema = z.object({
 	description:	z.string().max(500).optional(),
 	fromDate:		z.coerce.date(),
 	toDate:			z.coerce.date(),
+	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group'),
 }).refine((data) => data.toDate >= data.fromDate, {
 	message: 'toDate must be on or after fromDate',
 	path: ['toDate'],

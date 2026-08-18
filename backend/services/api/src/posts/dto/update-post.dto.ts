@@ -7,6 +7,7 @@ const updatePostSchema = z.object({
 	description:	z.string().max(500).optional(),
 	fromDate:		z.coerce.date().optional(),
 	toDate:			z.coerce.date().optional(),
+	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group').optional(),
 })
 
 export class UpdatePostDto extends createZodDto(updatePostSchema) {}
