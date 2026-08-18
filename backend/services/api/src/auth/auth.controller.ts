@@ -1,14 +1,17 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, UnauthorizedException } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { AuthService } from './auth.service'
 import { SignInDto } from './dto/signin.dto'
 import { RegisterDto } from '../users/dto/register.dto'
 import { REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS } from './types/cookies-constants'
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 
 @Controller('auth')
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
+	@UseGuards(ThrottlerGuard)
+	@Throttle({ default: { limit: 5, ttl: 60000 } })
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
 	async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {

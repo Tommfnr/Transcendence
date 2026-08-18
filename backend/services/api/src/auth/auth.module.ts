@@ -6,12 +6,14 @@ import { JwtModule } from '@nestjs/jwt'
 import * as dotenv from 'dotenv'
 import { AuthGuard } from './guard'
 import { RefreshTokensService } from './refreshtokens.service'
+import { ThrottlerModule } from '@nestjs/throttler'
 
 dotenv.config()
 
 @Module({
 	imports: [UsersModule,
-						JwtModule.register({ global: true })],
+						JwtModule.register({ global: true }),
+						ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }])],
 	providers: [AuthService, AuthGuard, RefreshTokensService],
 	controllers: [AuthController],
 	exports: [AuthGuard],
