@@ -26,7 +26,7 @@ export class ObjectsController {
 	
 	@Get(':id')
 	findOne(@Param('id') id: string) {
-			return (this.objectsService.findOne(Number(id)))
+			return (this.objectsService.findByIdOrThrow(Number(id)))
 	}
 	
 	@Post()

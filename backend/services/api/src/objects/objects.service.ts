@@ -1,7 +1,7 @@
 // Service files defines the functions used in backend
 // See : https://docs.nestjs.com/providers#services
 
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../database/schema'
@@ -25,12 +25,15 @@ export class ObjectsService {
 			)
 	}
 
-	findOne(id: number) {
-			return (this.db
-					.select()
-					.from(objects)
-					.where(eq(objects.id, id))
-			)
+	async findByIdOrThrow(id: number) {
+		const result = await this.db
+				.select()
+				.from(objects)
+				.where(eq(objects.id, id))
+		if (result.length === 0) {
+			throw new NotFoundException(`Object ${id} not found`)
+		}
+		return (result[0])
 	}
 
 	create(userId: number, dto: CreateObjectDto) {

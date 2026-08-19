@@ -8,5 +8,6 @@ import { ObjectsService } from './objects.service'
 @Module({
 	controllers: [ObjectsController],
 	providers: [ObjectsService],
+	exports: [ObjectsService],
 })
 export class ObjectsModule {}
