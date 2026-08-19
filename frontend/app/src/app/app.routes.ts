@@ -10,6 +10,7 @@ import { Catalog } from './pages/catalog/catalog';
 import { EditAddObject } from './pages/editAddObject/editAddObject';
 import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
+import { OfferHelp } from './pages/offerHelp/offerHelp';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -64,6 +65,10 @@ export const routes: Routes = [
       {
         path: 'iCanHelp',
         component: ICanHelp
+      },
+      {
+        path: 'offerHelp',
+        component: OfferHelp
       }
     ]
   },

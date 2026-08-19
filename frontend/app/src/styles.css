@@ -16,3 +16,21 @@
 	/* Font */
 	--font-sans: 'Nunito', sans-serif;
 }
+
+@keyframes rainbow {
+  0%   { background-color: #ff0000; }
+  17%  { background-color: #ff8800; }
+  33%  { background-color: #ffee00; }
+  50%  { background-color: #00cc44; }
+  67%  { background-color: #0088ff; }
+  83%  { background-color: #8800ff; }
+  100% { background-color: #ff0000; }
+}
+
+.rainbow {
+  animation: rainbow 10s linear infinite;
+}
+
+.rainbow:hover {
+  animation: rainbow 0.25s linear infinite;
+}
