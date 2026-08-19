@@ -11,6 +11,7 @@ import { EditAddObject } from './pages/editAddObject/editAddObject';
 import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
+import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -69,6 +70,10 @@ export const routes: Routes = [
       {
         path: 'offerHelp',
         component: OfferHelp
+      },
+      {
+        path: 'assistanceOfferDetails',
+        component: AssistanceOfferDetails
       }
     ]
   },
