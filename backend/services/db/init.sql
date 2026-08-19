@@ -1,4 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS citext;
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+-- Generalized Search Tree
+
+
 
 CREATE TABLE IF NOT EXISTS users (
 	id					SERIAL PRIMARY KEY,
@@ -60,3 +64,38 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	expires_at	TIMESTAMP NOT NULL,
 	created_at	TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TYPE lending_status as ENUM (
+	'created',
+	'pending',
+	'accepted',
+	'active',
+	'awaiting_confirmation',
+	'returned',
+	'disputed',
+	'rejected',
+	'cancelled',
+	'overdue'
+);
+
+CREATE TABLE IF NOT EXISTS lending (
+	id														SERIAL PRIMARY KEY,
+	object_id											INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
+	lender_id											INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	borrower_id										INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	status												lending_status,
+	lended_from										TIMESTAMPTZ,
+	lended_to											TIMESTAMPTZ,
+	picked_up_at									TIMESTAMPTZ,
+	borrower_returned_at					TIMESTAMPTZ,
+	lender_confirmed_returned_at	TIMESTAMPTZ,
+	created_at										TIMESTAMPTZ DEFAULT NOW(),
+	updated_at										TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE lending ADD CONSTRAINT no_overlap
+EXCLUDE USING gist (
+	object_id WITH =, -- for same object
+	tstzrange(lended_from, lended_to) WITH && -- if the two objects time range overlap 
+) WHERE (status IN ('pending', 'accepted', 'active', 'awaiting_confirmation')); -- only apply overlap check to these statuses
+-- refuse to let two lending row exists if same object and same time range and statuses conflicts (like both pending, both accepted...)
