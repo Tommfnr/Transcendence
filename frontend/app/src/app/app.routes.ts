@@ -5,6 +5,14 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AppLayout } from './layouts/app-layout/app-layout';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Profile } from './pages/profile/profile';
+import { Catalog } from './pages/catalog/catalog';
+import { EditAddObject } from './pages/editAddObject/editAddObject';
+import { GroupParameter } from './pages/groupParameter/groupParameter';
+import { ICanHelp } from './pages/iCanHelp/iCanHelp';
+import { OfferHelp } from './pages/offerHelp/offerHelp';
+import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -28,6 +36,7 @@ export const routes: Routes = [
   {
     path: 'app',
     component: AppLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -37,6 +46,34 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: Dashboard
+      },
+      {
+        path: 'profile',
+        component: Profile
+      },
+      {
+        path: 'catalog',
+        component: Catalog
+      },
+      {
+        path: 'editAddObject',
+        component: EditAddObject
+      },
+      {
+        path: 'groupParameter',
+        component: GroupParameter
+      },
+      {
+        path: 'iCanHelp',
+        component: ICanHelp
+      },
+      {
+        path: 'offerHelp',
+        component: OfferHelp
+      },
+      {
+        path: 'assistanceOfferDetails',
+        component: AssistanceOfferDetails
       }
     ]
   },

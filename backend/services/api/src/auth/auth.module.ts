@@ -11,8 +11,7 @@ dotenv.config()
 
 @Module({
 	imports: [UsersModule,
-						JwtModule.register({ global: true, secret: process.env.JWT_SECRET, signOptions: { expiresIn: '60s' }}),
-						JwtModule.register({ global: true, secret: process.env.JWT_REFRESH_SECRET, signOptions: { expiresIn: '7d' }})],
+						JwtModule.register({ global: true })],
 	providers: [AuthService, AuthGuard, RefreshTokensService],
 	controllers: [AuthController],
 	exports: [AuthGuard],

@@ -3,11 +3,12 @@ import { form, FormField, required, email, submit } from '@angular/forms/signals
 import { LoginData } from '../../models/login-data.model';
 import { Router } from '@angular/router'
 import { RefreshService } from '../../services/refresh.service';
+import { ButtonComponent } from "../../components/button/button";
 
 
 @Component({
   selector: 'app-login',
-  imports: [FormField],
+  imports: [FormField, ButtonComponent],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
