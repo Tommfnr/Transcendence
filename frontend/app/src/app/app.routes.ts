@@ -9,6 +9,7 @@ import { Profile } from './pages/profile/profile';
 import { Catalog } from './pages/catalog/catalog';
 import { EditAddObject } from './pages/editAddObject/editAddObject';
 import { GroupParameter } from './pages/groupParameter/groupParameter';
+import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -59,6 +60,10 @@ export const routes: Routes = [
       {
         path: 'groupParameter',
         component: GroupParameter
+      },
+      {
+        path: 'iCanHelp',
+        component: ICanHelp
       }
     ]
   },
