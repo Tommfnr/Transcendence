@@ -2,7 +2,7 @@
 // We could forget init.sql (used by DB) and just use this to create the tables,
 // but I think it's great to keep init.sql to create the tables before runtime, during the containers startup
 
-import { pgTable, serial, varchar, customType, integer, pgEnum, boolean, timestamp, uuid, unique } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, customType, integer, pgEnum, boolean, timestamp, uuid, unique, text } from 'drizzle-orm/pg-core'
 
 const citext = customType<{ data: string }>({
 	dataType() {
@@ -64,6 +64,24 @@ export const posts = pgTable('posts', {
 	fromDate: 		timestamp('from_date').notNull(),
 	toDate: 		timestamp('to_date').notNull(),
 })
+
+export const conversations = pgTable('conversations', {
+	id:				serial('id').primaryKey(),
+	postId:			integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+	requesterId:	integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	createdAt:		timestamp('created_at').notNull().defaultNow(),
+	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+	uniquePostRequester: unique().on(table.postId, table.requesterId),
+}));
+
+export const messages = pgTable('messages', {
+	id:					serial('id').primaryKey(),
+	conversationId:		integer('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+	content:			text('content').notNull(),
+	ownerId:			integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	createdAt:			timestamp('created_at').notNull().defaultNow(),
+});
 
 export const postGroups = pgTable('post_groups', {
 	id:			serial('id').primaryKey(),
