@@ -91,7 +91,7 @@ export class PostsService {
 			if (Object.keys(postFields).length > 0) {
 				[post] = await t
 						.update(posts)
-						.set(postFields)
+						.set({ ...postFields, updatedAt: new Date() })
 						.where(eq(posts.id, id))
 						.returning()
 			}
