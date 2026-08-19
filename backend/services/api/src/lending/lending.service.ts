@@ -1,7 +1,6 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
-import { and, desc, eq } from 'drizzle-orm'
 import { lending } from '../database/schema'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsService } from 'src/objects/objects.service'
@@ -11,10 +10,6 @@ export class LendingService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase,
 							private readonly objectsService: ObjectsService) {}
 
-	async listALL_DEBUG() {
-		return (this.db.select().from(lending).orderBy(desc(lending.createdAt)));
-	}
-	
 	async newTransaction(dto: CreateTransactionDto, userId: number) {
 		const object = await this.objectsService.findByIdOrThrow(dto.objectId)
 

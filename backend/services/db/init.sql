@@ -65,27 +65,32 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	created_at	TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TYPE lending_status as ENUM (
-	'created',
-	'pending',
-	'accepted',
-	'active',
-	'awaiting_confirmation',
-	'returned',
-	'disputed',
-	'rejected',
-	'cancelled',
-	'overdue'
-);
+DO $$
+BEGIN
+	CREATE TYPE lending_status as ENUM (
+		'created',
+		'pending',
+		'accepted',
+		'active',
+		'awaiting_confirmation',
+		'returned',
+		'disputed',
+		'rejected',
+		'cancelled',
+		'overdue'
+	);
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
 
 CREATE TABLE IF NOT EXISTS lending (
 	id														SERIAL PRIMARY KEY,
 	object_id											INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
 	lender_id											INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	borrower_id										INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	status												lending_status,
-	lended_from										TIMESTAMPTZ,
-	lended_to											TIMESTAMPTZ,
+	status												lending_status NOT NULL DEFAULT 'created',
+	lended_from										TIMESTAMPTZ NOT NULL,
+	lended_to											TIMESTAMPTZ NOT NULL,
 	picked_up_at									TIMESTAMPTZ,
 	borrower_returned_at					TIMESTAMPTZ,
 	lender_confirmed_returned_at	TIMESTAMPTZ,

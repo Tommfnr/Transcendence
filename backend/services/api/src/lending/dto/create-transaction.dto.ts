@@ -1,18 +1,11 @@
-import { IsInt, IsPositive, IsISO8601, IsOptional, IsString, MaxLength, Max } from 'class-validator'
+import { z } from 'zod'
+import { createZodDto } from 'nestjs-zod'
 
-export class CreateTransactionDto {
-	@IsInt()
-	@IsPositive()
-	objectId!: number
+const createTransactionSchema = z.object({
+	objectId: z.number("Please input a number").int().positive(),
+	lendedFrom: z.iso.datetime({ offset: true }).or(z.iso.date()),
+	lendedTo: z.iso.datetime({ offset: true }).or(z.iso.date()),
+	message: z.string().max(250, 'Max 250 characters').optional(),
+})
 
-	@IsISO8601()
-	lendedFrom!: string
-
-	@IsISO8601()
-	lendedTo!: string
-
-	@IsOptional()
-	@IsString()
-	@MaxLength(250)
-	message?: string
-}
+export class CreateTransactionDto extends createZodDto(createTransactionSchema) {}
