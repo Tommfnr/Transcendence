@@ -12,6 +12,7 @@ import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
 import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
+import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -74,6 +75,10 @@ export const routes: Routes = [
       {
         path: 'assistanceOfferDetails',
         component: AssistanceOfferDetails
+      },
+      {
+        path: 'exampleGroupList',
+        component: ExampleGroupList
       }
     ]
   },
