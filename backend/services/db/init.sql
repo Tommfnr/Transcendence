@@ -56,6 +56,34 @@ CREATE TABLE IF NOT EXISTS group_object_grants (
 	CONSTRAINT		unique_group_object_grant UNIQUE (group_id, object_id)
 );
 
+DO $$
+BEGIN
+	CREATE TYPE post_status AS ENUM ('open', 'closed');
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS posts (
+	id					SERIAL PRIMARY KEY,
+	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	title				VARCHAR(50) NOT NULL,
+	type				VARCHAR(20),
+	description			VARCHAR(500),
+	status				post_status NOT NULL DEFAULT 'open',
+	created_at			TIMESTAMP DEFAULT NOW(),
+	updated_at			TIMESTAMP DEFAULT NOW(),
+	from_date			TIMESTAMP NOT NULL,
+	to_date				TIMESTAMP NOT NULL,
+	CONSTRAINT		posts_date_order CHECK (to_date >= from_date)
+);
+
+CREATE TABLE IF NOT EXISTS post_groups (
+	id			SERIAL PRIMARY KEY,
+	post_id		INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+	group_id	INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+	CONSTRAINT	unique_post_group UNIQUE (post_id, group_id)
+);
+
 CREATE TABLE IF NOT EXISTS refresh_tokens (
 	id					SERIAL PRIMARY KEY,
 	jti					UUID NOT NULL UNIQUE,
