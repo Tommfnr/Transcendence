@@ -18,6 +18,14 @@
 	--font-sans: 'Nunito', sans-serif;
 }
 
+@utility wrapper {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 @keyframes rainbow {
   0%   { background-color: #ff0000; }
   17%  { background-color: #ff8800; }
