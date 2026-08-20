@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, inject, provideAppInitializer } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { firstValueFrom, catchError, of } from 'rxjs';
+import { firstValueFrom, catchError, of, switchMap} from 'rxjs';
 
 import { routes } from './app.routes';
 import { refreshInterceptor } from './services/refresh.interceptor';
@@ -14,7 +14,12 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([refreshInterceptor])),
     provideAppInitializer(() => { // to refresh page on arrival, no login if existing session found
       const refreshService = inject(RefreshService)
-      return (firstValueFrom(refreshService.refreshToken().pipe(catchError(() => of(null)))))
+      return (firstValueFrom(
+        refreshService.refreshToken().pipe(
+          switchMap(() => refreshService.getMe()),
+          catchError(() => of(null))
+        )
+      ))
     })
   ]
 };
