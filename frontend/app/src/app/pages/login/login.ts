@@ -41,7 +41,7 @@ export class Login {
         	const { identifier, password, rememberMe } = this.loginModel()
 
         	this.refreshService.login(identifier, password, rememberMe).subscribe({
-            next: () => this.router.navigate(['/']),
+            next: () => this.router.navigate(['/app']),
             error: (err) => console.log('Invalid creds (FRONTEND)', err)
           })
       })
