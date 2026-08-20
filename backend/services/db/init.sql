@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS posts (
 	created_at			TIMESTAMP DEFAULT NOW(),
 	updated_at			TIMESTAMP DEFAULT NOW(),
 	from_date			TIMESTAMP NOT NULL,
-	to_date				TIMESTAMP NOT NULL
+	to_date				TIMESTAMP NOT NULL,
+	CONSTRAINT		posts_date_order CHECK (to_date >= from_date)
 );
 
 CREATE TABLE IF NOT EXISTS post_groups (
