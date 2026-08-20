@@ -101,6 +101,14 @@ export class PostsService {
 				await t.insert(postGroups).values(
 					groupIds.map((groupId) => ({ postId: id, groupId }))
 				)
+
+				if (Object.keys(postFields).length === 0) {
+					;[post] = await t
+						.update(posts)
+						.set({ updatedAt: new Date() })
+						.where(eq(posts.id, id))
+						.returning()
+				}
 			}
 
 			return (post)
