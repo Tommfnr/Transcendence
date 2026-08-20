@@ -77,6 +77,8 @@ export class ChatsService {
 
 			if (existing)
 				throw new ConflictException('Conversation already exists for this post, use POST /chats/:id/messages instead')
+			if (post.status === 'closed')
+				throw new ForbiddenException('Cannot start a conversation on a closed post')
 
 			const [conversation] = await t
 					.insert(conversations)
