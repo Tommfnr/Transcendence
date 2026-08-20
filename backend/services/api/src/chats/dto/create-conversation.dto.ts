@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { messageContentSchema } from '../../zod/zod.schemas'
 
 const createConversationSchema = z.object({
 	postId:		z.number().int().positive(),
-	content:	z.string().min(1, 'Message required').max(2000, 'Max 2000 characters'),
+	content:	messageContentSchema,
 })
 
 export class CreateConversationDto extends createZodDto(createConversationSchema) {}
