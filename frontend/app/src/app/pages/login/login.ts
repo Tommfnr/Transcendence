@@ -25,7 +25,7 @@ export class Login {
 
   loginForm = form(this.loginModel, (fieldPath) => {
     required(fieldPath.identifier, { message: 'Username or email is required' });
-    
+
     const currentIdentifier = this.loginModel().identifier;
     if (currentIdentifier.includes('@')) {
       email(fieldPath.identifier, { message: 'Enter a valid email address' });
@@ -37,16 +37,21 @@ export class Login {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    	submit(this.loginForm, async () => {
-        	const { identifier, password, rememberMe } = this.loginModel()
+    submit(this.loginForm, async () => {
+      const { identifier, password, rememberMe } = this.loginModel()
 
-        	this.refreshService.login(identifier, password, rememberMe).subscribe({
+      this.refreshService.login(identifier, password, rememberMe).subscribe({
+        next: () => {
+          this.refreshService.getMe().subscribe({
             next: () => this.router.navigate(['/app']),
-            error: (err) => console.log('Invalid creds (FRONTEND)', err)
+            error: (err) => console.log('Failed to fetch profile', err)
           })
+        },
+        error: (err) => console.log('Invalid creds (FRONTEND)', err)
       })
-    };
-  
+    })
+  };
+
 }
 
 
