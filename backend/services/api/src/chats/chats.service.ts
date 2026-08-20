@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and, or, desc } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { conversations, messages, posts } from '../database/schema'
@@ -70,23 +70,18 @@ export class ChatsService {
 			if (post.ownerId === userId)
 				throw new ForbiddenException('You cannot message yourself about your own post')
 
-			let [conversation] = await t
+			const [existing] = await t
 					.select()
 					.from(conversations)
 					.where(and(eq(conversations.postId, postId), eq(conversations.requesterId, userId)))
 
-			if (!conversation) {
-				[conversation] = await t
-						.insert(conversations)
-						.values({ postId, requesterId: userId })
-						.returning()
-			} else {
-				[conversation] = await t
-						.update(conversations)
-						.set({ updatedAt: new Date() })
-						.where(eq(conversations.id, conversation.id))
-						.returning()
-			}
+			if (existing)
+				throw new ConflictException('Conversation already exists for this post, use POST /chats/:id/messages instead')
+
+			const [conversation] = await t
+					.insert(conversations)
+					.values({ postId, requesterId: userId })
+					.returning()
 
 			const [message] = await t
 					.insert(messages)
