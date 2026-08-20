@@ -1,0 +1,14 @@
+<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
+   <h1>Page: exampleGroupList</h1>
+  <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+
+  @if (errorMessage()) {
+    <p class="text-red-600">{{ errorMessage() }}</p>
+  } @else {
+    @for (group of groups(); track group.id) {
+      <p>{{ group.name }}</p>
+    } @empty {
+      <p>Aucun groupe</p>
+    }
+  }
+</main>
