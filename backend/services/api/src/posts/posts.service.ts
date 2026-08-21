@@ -1,54 +1,52 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { posts, postGroups, groupMembers, groups } from '../database/schema'
+import { posts, postGroups, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
+import { GroupsService } from '../groups/groups.service'
 
 @Injectable()
 export class PostsService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+	constructor(@Inject(DB) private db : PostgresJsDatabase, private readonly groupsService: GroupsService) {}
 
 	findAll() {
-		return (this.db.select().from(posts).orderBy(posts.id))
+		return this.db.select().from(posts).orderBy(posts.id)
 	}
 
 	findByUserId(userId: number) {
-		return (this.db
+		return this.db
 				.select()
 				.from(posts)
-				.where(eq(posts.ownerId, userId)))
+				.where(eq(posts.ownerId, userId))
 	}
 
-	async findOne(id: number) {
-		const [post] = await this.db.select().from(posts).where(eq(posts.id, id))
+	async findOne(postId: number) {
+		const [post] = await this.db.select().from(posts).where(eq(posts.id, postId))
 
 		if (!post)
 			throw new NotFoundException('Post not found')
 
-		return (post)
+		return post
 	}
 
 	findGroups(postId: number) {
-		return (this.db
+		return this.db
 				.select({ id: groups.id, name: groups.name })
 				.from(postGroups)
 				.innerJoin(groups, eq(postGroups.groupId, groups.id))
-				.where(eq(postGroups.postId, postId)))
+				.where(eq(postGroups.postId, postId))
 	}
 
 	async create(userId: number, dto: CreatePostDto) {
-		return (this.db.transaction(async (t) => {
+		return this.db.transaction(async (t) => {
 			const { groupIds: rawGroupIds, ...postFields } = dto
 			const groupIds = [...new Set(rawGroupIds)]
 
-			const memberships = await t
-					.select({ groupId: groupMembers.groupId })
-					.from(groupMembers)
-					.where(and(eq(groupMembers.userId, userId), inArray(groupMembers.groupId, groupIds)))
+			const isMember = await this.groupsService.isMemberOfAll(userId, groupIds)
 
-			if (memberships.length !== groupIds.length)
+			if (!isMember)
 				throw new ForbiddenException('You can only post to groups you belong to')
 
 			const [post] = await t
@@ -60,16 +58,19 @@ export class PostsService {
 				groupIds.map((groupId) => ({ postId: post.id, groupId }))
 			)
 
-			return (post)
-		}))
+			return post
+		})
 	}
 
-	async update(id: number, userId: number, dto: UpdatePostDto) {
+	async update(postId: number, userId: number, dto: UpdatePostDto) {
 		const { groupIds: rawGroupIds, ...postFields } = dto
-		const groupIds = rawGroupIds ? [...new Set(rawGroupIds)] : undefined
 
-		return (this.db.transaction(async (t) => {
-			const [existing] = await t.select().from(posts).where(eq(posts.id, id))
+		let groupIds
+		if (rawGroupIds)
+			groupIds = [...new Set(rawGroupIds)]
+
+		return this.db.transaction(async (t) => {
+			const [existing] = await t.select().from(posts).where(eq(posts.id, postId))
 
 			if (!existing)
 				throw new NotFoundException('Post not found')
@@ -77,12 +78,9 @@ export class PostsService {
 				throw new ForbiddenException('Only the post owner can update this post')
 
 			if (groupIds) {
-				const memberships = await t
-						.select({ groupId: groupMembers.groupId })
-						.from(groupMembers)
-						.where(and(eq(groupMembers.userId, userId), inArray(groupMembers.groupId, groupIds)))
+				const isMember = await this.groupsService.isMemberOfAll(userId, groupIds)
 
-				if (memberships.length !== groupIds.length)
+				if (!isMember)
 					throw new ForbiddenException('You can only post to groups you belong to')
 			}
 
@@ -92,39 +90,39 @@ export class PostsService {
 				[post] = await t
 						.update(posts)
 						.set({ ...postFields, updatedAt: new Date() })
-						.where(eq(posts.id, id))
+						.where(eq(posts.id, postId))
 						.returning()
 			}
 
 			if (groupIds) {
-				await t.delete(postGroups).where(eq(postGroups.postId, id))
+				await t.delete(postGroups).where(eq(postGroups.postId, postId))
 				await t.insert(postGroups).values(
-					groupIds.map((groupId) => ({ postId: id, groupId }))
+					groupIds.map((groupId) => ({ postId, groupId }))
 				)
 
 				if (Object.keys(postFields).length === 0) {
 					;[post] = await t
 						.update(posts)
 						.set({ updatedAt: new Date() })
-						.where(eq(posts.id, id))
+						.where(eq(posts.id, postId))
 						.returning()
 				}
 			}
 
-			return (post)
-		}))
+			return post
+		})
 	}
 
-	async remove(id: number, userId: number) {
-		const [existing] = await this.db.select().from(posts).where(eq(posts.id, id))
+	async remove(postId: number, userId: number) {
+		const [existing] = await this.db.select().from(posts).where(eq(posts.id, postId))
 
 		if (!existing)
 			throw new NotFoundException('Post not found')
 		if (existing.ownerId !== userId)
 			throw new ForbiddenException('Only the post owner can delete this post')
 
-		await this.db.delete(posts).where(eq(posts.id, id))
+		await this.db.delete(posts).where(eq(posts.id, postId))
 
-		return ({ message: 'Post successfully deleted' })
+		return { message: 'Post successfully deleted' }
 	}
 }

@@ -12,40 +12,40 @@ export class PostsController {
 
 	@Get()
 	findAll() {
-		return (this.postsService.findAll())
+		return this.postsService.findAll()
 	}
 
 	@Get('my')
 	findMy(@Req() req: AuthenticatedRequest) {
 		const userId = req.user.sub
-		return (this.postsService.findByUserId(userId))
+		return this.postsService.findByUserId(userId)
 	}
 
-	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return (this.postsService.findOne(Number(id)))
+	@Get(':postId')
+	findOne(@Param('postId') postId: string) {
+		return this.postsService.findOne(Number(postId))
 	}
 
-	@Get(':id/groups')
-	findGroups(@Param('id') id: string) {
-		return (this.postsService.findGroups(Number(id)))
+	@Get(':postId/groups')
+	findGroups(@Param('postId') postId: string) {
+		return this.postsService.findGroups(Number(postId))
 	}
 
 	@Post()
 	create(@Req() req: AuthenticatedRequest, @Body() dto: CreatePostDto) {
 		const userId = req.user.sub
-		return (this.postsService.create(userId, dto))
+		return this.postsService.create(userId, dto)
 	}
 
-	@Put(':id')
-	update(@Param('id') id: string, @Req() req: AuthenticatedRequest, @Body() dto: UpdatePostDto) {
+	@Put(':postId')
+	update(@Param('postId') postId: string, @Req() req: AuthenticatedRequest, @Body() dto: UpdatePostDto) {
 		const userId = req.user.sub
-		return (this.postsService.update(Number(id), userId, dto))
+		return this.postsService.update(Number(postId), userId, dto)
 	}
 
-	@Delete(':id')
-	remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+	@Delete(':postId')
+	remove(@Param('postId') postId: string, @Req() req: AuthenticatedRequest) {
 		const userId = req.user.sub
-		return (this.postsService.remove(Number(id), userId))
+		return this.postsService.remove(Number(postId), userId)
 	}
 }
