@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Param, Req, Body, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, UseGuards, Param, Req, Body } from '@nestjs/common'
 import { ChatsService } from './chats.service'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
-import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { AuthGuard } from '../auth/guard'
+import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 
 @Controller('chats')
 @UseGuards(AuthGuard)
@@ -16,16 +16,16 @@ export class ChatsController {
 		return this.chatsService.findMy(userId)
 	}
 
-	@Get(':id')
-	findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+	@Get(':conversationId')
+	findOne(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest) {
 		const userId = req.user.sub
-		return this.chatsService.findOne(Number(id), userId)
+		return this.chatsService.findOne(Number(conversationId), userId)
 	}
 
-	@Get(':id/messages')
-	findMessages(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+	@Get(':conversationId/messages')
+	findMessages(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest) {
 		const userId = req.user.sub
-		return this.chatsService.findMessages(Number(id), userId)
+		return this.chatsService.findMessages(Number(conversationId), userId)
 	}
 
 	@Post()
@@ -34,9 +34,9 @@ export class ChatsController {
 		return this.chatsService.create(userId, dto)
 	}
 
-	@Post(':id/messages')
-	createMessage(@Param('id') id: string, @Req() req: AuthenticatedRequest, @Body() dto: CreateMessageDto) {
+	@Post(':conversationId/messages')
+	createMessage(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest, @Body() dto: CreateMessageDto) {
 		const userId = req.user.sub
-		return this.chatsService.createMessage(Number(id), userId, dto)
+		return this.chatsService.createMessage(Number(conversationId), userId, dto)
 	}
 }

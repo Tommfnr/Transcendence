@@ -27,7 +27,7 @@ export class ChatsService {
 				.orderBy(desc(conversations.updatedAt))
 	}
 
-	async findOne(id: number, userId: number) {
+	async findOne(conversationId: number, userId: number) {
 		const [conversation] = await this.db
 				.select({
 					id: conversations.id,
@@ -39,7 +39,7 @@ export class ChatsService {
 				})
 				.from(conversations)
 				.innerJoin(posts, eq(conversations.postId, posts.id))
-				.where(eq(conversations.id, id))
+				.where(eq(conversations.id, conversationId))
 
 		if (!conversation)
 			throw new NotFoundException('Conversation not found')
@@ -49,13 +49,13 @@ export class ChatsService {
 		return conversation
 	}
 
-	async findMessages(id: number, userId: number) {
-		await this.findOne(id, userId)
+	async findMessages(conversationId: number, userId: number) {
+		await this.findOne(conversationId, userId)
 
 		return this.db
 				.select()
 				.from(messages)
-				.where(eq(messages.conversationId, id))
+				.where(eq(messages.conversationId, conversationId))
 				.orderBy(messages.createdAt)
 	}
 
@@ -76,7 +76,7 @@ export class ChatsService {
 					.where(and(eq(conversations.postId, postId), eq(conversations.requesterId, userId)))
 
 			if (existing)
-				throw new ConflictException('Conversation already exists for this post, use POST /chats/:id/messages instead')
+				throw new ConflictException('Conversation already exists for this post, use POST /chats/:conversationId/messages instead')
 			if (post.status === 'closed')
 				throw new ForbiddenException('Cannot start a conversation on a closed post')
 
@@ -90,17 +90,17 @@ export class ChatsService {
 					.values({ conversationId: conversation.id, ownerId: userId, content })
 					.returning()
 
-			return { conversation, message }
+			return ({ conversation, message })
 		})
 	}
 
-	async createMessage(id: number, userId: number, dto: CreateMessageDto) {
+	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {
 		return this.db.transaction(async (t) => {
 			const [conversation] = await t
 					.select({ id: conversations.id, requesterId: conversations.requesterId, postOwnerId: posts.ownerId })
 					.from(conversations)
 					.innerJoin(posts, eq(conversations.postId, posts.id))
-					.where(eq(conversations.id, id))
+					.where(eq(conversations.id, conversationId))
 
 			if (!conversation)
 				throw new NotFoundException('Conversation not found')
@@ -109,13 +109,13 @@ export class ChatsService {
 
 			const [message] = await t
 					.insert(messages)
-					.values({ conversationId: id, ownerId: userId, content: dto.content })
+					.values({ conversationId, ownerId: userId, content: dto.content })
 					.returning()
 
 			await t
 					.update(conversations)
 					.set({ updatedAt: new Date() })
-					.where(eq(conversations.id, id))
+					.where(eq(conversations.id, conversationId))
 
 			return message
 		})
