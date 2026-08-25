@@ -2,7 +2,7 @@
   <section class="flex items-center justify-between gap-2 px-3">
     <a
       routerLink="/app/exampleGroupList"
-      class="flex h-10 min-w-40 flex-1 items-center gap-[12px] rounded bg-card px-[12px] drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
+      class="flex h-10 min-w-40 flex-1 items-center gap-[12px] rounded-sm bg-card px-[12px] drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
     >
       <img src="/icons/all-inclusive.svg" alt="" class="size-4 shrink-0" />
       <span class="text-xs font-bold text-black">Tous mes groupes</span>
@@ -12,7 +12,7 @@
     <a
       routerLink="/app/groupParameter"
       aria-label="Paramètres"
-      class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded bg-card drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
+      class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded-sm bg-card drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
     >
       <img src="/icons/settings.svg" alt="" class="size-6" />
     </a>
@@ -20,28 +20,28 @@
 
   <section class="flex items-center justify-center gap-x-6 py-1">
     <div
-      class="flex h-16 items-center rounded border border-primary/33 bg-primary/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
+      class="flex items-center py-2 rounded-sm border border-primary/33 bg-primary/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
     >
       <div class="flex h-full items-center px-2">
         <img src="/icons/hand-heart.svg" alt="" class="h-[30px] w-[34px]" />
       </div>
-      <div class="flex w-[62px] flex-col pt-1.5 leading-none text-black">
+      <div class="flex w-20 flex-col whitespace-nowrap leading-none text-black">
         <span class="text-xl font-bold">{{ requestCount }}</span>
-        <span class="mt-2 text-[0.625rem] font-semibold tracking-[-0.2px]">demandes</span>
-        <span class="mt-1 text-[0.5rem] font-light tracking-[-0.08px]">de proches</span>
+        <span class="mt-2 text-2xs font-semibold tracking-[-0.2px]">demandes</span>
+        <span class="mt-1 text-2xs font-light tracking-[-0.08px]">de proches</span>
       </div>
     </div>
 
     <div
-      class="flex h-16 items-center rounded border border-success/33 bg-success/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
+      class="flex items-center py-2 rounded-sm border border-success/33 bg-success/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
     >
       <div class="flex h-full items-center px-2">
         <img src="/icons/bag-heart.svg" alt="" class="h-[30px] w-[35px]" />
       </div>
-      <div class="flex w-[62px] flex-col pt-1.5 leading-none text-black">
+      <div class="flex w-20 flex-col whitespace-nowrap leading-none text-black">
         <span class="text-xl font-bold">{{ offerCount }}</span>
-        <span class="mt-2 text-[0.625rem] font-semibold tracking-[-0.2px]">propositions</span>
-        <span class="mt-1 text-[0.5rem] font-light tracking-[-0.08px]">d'aide recentes</span>
+        <span class="mt-2 text-2xs font-semibold tracking-[-0.2px]">propositions</span>
+        <span class="mt-1 text-2xs font-light tracking-[-0.08px]">d'aide recentes</span>
       </div>
     </div>
   </section>

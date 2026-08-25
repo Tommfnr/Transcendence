@@ -16,8 +16,8 @@ export class HeaderMarketing {
 	readonly isLoggedIn = this.refreshService.isLoggedIn;
 
 	onLogout() {
-		this.refreshService.logout().subscribe(() => {
-			next: () => this.router.navigate(['/']);
+		this.refreshService.logout().subscribe( {
+			next: () => this.router.navigate(['/']),
 			error: () => {
 				this.refreshService.clearAccessToken();
 				this.router.navigate(['/']);

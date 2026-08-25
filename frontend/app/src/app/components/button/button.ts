@@ -18,7 +18,7 @@ export class ButtonComponent {
 	@Input() size: 'small' | 'medium' | 'large' = 'medium';
 
 	get classes():string {
-		const base = 'cursor-pointer rounded-md hover:bg-alert transition-colors duration-300 ease-in-out font-bold';
+		const base = 'cursor-pointer rounded-card hover:bg-alert transition-colors duration-300 ease-in-out font-bold';
 		const variants: Record<ButtonVariant, string> = {
 			'primary': 'bg-primary text-white',
 			'secondary': 'bg-secondary text-white'

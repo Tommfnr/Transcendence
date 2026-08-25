@@ -15,7 +15,84 @@
 	--color-complementary: #7043C3;
 
 	/* Font */
+	/*
+	Use ONLY these. If a size feels wrong, pick the nearest step —
+	never write text-[0.5625rem].
+	*/
+	--text-*: initial;
 	--font-sans: 'Nunito', sans-serif;
+
+	
+	/* 10px — Micro. Dense mobile UI only: timestamps, stat qualifiers,
+	   chip labels. Never for anything the user must read carefully. */
+	--text-2xs: 0.625rem;
+	--text-2xs--line-height: 0.875rem;
+
+	/* 12px — Caption. Secondary text inside cards: descriptions,
+	   group names, metadata lines. The smallest readable size. */
+	--text-xs: 0.75rem;
+	--text-xs--line-height: 1rem;
+
+	/* 14px — Small. Card titles, tab labels, footer links,
+	   small buttons. Bold at this size = a card's main label. */
+	--text-sm: 0.875rem;
+	--text-sm--line-height: 1.25rem;
+
+	/* 16px — Body. Default for paragraphs, form labels, inputs.
+	   Also the browser default: never go below this for long text. */
+	--text-base: 1rem;
+	--text-base--line-height: 1.5rem;
+
+	/* 18px — Lead. Emphasised body, the header greeting,
+	   large buttons. Use sparingly. */
+	--text-lg: 1.125rem;
+	--text-lg--line-height: 1.75rem;
+
+	/* 20px — Stat. Big numbers in the dashboard counters,
+	   and h3-level section headings. */
+	--text-xl: 1.25rem;
+	--text-xl--line-height: 1.75rem;
+
+	/* 24px — Heading. Section titles (h2) and the marketing logo. */
+	--text-2xl: 1.5rem;
+	--text-2xl--line-height: 2rem;
+
+	/* 32px — Display. Page title (h1). One per page, max. */
+	--text-3xl: 2rem;
+	--text-3xl--line-height: 2.5rem;
+
+	/* ── Radius ───────────────────────────────────────────────────── */
+
+	--radius-*: initial;
+	/* 4px — Chips, badges, tags. Small elements where a big radius
+	   would eat the content. */
+	--radius-sm: 0.25rem;
+
+	/* 8px — The default. Cards, inputs, buttons, images.
+	   When in doubt, use this one. */
+	--radius-card: 0.5rem;
+
+	/* Fully round — Avatars, icon buttons, status dots.
+	   Only for things that are square or circular by nature. */
+	--radius-full: 9999px;
+
+	
+	
+	/* ── Spacing ───────────────────────────────────────────────────
+	   Derived from Tailwind's 0.25rem base — nothing to declare here.
+	   The rule is which steps you allow:
+
+	     1  (4px)   icon ↔ label, tightest usable gap
+	     2  (8px)   inside a component: chip padding, stacked lines
+	     3  (12px)  card padding on mobile
+	     4  (16px)  the default. Gap between cards, section padding
+	     6  (24px)  between distinct blocks
+	     8  (32px)  between page sections
+	     12 (48px)  above/below a page header
+
+	   Half steps (0.5, 1.5, 2.5) are pixel-nudges that never
+	   reproduce elsewhere. If you need one, the layout is wrong —
+	   usually a line-height or a border you forgot to account for. */
 }
 
 @utility wrapper {
