@@ -1,11 +1,11 @@
 <article
   class="flex w-full flex-col overflow-hidden rounded-card bg-card shadow-card"
 >
-  <div class="flex items-start gap-2 px-2.5 py-1">
+  <div class="flex items-start gap-2 px-2 pt-2 pb-1">
     <div class="size-10 shrink-0 rounded-full bg-muted/50"></div>
 
-    <div class="flex min-w-0 flex-1 flex-col">
-      <div class="flex items-center gap-2.5 px-0.5 py-0.5">
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <div class="flex items-center gap-2">
         <p class="truncate text-xs font-bold text-text-strong">
           {{ request().authorName }}
           <span class="text-xs font-normal">- </span>
@@ -16,22 +16,18 @@
         </span>
       </div>
 
-      <div class="flex h-13 flex-col gap-1 overflow-hidden px-0.5">
+      <div class="flex flex-col gap-1">
         <h3 class="truncate text-xs font-bold text-text-strong">{{ request().title }}</h3>
         <p class="line-clamp-2 text-xs text-text">{{ request().description }}</p>
       </div>
     </div>
   </div>
 
-  <div class="flex h-[30px] items-center justify-between px-2">
+  <div class="flex items-center justify-between px-2 pt-1 pb-2">
     <div class="flex items-center gap-2">
       @for (tag of request().tags; track tag.label) {
-        <span class="flex items-center gap-1 rounded-sm bg-complementary/15 px-2 py-1">
-          <img
-            [src]="'/icons/' + tag.icon + '.svg'"
-            [class]="tag.icon === 'tag' ? 'size-2.5' : 'size-3'"
-            alt=""
-          />
+        <span class="flex items-center gap-1 rounded-sm bg-complementary-surface px-2 py-1">
+          <img [src]="'/icons/' + tag.icon + '.svg'" alt="" class="size-3" />
           <span class="whitespace-nowrap text-2xs tracking-[-0.18px] text-text-strong">
             {{ tag.label }}
           </span>

@@ -28,9 +28,24 @@
 	/* Neutral placeholder surface: empty avatars, image skeletons. */
 	--color-muted: #D9D9D9;
 
-	/* Tint steps -- the only opacities allowed on a brand colour.
-	   bg-primary/15 (subtle surface), border-primary/30 (its border),
-	   bg-primary/50 (muted state). Anything else is drift. */
+	/* Tinted surfaces -- a brand colour used as a background.
+	   color-mix keeps them composited at paint time, so they stay correct
+	   whatever sits behind. Do NOT replace these with flattened hex values:
+	   a flat colour bakes in one specific backdrop. Figma stores the
+	   flattened equivalent only because paint opacity does not survive
+	   nested instances there. */
+	--color-primary-surface:       color-mix(in srgb, var(--color-primary) 15%, transparent);
+	--color-success-surface:       color-mix(in srgb, var(--color-success) 15%, transparent);
+	--color-complementary-surface: color-mix(in srgb, var(--color-complementary) 15%, transparent);
+
+	/* Their matching borders. */
+	--color-primary-border: color-mix(in srgb, var(--color-primary) 30%, transparent);
+	--color-success-border: color-mix(in srgb, var(--color-success) 30%, transparent);
+
+	/* Ad-hoc opacity on a brand colour is now a last resort: the three
+	   recurring tints above are named tokens. The only remaining allowed
+	   step is /50, for a muted state (avatar placeholders). Anything else
+	   is drift -- if a new tint recurs, give it a -surface token. */
 
 	/* Font */
 	/*
