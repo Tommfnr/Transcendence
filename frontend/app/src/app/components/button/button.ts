@@ -1,34 +1,25 @@
 import { Component, Input } from '@angular/core';
+import { ButtonDirective, ButtonSize, ButtonVariant } from './button.directive';
 
-type ButtonVariant = 'primary' | 'secondary';
-type ButtonSize = 'small' | 'medium' | 'large';
-
+/**
+ * Convenience wrapper around ButtonDirective for the common case:
+ * a real <button> that performs an action.
+ *
+ * When the click navigates, don't use this — put the directive on an
+ * anchor instead: <a appButton routerLink="...">.
+ */
 @Component({
 	selector: 'app-button',
 	standalone: true,
+	imports: [ButtonDirective],
 	template: `
-		<button [class]="classes">
+		<button [type]="type" appButton [variant]="variant" [size]="size">
 			<ng-content></ng-content>
 		</button>
 	`,
 })
-
 export class ButtonComponent {
-	@Input() variant: 'primary' | 'secondary' = 'primary';
-	@Input() size: 'small' | 'medium' | 'large' = 'medium';
-
-	get classes():string {
-		const base = 'cursor-pointer rounded-card hover:bg-alert transition-colors duration-300 ease-in-out font-bold';
-		const variants: Record<ButtonVariant, string> = {
-			'primary': 'bg-primary text-white',
-			'secondary': 'bg-secondary text-white'
-		};
-		const sizes: Record<ButtonSize, string> = {
-			'small': 'text-sm px-3 py-1.5',
-			'medium': 'text-base px-4 py-2',
-			'large': 'text-lg px-6 py-3'
-		};
-
-		return `${base} ${variants[this.variant]} ${sizes[this.size]}`;
-	}
+	@Input() variant: ButtonVariant = 'primary';
+	@Input() size: ButtonSize = 'medium';
+	@Input() type: 'button' | 'submit' | 'reset' = 'button';
 }

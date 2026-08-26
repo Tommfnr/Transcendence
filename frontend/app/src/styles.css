@@ -6,13 +6,31 @@
 @theme {
 	/* Colors*/
 	--color-primary: #FF9D2E;
+	--color-secondary: #4B5563;
 	--color-alert: #FF7700;
+	--color-error: #EF4444;
 	--color-background: #F8F9FA;
 	--color-card: #FFFFFF;
 	--color-text: #1F2937;
 	--color-text-secondary: #6B7280;
 	--color-success: #3FCD6E;
 	--color-complementary: #7043C3;
+
+	/* Pure black. Dense mobile UI where maximum contrast is needed:
+	   card titles, stat labels, header greeting. For long-form copy
+	   prefer --color-text, which is softer on the eye. */
+	--color-text-strong: #000000;
+
+	/* Text and icons sitting ON a primary/complementary fill.
+	   Never use it on a light background. */
+	--color-on-primary: #FFFFFF;
+
+	/* Neutral placeholder surface: empty avatars, image skeletons. */
+	--color-muted: #D9D9D9;
+
+	/* Tint steps -- the only opacities allowed on a brand colour.
+	   bg-primary/15 (subtle surface), border-primary/30 (its border),
+	   bg-primary/50 (muted state). Anything else is drift. */
 
 	/* Font */
 	/*
@@ -61,6 +79,22 @@
 	--text-3xl: 2rem;
 	--text-3xl--line-height: 2.5rem;
 
+	/* ── Shadows ───────────────────────────────────────────
+	   Two elevations, one light source. Use `shadow-*`, never
+	   `drop-shadow-*` — that one is for non-rectangular shapes
+	   (transparent PNGs, SVG icons) and costs more to render. */
+
+	--shadow-*: initial;
+	--drop-shadow-*: initial;
+
+	/* Raised — elements that sit above the page: stat cards,
+	   the group selector, floating buttons. */
+	--shadow-raised: 0 2px 2px 0 rgb(0 0 0 / 0.25);
+
+	/* Card — surfaces resting flat on the background: request cards,
+	   list items. Softer and more diffuse than raised. */
+	--shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.25);
+
 	/* ── Radius ───────────────────────────────────────────────────── */
 
 	--radius-*: initial;
@@ -93,6 +127,17 @@
 	   Half steps (0.5, 1.5, 2.5) are pixel-nudges that never
 	   reproduce elsewhere. If you need one, the layout is wrong —
 	   usually a line-height or a border you forgot to account for. */
+}
+
+/* Routed page components sit between the layout's <main> and the page
+   markup. Their host element is display:inline by default, which breaks
+   the layout's flex column — flex-1 on a page wrapper would do nothing.
+   This makes every routed host a proper stretching flex item. */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 @utility wrapper {

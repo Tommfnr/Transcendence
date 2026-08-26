@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RefreshService } from '../../services/refresh.service';
 import { Router } from '@angular/router';
+import { ButtonDirective } from '../button/button.directive';
 
 @Component({
 	selector: 'app-header-marketing',
-	imports: [RouterLink],
+	imports: [RouterLink, ButtonDirective],
 	templateUrl: './header-marketing.html',
 })
 
