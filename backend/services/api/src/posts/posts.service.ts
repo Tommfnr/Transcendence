@@ -1,15 +1,28 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { PostgresJsDatabase, PostgresJsTransaction } from 'drizzle-orm/postgres-js'
 import { posts, postGroups, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { GroupsService } from '../groups/groups.service'
 
+type Executor = PostgresJsDatabase | PostgresJsTransaction<Record<string, never>, Record<string, never>>
+
 @Injectable()
 export class PostsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase, private readonly groupsService: GroupsService) {}
+
+	private async findAuthorizedPost(executor: Executor, postId: number, userId: number, action: string) {
+		const [post] = await executor.select().from(posts).where(eq(posts.id, postId))
+
+		if (!post)
+			throw new NotFoundException('Post not found')
+		if (post.ownerId !== userId)
+			throw new ForbiddenException(`Only the post owner can ${action} this post`)
+
+		return post
+	}
 
 	findAll() {
 		return this.db.select().from(posts).orderBy(posts.id)
@@ -70,12 +83,7 @@ export class PostsService {
 			groupIds = [...new Set(rawGroupIds)]
 
 		return this.db.transaction(async (t) => {
-			const [existing] = await t.select().from(posts).where(eq(posts.id, postId))
-
-			if (!existing)
-				throw new NotFoundException('Post not found')
-			if (existing.ownerId !== userId)
-				throw new ForbiddenException('Only the post owner can update this post')
+			const existing = await this.findAuthorizedPost(t, postId, userId, 'update')
 
 			if (groupIds) {
 				const isMember = await this.groupsService.isMemberOfAll(userId, groupIds)
@@ -114,12 +122,7 @@ export class PostsService {
 	}
 
 	async remove(postId: number, userId: number) {
-		const [existing] = await this.db.select().from(posts).where(eq(posts.id, postId))
-
-		if (!existing)
-			throw new NotFoundException('Post not found')
-		if (existing.ownerId !== userId)
-			throw new ForbiddenException('Only the post owner can delete this post')
+		await this.findAuthorizedPost(this.db, postId, userId, 'delete')
 
 		await this.db.delete(posts).where(eq(posts.id, postId))
 
