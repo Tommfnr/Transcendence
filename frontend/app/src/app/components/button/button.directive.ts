@@ -22,11 +22,14 @@ export class ButtonDirective {
 	@HostBinding('class')
 	get classes(): string {
 		const base =
-			'inline-flex cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-300 ease-in-out hover:bg-alert';
+			'inline-flex cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-300 ease-in-out';
 
+		// Hover lives in the variant, not the base: turning a secondary button
+		// orange has to switch its text colour too, or white lands on #FF7700
+		// at 2.7:1.
 		const variants: Record<ButtonVariant, string> = {
-			primary: 'bg-primary text-on-primary',
-			secondary: 'bg-secondary text-on-primary',
+			primary: 'bg-primary text-on-primary hover:bg-alert',
+			secondary: 'bg-secondary text-on-secondary hover:bg-alert hover:text-on-primary',
 		};
 
 		const sizes: Record<ButtonSize, string> = {

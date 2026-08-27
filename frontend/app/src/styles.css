@@ -21,9 +21,15 @@
 	   prefer --color-text, which is softer on the eye. */
 	--color-text-strong: #000000;
 
-	/* Text and icons sitting ON a primary/complementary fill.
-	   Never use it on a light background. */
-	--color-on-primary: #FFFFFF;
+	/* Text and icons sitting ON an orange fill (primary, alert).
+	   Dark, not white: #FF9D2E is light in luminance, so white text on it
+	   measures 2.1:1 — far below the 4.5:1 AA threshold. Dark text gives
+	   7.1:1. Never use this on a dark background. */
+	--color-on-primary: #1F2937;
+
+	/* Text and icons sitting ON a dark fill (secondary, complementary).
+	   White gives 7.6:1 on #4B5563. */
+	--color-on-secondary: #FFFFFF;
 
 	/* Neutral placeholder surface: empty avatars, image skeletons. */
 	--color-muted: #D9D9D9;
