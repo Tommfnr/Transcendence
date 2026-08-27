@@ -84,6 +84,23 @@ CREATE TABLE IF NOT EXISTS post_groups (
 	CONSTRAINT	unique_post_group UNIQUE (post_id, group_id)
 );
 
+CREATE TABLE IF NOT EXISTS conversations (
+	id				SERIAL PRIMARY KEY,
+	post_id			INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+	requester_id	INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	created_at		TIMESTAMP NOT NULL DEFAULT NOW(),
+	updated_at		TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT		unique_post_requester UNIQUE (post_id, requester_id)
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+	id					SERIAL PRIMARY KEY,
+	conversation_id		INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+	content				TEXT NOT NULL,
+	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	created_at			TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS refresh_tokens (
 	id					SERIAL PRIMARY KEY,
 	jti					UUID NOT NULL UNIQUE,
