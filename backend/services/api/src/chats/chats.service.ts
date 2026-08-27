@@ -1,34 +1,19 @@
 import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, and, or, desc } from 'drizzle-orm'
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { PostgresJsDatabase, PostgresJsTransaction } from 'drizzle-orm/postgres-js'
 import { conversations, messages, posts } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
 
+type Executor = PostgresJsDatabase | PostgresJsTransaction<Record<string, never>, Record<string, never>>
+
 @Injectable()
 export class ChatsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	findMy(userId: number) {
-		return this.db
-				.select({
-					id: conversations.id,
-					postId: conversations.postId,
-					requesterId: conversations.requesterId,
-					createdAt: conversations.createdAt,
-					updatedAt: conversations.updatedAt,
-					postTitle: posts.title,
-					postOwnerId: posts.ownerId,
-				})
-				.from(conversations)
-				.innerJoin(posts, eq(conversations.postId, posts.id))
-				.where(or(eq(conversations.requesterId, userId), eq(posts.ownerId, userId)))
-				.orderBy(desc(conversations.updatedAt))
-	}
-
-	async findOne(conversationId: number, userId: number) {
-		const [conversation] = await this.db
+	private async findAuthorizedConversation(executor: Executor, conversationId: number, userId: number) {
+		const [conversation] = await executor
 				.select({
 					id: conversations.id,
 					postId: conversations.postId,
@@ -47,6 +32,27 @@ export class ChatsService {
 			throw new ForbiddenException('You are not part of this conversation')
 
 		return conversation
+	}
+
+	findMy(userId: number) {
+		return this.db
+				.select({
+					id: conversations.id,
+					postId: conversations.postId,
+					requesterId: conversations.requesterId,
+					createdAt: conversations.createdAt,
+					updatedAt: conversations.updatedAt,
+					postTitle: posts.title,
+					postOwnerId: posts.ownerId,
+				})
+				.from(conversations)
+				.innerJoin(posts, eq(conversations.postId, posts.id))
+				.where(or(eq(conversations.requesterId, userId), eq(posts.ownerId, userId)))
+				.orderBy(desc(conversations.updatedAt))
+	}
+
+	findOne(conversationId: number, userId: number) {
+		return this.findAuthorizedConversation(this.db, conversationId, userId)
 	}
 
 	async findMessages(conversationId: number, userId: number) {
@@ -96,16 +102,7 @@ export class ChatsService {
 
 	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {
 		return this.db.transaction(async (t) => {
-			const [conversation] = await t
-					.select({ id: conversations.id, requesterId: conversations.requesterId, postOwnerId: posts.ownerId })
-					.from(conversations)
-					.innerJoin(posts, eq(conversations.postId, posts.id))
-					.where(eq(conversations.id, conversationId))
-
-			if (!conversation)
-				throw new NotFoundException('Conversation not found')
-			if (conversation.requesterId !== userId && conversation.postOwnerId !== userId)
-				throw new ForbiddenException('You are not part of this conversation')
+			await this.findAuthorizedConversation(t, conversationId, userId)
 
 			const [message] = await t
 					.insert(messages)
