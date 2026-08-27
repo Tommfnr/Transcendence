@@ -82,14 +82,21 @@ export class ChatsService {
 					.where(and(eq(conversations.postId, postId), eq(conversations.requesterId, userId)))
 
 			if (existing)
-				throw new ConflictException('Conversation already exists for this post, use POST /chats/:conversationId/messages instead')
+				throw new ConflictException('Conversation already exists for this post')
 			if (post.status === 'closed')
 				throw new ForbiddenException('Cannot start a conversation on a closed post')
 
-			const [conversation] = await t
-					.insert(conversations)
-					.values({ postId, requesterId: userId })
-					.returning()
+			let conversation
+			try {
+				[conversation] = await t
+						.insert(conversations)
+						.values({ postId, requesterId: userId })
+						.returning()
+			} catch (err: any) {
+				if (err.code === '23505') // unique_violation, race with a concurrent create
+					throw new ConflictException('Conversation already exists for this post')
+				throw err
+			}
 
 			const [message] = await t
 					.insert(messages)
