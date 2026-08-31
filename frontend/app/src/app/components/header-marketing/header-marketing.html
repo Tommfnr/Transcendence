@@ -1,6 +1,7 @@
-<header class=" text-primary ">
+<header class=" text-primary wrapper">
   <div class="container mx-auto flex items-center justify-between px-6 py-4">
-    <a routerLink="/" class="text-2xl font-bold tracking-wide">PEP</a>
+	
+    <a routerLink="/" class="text-2xl font-bold tracking-wide"><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0" /></a>
 
     <nav class="">
       <ul class="flex gap-8 items-center">
@@ -17,8 +18,13 @@
         </li>
 
         <li>
-          <a routerLink="/register" class="font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition">Register</a>
+          <a routerLink="/register" appButton size="small">Register</a>
         </li>
+		@if(isLoggedIn()) {
+		<li>
+		  <button type="button" (click)="onLogout()">Log out</button>
+		</li>
+		}
       </ul>
     </nav>
   </div>

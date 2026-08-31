@@ -1,50 +1,47 @@
 <article
-  class="flex w-full flex-col overflow-hidden rounded-2xl bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.25)]"
+  class="flex w-full flex-col overflow-hidden rounded-card bg-card shadow-card"
 >
-  <div class="flex items-start gap-2 px-2.5 py-1">
-    <div class="size-10 shrink-0 rounded-full bg-[#D9D9D9]/50"></div>
+  <div class="flex items-start gap-2 px-2 pt-2 pb-1">
+    <app-avatar tone="neutral" />
 
-    <div class="flex min-w-0 flex-1 flex-col">
-      <div class="flex items-center gap-2.5 px-0.5 py-0.5">
-        <p class="truncate text-xs font-bold text-black">
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <p class="truncate text-xs font-bold text-text-strong">
           {{ request().authorName }}
-          <span class="text-[0.6875rem] font-normal">- </span>
-          <span class="text-[0.6875rem] font-normal italic">{{ request().groupName }}</span>
+          <span class="text-xs font-normal">- </span>
+          <span class="text-xs font-normal italic">{{ request().groupName }}</span>
         </p>
-        <span class="ml-auto shrink-0 text-[0.625rem] font-light tracking-[-0.2px] text-black">
+        <span class="ml-auto shrink-0 text-2xs font-light tracking-[-0.2px] text-text-strong">
           {{ request().timeAgo }}
         </span>
       </div>
 
-      <div class="flex h-13 flex-col gap-1 overflow-hidden px-0.5">
-        <h3 class="truncate text-xs font-bold text-black">{{ request().title }}</h3>
-        <p class="text-[0.6875rem] text-text">{{ request().description }}</p>
+      <div class="flex flex-col gap-1">
+        <h3 class="truncate text-xs font-bold text-text-strong">{{ request().title }}</h3>
+        <p class="line-clamp-2 text-xs text-text">{{ request().description }}</p>
       </div>
     </div>
   </div>
 
-  <div class="flex h-[30px] items-center justify-between px-2">
+  <div class="flex items-center justify-between px-2 pt-1 pb-2">
     <div class="flex items-center gap-2">
       @for (tag of request().tags; track tag.label) {
-        <span class="flex h-[18px] items-center gap-1 rounded bg-complementary/15 px-2">
-          <img
-            [src]="'/icons/' + tag.icon + '.svg'"
-            [class]="tag.icon === 'tag' ? 'size-2.5' : 'size-3'"
-            alt=""
-          />
-          <span class="whitespace-nowrap text-[0.5625rem] tracking-[-0.18px] text-black">
-            {{ tag.label }}
-          </span>
-        </span>
+        <app-tag [label]="tag.label" [icon]="tag.icon" />
       }
     </div>
 
-    <a
-      routerLink="/app/iCanHelp"
-      (click)="help.emit(request())"
-      class="flex h-[26px] w-[83px] shrink-0 items-center justify-center rounded-lg bg-primary text-[0.6875rem] font-bold text-background"
-    >
-      Je peux aider
-    </a>
+    @if (isOpen()) {
+      <a
+        routerLink="/app/iCanHelp"
+        (click)="help.emit(request())"
+        appButton
+        size="xsmall"
+        class="shrink-0"
+      >
+        Je peux aider
+      </a>
+    } @else {
+      <app-status-badge [status]="closedStatus()" />
+    }
   </div>
 </article>

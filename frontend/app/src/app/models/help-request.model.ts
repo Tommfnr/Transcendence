@@ -5,6 +5,8 @@ export interface HelpRequestTag {
   label: string;
 }
 
+export type HelpRequestStatus = 'open' | 'pending' | 'done';
+
 export interface HelpRequest {
   id: number;
   authorName: string;
@@ -13,4 +15,6 @@ export interface HelpRequest {
   title: string;
   description: string;
   tags: HelpRequestTag[];
+  /** Defaults to 'open' — the card then shows its call-to-action. */
+  status?: HelpRequestStatus;
 }

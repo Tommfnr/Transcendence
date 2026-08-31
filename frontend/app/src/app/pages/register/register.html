@@ -9,7 +9,7 @@
     <div>
       <label class="block">
         Email
-        <input type="text" [formField]="registerForm.email" class="block w-full border border-primary rounded-lg p-2"/>
+        <input type="text" [formField]="registerForm.email" class="block w-full border border-primary rounded-card p-2"/>
       </label>
       @if (registerForm.email().invalid() && registerForm.email().touched()) {
         <div class="error">
@@ -23,7 +23,7 @@
     <div>
       <label class="block">
         Username
-        <input type="text" [formField]="registerForm.username" class="block w-full border border-primary rounded-lg p-2"/>
+        <input type="text" [formField]="registerForm.username" class="block w-full border border-primary rounded-card p-2"/>
       </label>
       @if (registerForm.username().invalid() && registerForm.username().touched()) {
         <div class="error">
@@ -37,7 +37,7 @@
     <div>
       <label class="block">
         Password
-        <input type="password" [formField]="registerForm.h_password" class="block w-full border border-primary rounded-lg p-2"/>
+        <input type="password" [formField]="registerForm.h_password" class="block w-full border border-primary rounded-card p-2"/>
       </label>
       @if (registerForm.h_password().invalid() && registerForm.h_password().touched()) {
         <div class="error">

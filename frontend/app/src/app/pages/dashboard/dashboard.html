@@ -1,47 +1,46 @@
-<main class="relative mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 pb-10">
   <section class="flex items-center justify-between gap-2 px-3">
     <a
       routerLink="/app/exampleGroupList"
-      class="flex h-10 min-w-40 flex-1 items-center gap-[12px] rounded bg-card px-[12px] drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
+      class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised"
     >
       <img src="/icons/all-inclusive.svg" alt="" class="size-4 shrink-0" />
-      <span class="text-xs font-bold text-black">Tous mes groupes</span>
+      <span class="text-xs font-bold text-text-strong">Tous mes groupes</span>
       <img src="/icons/chevron-down.svg" alt="" class="size-4 shrink-0" />
     </a>
 
     <a
       routerLink="/app/groupParameter"
       aria-label="Paramètres"
-      class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded bg-card drop-shadow-[0_2px_1px_rgba(0,0,0,0.25)]"
+      class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded-sm bg-card shadow-raised"
     >
       <img src="/icons/settings.svg" alt="" class="size-6" />
     </a>
   </section>
 
-  <section class="flex items-center justify-center gap-x-6 py-1">
+  <section class="flex items-center justify-center gap-x-6 py-3">
     <div
-      class="flex h-16 items-center rounded border border-primary/33 bg-primary/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
+      class="flex items-center py-2 rounded-sm border border-primary-border bg-primary-surface px-1 shadow-raised"
     >
       <div class="flex h-full items-center px-2">
-        <img src="/icons/hand-heart.svg" alt="" class="h-[30px] w-[34px]" />
+        <img src="/icons/hand-heart.svg" alt="" class="size-8" />
       </div>
-      <div class="flex w-[62px] flex-col pt-1.5 leading-none text-black">
+      <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
         <span class="text-xl font-bold">{{ requestCount }}</span>
-        <span class="mt-2 text-[0.625rem] font-semibold tracking-[-0.2px]">demandes</span>
-        <span class="mt-1 text-[0.5rem] font-light tracking-[-0.08px]">de proches</span>
+        <span class="text-2xs font-semibold tracking-[-0.2px]">demandes</span>
+        <span class="text-2xs font-light tracking-[-0.08px]">de proches</span>
       </div>
     </div>
 
     <div
-      class="flex h-16 items-center rounded border border-success/33 bg-success/15 px-0.5 shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]"
+      class="flex items-center py-2 rounded-sm border border-success-border bg-success-surface px-1 shadow-raised"
     >
       <div class="flex h-full items-center px-2">
-        <img src="/icons/bag-heart.svg" alt="" class="h-[30px] w-[35px]" />
+        <img src="/icons/bag-heart.svg" alt="" class="size-8" />
       </div>
-      <div class="flex w-[62px] flex-col pt-1.5 leading-none text-black">
+      <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
         <span class="text-xl font-bold">{{ offerCount }}</span>
-        <span class="mt-2 text-[0.625rem] font-semibold tracking-[-0.2px]">propositions</span>
-        <span class="mt-1 text-[0.5rem] font-light tracking-[-0.08px]">d'aide recentes</span>
+        <span class="text-2xs font-semibold tracking-[-0.2px]">propositions</span>
+        <span class="text-2xs font-light tracking-[-0.08px]">d'aide recentes</span>
       </div>
     </div>
   </section>
@@ -53,7 +52,7 @@
         (click)="selectTab('requests')"
         class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
         [ngClass]="
-          activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-black'
+          activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
         "
       >
         Demandes
@@ -64,7 +63,7 @@
         (click)="selectTab('offers')"
         class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
         [ngClass]="
-          activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-black'
+          activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
         "
       >
         Propositions d'aide
@@ -81,8 +80,8 @@
   <button
     type="button"
     aria-label="Nouvelle demande"
-    class="fixed bottom-6 left-1/2 size-[60px] -translate-x-1/2"
+    class="fixed bottom-6 left-1/2 size-15 -translate-x-1/2"
   >
     <img src="/icons/fab-add.svg" alt="" class="size-full" />
   </button>
-</main>
+
