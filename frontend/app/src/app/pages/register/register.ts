@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { AuthService } from '../../services/auth.service';
 import { RegisterData } from '../../models/register-data.model';
 import { ButtonComponent } from "../../components/button/button";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -11,6 +12,10 @@ import { ButtonComponent } from "../../components/button/button";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
+  private router = inject(Router)
+
+  readonly registrationSuccess = signal(false);
+
   registerModel = signal<RegisterData>({
     email: '',
     username: '',
@@ -39,11 +44,13 @@ export class Register {
         h_password,
       };
 
-      this.authService.register(body)
-        .subscribe({
-          next: (response) => console.log('Logged in!', response),
-          error: (err) => console.log('Invalid credentials (FRONTEND)', err),
-        });
+      this.authService.register(body).subscribe({
+        next: () => {
+          this.registrationSuccess.set(true);
+          setTimeout(() => this.router.navigate(['/login']), 3000);
+        },
+        error: (err) => console.log('Invalid credentials (FRONTEND)', err),
+      });
     });
   }
 }

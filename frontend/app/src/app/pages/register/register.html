@@ -1,52 +1,60 @@
-<form (submit)="onSubmit($event)">
-  <div>
-    <label class="block">
-      Email
-      <input type="text" [formField]="registerForm.email" class="block w-full border border-primary rounded-lg p-2"/>
-    </label>
-    @if (registerForm.email().invalid() && registerForm.email().touched()) {
-      <div class="error">
-        @for (error of registerForm.email().errors(); track error.kind) {
-          <span>{{ error.message }}</span>
-        }
-      </div>
+@if (registrationSuccess()) {
+  <div class="flex flex-col items-center gap-4 p-6 text-center">
+    <p class="text-lg font-bold text-black">Votre compte a bien été créé !</p>
+    <p class="text-sm text-black">Redirection vers la page de connexion...</p>
+  </div>
+}
+@else {
+  <form (submit)="onSubmit($event)">
+    <div>
+      <label class="block">
+        Email
+        <input type="text" [formField]="registerForm.email" class="block w-full border border-primary rounded-lg p-2"/>
+      </label>
+      @if (registerForm.email().invalid() && registerForm.email().touched()) {
+        <div class="error">
+          @for (error of registerForm.email().errors(); track error.kind) {
+            <span>{{ error.message }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label class="block">
+        Username
+        <input type="text" [formField]="registerForm.username" class="block w-full border border-primary rounded-lg p-2"/>
+      </label>
+      @if (registerForm.username().invalid() && registerForm.username().touched()) {
+        <div class="error">
+          @for (error of registerForm.username().errors(); track error.kind) {
+            <span>{{ error.message }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label class="block">
+        Password
+        <input type="password" [formField]="registerForm.h_password" class="block w-full border border-primary rounded-lg p-2"/>
+      </label>
+      @if (registerForm.h_password().invalid() && registerForm.h_password().touched()) {
+        <div class="error">
+          @for (error of registerForm.h_password().errors(); track error.kind) {
+            <span>{{ error.message }}</span>
+          }
+        </div>
     }
+    </div>
+
+    <app-button type="submit" variant="primary">Register</app-button>
+  </form>
+
+  <div class="form-debug">
+    <h3>Current Form Values:</h3>
+    <p>Email: {{ registerForm.email().value() }}</p>
+    <p>Username: {{ registerForm.username().value() }}</p>
+    <p>Password: {{ registerForm.h_password().value() ? '••••••••' : '(empty)' }}</p>
   </div>
-
-  <div>
-    <label class="block">
-      Username
-      <input type="text" [formField]="registerForm.username" class="block w-full border border-primary rounded-lg p-2"/>
-    </label>
-    @if (registerForm.username().invalid() && registerForm.username().touched()) {
-      <div class="error">
-        @for (error of registerForm.username().errors(); track error.kind) {
-          <span>{{ error.message }}</span>
-        }
-      </div>
-    }
-  </div>
-
-  <div>
-    <label class="block">
-      Password
-      <input type="password" [formField]="registerForm.h_password" class="block w-full border border-primary rounded-lg p-2"/>
-    </label>
-    @if (registerForm.h_password().invalid() && registerForm.h_password().touched()) {
-      <div class="error">
-        @for (error of registerForm.h_password().errors(); track error.kind) {
-          <span>{{ error.message }}</span>
-        }
-      </div>
-  }
-  </div>
-
-  <app-button type="submit" variant="primary">Register</app-button>
-</form>
-
-<div class="form-debug">
-  <h3>Current Form Values:</h3>
-  <p>Email: {{ registerForm.email().value() }}</p>
-  <p>Username: {{ registerForm.username().value() }}</p>
-  <p>Password: {{ registerForm.h_password().value() ? '••••••••' : '(empty)' }}</p>
-</div>
+}
