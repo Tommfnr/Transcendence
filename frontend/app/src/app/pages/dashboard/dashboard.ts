@@ -42,6 +42,7 @@ export class Dashboard {
         { icon: 'calendar', label: '17/05-18/05' },
         { icon: 'tag', label: 'Maison' },
       ],
+      status: 'pending',
     },
     {
       id: 3,

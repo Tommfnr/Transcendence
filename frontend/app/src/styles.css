@@ -6,7 +6,9 @@
 @theme {
 	/* Colors*/
 	--color-primary: #FF9D2E;
+	--color-secondary: #4B5563;
 	--color-alert: #FF7700;
+	--color-error: #EF4444;
 	--color-background: #F8F9FA;
 	--color-card: #FFFFFF;
 	--color-text: #1F2937;
@@ -14,8 +16,157 @@
 	--color-success: #3FCD6E;
 	--color-complementary: #7043C3;
 
+	/* Pure black. Dense mobile UI where maximum contrast is needed:
+	   card titles, stat labels, header greeting. For long-form copy
+	   prefer --color-text, which is softer on the eye. */
+	--color-text-strong: #000000;
+
+	/* Text and icons sitting ON an orange fill (primary, alert).
+	   Dark, not white: #FF9D2E is light in luminance, so white text on it
+	   measures 2.1:1 — far below the 4.5:1 AA threshold. Dark text gives
+	   7.1:1. Never use this on a dark background. */
+	--color-on-primary: #1F2937;
+
+	/* Text and icons sitting ON a dark fill (secondary, complementary).
+	   White gives 7.6:1 on #4B5563. */
+	--color-on-secondary: #FFFFFF;
+
+	/* Neutral placeholder surface: empty avatars, image skeletons. */
+	--color-muted: #D9D9D9;
+
+	/* Tinted surfaces -- a brand colour used as a background.
+	   color-mix keeps them composited at paint time, so they stay correct
+	   whatever sits behind. Do NOT replace these with flattened hex values:
+	   a flat colour bakes in one specific backdrop. Figma stores the
+	   flattened equivalent only because paint opacity does not survive
+	   nested instances there. */
+	--color-primary-surface:       color-mix(in srgb, var(--color-primary) 15%, transparent);
+	--color-success-surface:       color-mix(in srgb, var(--color-success) 15%, transparent);
+	--color-complementary-surface: color-mix(in srgb, var(--color-complementary) 15%, transparent);
+
+	/* Their matching borders. */
+	--color-primary-border: color-mix(in srgb, var(--color-primary) 30%, transparent);
+	--color-success-border: color-mix(in srgb, var(--color-success) 30%, transparent);
+
+	/* Ad-hoc opacity on a brand colour is now a last resort: the three
+	   recurring tints above are named tokens. The only remaining allowed
+	   step is /50, for a muted state (avatar placeholders). Anything else
+	   is drift -- if a new tint recurs, give it a -surface token. */
+
 	/* Font */
+	/*
+	Use ONLY these. If a size feels wrong, pick the nearest step —
+	never write text-[0.5625rem].
+	*/
+	--text-*: initial;
 	--font-sans: 'Nunito', sans-serif;
+
+	
+	/* 10px — Micro. Dense mobile UI only: timestamps, stat qualifiers,
+	   chip labels. Never for anything the user must read carefully. */
+	--text-2xs: 0.625rem;
+	--text-2xs--line-height: 0.875rem;
+
+	/* 12px — Caption. Secondary text inside cards: descriptions,
+	   group names, metadata lines. The smallest readable size. */
+	--text-xs: 0.75rem;
+	--text-xs--line-height: 1rem;
+
+	/* 14px — Small. Card titles, tab labels, footer links,
+	   small buttons. Bold at this size = a card's main label. */
+	--text-sm: 0.875rem;
+	--text-sm--line-height: 1.25rem;
+
+	/* 16px — Body. Default for paragraphs, form labels, inputs.
+	   Also the browser default: never go below this for long text. */
+	--text-base: 1rem;
+	--text-base--line-height: 1.5rem;
+
+	/* 18px — Lead. Emphasised body, the header greeting,
+	   large buttons. Use sparingly. */
+	--text-lg: 1.125rem;
+	--text-lg--line-height: 1.75rem;
+
+	/* 20px — Stat. Big numbers in the dashboard counters,
+	   and h3-level section headings. */
+	--text-xl: 1.25rem;
+	--text-xl--line-height: 1.75rem;
+
+	/* 24px — Heading. Section titles (h2) and the marketing logo. */
+	--text-2xl: 1.5rem;
+	--text-2xl--line-height: 2rem;
+
+	/* 32px — Display. Page title (h1). One per page, max. */
+	--text-3xl: 2rem;
+	--text-3xl--line-height: 2.5rem;
+
+	/* ── Shadows ───────────────────────────────────────────
+	   Two elevations, one light source. Use `shadow-*`, never
+	   `drop-shadow-*` — that one is for non-rectangular shapes
+	   (transparent PNGs, SVG icons) and costs more to render. */
+
+	--shadow-*: initial;
+	--drop-shadow-*: initial;
+
+	/* Raised — elements that sit above the page: stat cards,
+	   the group selector, floating buttons. */
+	--shadow-raised: 0 2px 2px 0 rgb(0 0 0 / 0.25);
+
+	/* Card — surfaces resting flat on the background: request cards,
+	   list items. Softer and more diffuse than raised. */
+	--shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.25);
+
+	/* ── Radius ───────────────────────────────────────────────────── */
+
+	--radius-*: initial;
+	/* 4px — Chips, badges, tags. Small elements where a big radius
+	   would eat the content. */
+	--radius-sm: 0.25rem;
+
+	/* 8px — The default. Cards, inputs, buttons, images.
+	   When in doubt, use this one. */
+	--radius-card: 0.5rem;
+
+	/* Fully round — Avatars, icon buttons, status dots.
+	   Only for things that are square or circular by nature. */
+	--radius-full: 9999px;
+
+	
+	
+	/* ── Spacing ───────────────────────────────────────────────────
+	   Derived from Tailwind's 0.25rem base — nothing to declare here.
+	   The rule is which steps you allow:
+
+	     1  (4px)   icon ↔ label, tightest usable gap
+	     2  (8px)   inside a component: chip padding, stacked lines
+	     3  (12px)  card padding on mobile
+	     4  (16px)  the default. Gap between cards, section padding
+	     6  (24px)  between distinct blocks
+	     8  (32px)  between page sections
+	     12 (48px)  above/below a page header
+
+	   Half steps (0.5, 1.5, 2.5) are pixel-nudges that never
+	   reproduce elsewhere. If you need one, the layout is wrong —
+	   usually a line-height or a border you forgot to account for. */
+}
+
+/* Routed page components sit between the layout's <main> and the page
+   markup. Their host element is display:inline by default, which breaks
+   the layout's flex column — flex-1 on a page wrapper would do nothing.
+   This makes every routed host a proper stretching flex item. */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@utility wrapper {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 @keyframes rainbow {
