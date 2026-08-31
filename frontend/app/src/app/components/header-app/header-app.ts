@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { RefreshService } from '../../services/refresh.service';
 
 @Component({
   selector: 'app-header-app',
@@ -7,5 +8,6 @@ import { RouterLink } from '@angular/router';
   templateUrl: './header-app.html',
 })
 export class HeaderApp {
-  readonly userName = input('Steve');
+  private refreshService = inject(RefreshService)
+  readonly userName = computed(() => this.refreshService.user()?.username ?? 'Utilisateur');
 }

@@ -13,6 +13,11 @@ export class UsersController {
 		return (this.usersService.findAll())
 	}
 
+	@Get('me')
+	getMe(@Req() req: AuthenticatedRequest) {
+		return (this.usersService.findById(req.user.sub))
+	}
+
 	@Get(':id')
 	findOne(@Param('id') id: string) {
 		return (this.usersService.findById(Number(id)))

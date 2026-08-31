@@ -21,8 +21,9 @@ export class UsersService {
 			return (this.db.select().from(users).where(eq(users.username, loginIdentifier)))
 	}
 
-	findById(id: number) {
-		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).where(eq(users.id, id)))
+	async findById(id: number) {
+		const [user] = await this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).where(eq(users.id, id))
+		return (user)
 	}
 
 	async create(dto: RegisterDto) {

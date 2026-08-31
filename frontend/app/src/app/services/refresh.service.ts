@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable, tap } from 'rxjs'
 import { LoginResponse, RefreshResponse } from '../models/refresh.types'
+import { User } from '../models/user.model'
 
 @Injectable({ providedIn: 'root' })
 export class RefreshService {
@@ -9,18 +10,30 @@ export class RefreshService {
 
 	private accessToken = signal<string | null>(null)
 
+	private currentUser = signal<User | null>(null)
+	readonly user = this.currentUser.asReadonly()
+
 	readonly isLoggedIn = computed(() => this.accessToken() !== null)
 
-	login(username: string, password: string, rememberMe?: boolean ): Observable<LoginResponse> {
+	login(username: string, password: string, rememberMe?: boolean): Observable<LoginResponse> {
 		return (this.http
-		.post<LoginResponse>('/api/auth/login', { username, password, rememberMe })
-		.pipe(tap(({ access_token }) => {
-			this.accessToken.set(access_token)
-		}))
+			.post<LoginResponse>('/api/auth/login', { username, password, rememberMe })
+			.pipe(tap(({ access_token }) => {
+				this.accessToken.set(access_token)
+			}))
 		)
 	}
 
-	refreshToken(): Observable<RefreshResponse> {		
+	getMe(): Observable<User> {
+		return (this.http
+			.get<User>('/api/users/me')
+			.pipe(tap((user) => {
+				this.currentUser.set(user)
+			}))
+		)
+	}
+
+	refreshToken(): Observable<RefreshResponse> {
 		return (this.http
 			.post<RefreshResponse>('/api/auth/refresh', {})
 			.pipe(tap(({ access_token }) => {
