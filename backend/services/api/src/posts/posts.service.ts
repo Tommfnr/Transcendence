@@ -78,7 +78,7 @@ export class PostsService {
 	async update(postId: number, userId: number, dto: UpdatePostDto) {
 		const { groupIds: rawGroupIds, ...postFields } = dto
 
-		let groupIds
+		let groupIds: number[] | undefined
 		if (rawGroupIds)
 			groupIds = [...new Set(rawGroupIds)]
 
