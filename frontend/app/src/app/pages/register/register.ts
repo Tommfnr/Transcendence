@@ -4,6 +4,8 @@ import { AuthService } from '../../services/auth.service';
 import { RegisterData } from '../../models/register-data.model';
 import { ButtonComponent } from "../../components/button/button";
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 
 @Component({
   selector: 'app-register',
@@ -24,8 +26,8 @@ export class Register {
 
   registerForm = form(this.registerModel, (fieldPath) => {
     required(fieldPath.email, { message: 'Email is required' });
-    
-    required(fieldPath.username, { message: 'Username is required'});
+
+    required(fieldPath.username, { message: 'Username is required' });
 
     required(fieldPath.h_password, { message: 'Password is required' });
   });
@@ -35,22 +37,24 @@ export class Register {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    submit(this.registerForm, async () => {
+    submit(this.registerForm, async (field) => {
       const { email, username, h_password } = this.registerModel();
+      const body = {username, email, h_password };
 
-      const body = {
-        username,
-        email,
-        h_password,
-      };
-
-      this.authService.register(body).subscribe({
-        next: () => {
-          this.registrationSuccess.set(true);
-          setTimeout(() => this.router.navigate(['/login']), 3000);
-        },
-        error: (err) => console.log('Invalid credentials (FRONTEND)', err),
-      });
+      try {
+        await firstValueFrom(this.authService.register(body));
+        this.registrationSuccess.set(true);
+        setTimeout(() => this.router.navigate(['/login']), 3000);
+        return undefined;
+      } 
+      catch (err) {
+        if (isZodValidationError(err)) {
+          const { fieldErrors } = mapZodErrorsToFieldTree(err.error, field);
+          return fieldErrors;
+        }
+        console.log('Registration failed (FRONTEND)', err);
+        return undefined;
+      }
     });
   }
 }
