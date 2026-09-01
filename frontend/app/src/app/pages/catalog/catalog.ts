@@ -14,6 +14,6 @@ export class Catalog implements OnInit {
   readonly objectData = signal<ObjectData[]>([]);
 
   ngOnInit(): void {
-    this.objectService.findAll().subscribe((data) => { this.objectData.set(data); });
+    this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
   }
 }

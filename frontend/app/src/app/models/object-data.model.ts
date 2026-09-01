@@ -11,3 +11,11 @@ export interface ObjectData {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CreateObjectData {
+  name: string;
+  type: string;
+  description: string;
+  condition: ObjectCondition;
+  isAvailable: boolean;
+}

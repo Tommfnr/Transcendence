@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ObjectData } from '../models/object-data.model';
+import { ObjectData, CreateObjectData } from '../models/object-data.model';
 
 @Injectable({
 	providedIn: 'root'
@@ -9,7 +9,11 @@ import { ObjectData } from '../models/object-data.model';
 export class ObjectService {
 	private http = inject(HttpClient)
 
-	findAll() {
-		return this.http.get<ObjectData[]>('/api/objects');
+	findMy() {
+		return this.http.get<ObjectData[]>('/api/objects/my');
+	}
+
+	create(body: CreateObjectData) {
+		return this.http.post<ObjectData[]>('/api/objects', body);
 	}
 }
