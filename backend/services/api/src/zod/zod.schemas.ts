@@ -44,3 +44,9 @@ export const groupNameSchema = z
 	.regex(/^[a-zA-Z ]{1,}$/,
 			'No special characters allowed for group name'
 	)
+
+export const messageContentSchema = z
+	.string("Please input a string")
+	.min(1, 'Message required')
+	.max(2000, 'Max 2000 characters')
+	.refine((v) => v.trim().length > 0, 'Message required')

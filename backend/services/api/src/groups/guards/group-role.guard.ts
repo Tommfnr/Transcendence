@@ -6,11 +6,11 @@ import { DB } from '../../database/database.module'
 
 @Injectable()
 export class GroupRoleGuard implements CanActivate {
-	constructor(@Inject(DB) private db: PostgresJsDatabase) {}
+	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest()
-		const groupId = Number(req.params.id)
+		const groupId = Number(req.params.groupId)
 
 		const [membership] = await this.db
 			.select()
@@ -22,6 +22,6 @@ export class GroupRoleGuard implements CanActivate {
 		if (membership.role !== 'admin')
 			throw new ForbiddenException('Admin role needed for this action')
 
-		return (true)
+		return true
 	}
 }
