@@ -5,7 +5,7 @@ import { groupMembers } from '../../database/schema'
 import { DB } from '../../database/database.module'
 
 @Injectable()
-export class GroupRoleGuard implements CanActivate {
+export class GroupAdminGuard implements CanActivate {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {

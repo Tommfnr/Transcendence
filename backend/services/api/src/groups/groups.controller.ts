@@ -5,7 +5,7 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
 import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
-import { GroupRoleGuard } from './guards/group-role.guard'
+import { GroupAdminGuard } from './guards/group-admin.guard'
 
 @UseGuards(AuthGuard)
 @Controller('groups')
@@ -45,46 +45,46 @@ export class GroupsController {
 	}
 
 	@Patch(':groupId')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	update(@Param('groupId') groupId: string, @Body() dto: UpdateGroupDto) {
 		return this.groupsService.update(Number(groupId), dto)
 	}
 
 	@Post(':groupId/members/:targetUserId')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	addMember(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string) {
 		return this.groupsService.addMember(Number(groupId), Number(targetUserId))
 	}
 
 	@Post(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	grantObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.grantObject(Number(groupId), Number(objectId), requesterId)
 	}
 
 	@Delete(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	revokeObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.revokeObject(Number(groupId), Number(objectId), requesterId)
 	}
 
 	@Patch(':groupId/members/:targetUserId/role')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	updateMemberRole(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string, @Body() dto: UpdateMemberRoleDto) {
 		return this.groupsService.updateMemberRole(Number(groupId), Number(targetUserId), dto.role)
 	}
 
 	@Patch(':groupId/owner/:newOwnerId')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	transferOwnership(@Param('groupId') groupId: string, @Param('newOwnerId') newOwnerId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.transferOwnership(Number(groupId), Number(newOwnerId), requesterId)
 	}
 
 	@Delete(':groupId/members/:targetUserId')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	removeMember(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string) {
 		return this.groupsService.removeMember(Number(groupId), Number(targetUserId))
 	}
@@ -96,7 +96,7 @@ export class GroupsController {
 	}
 
 	@Delete(':groupId')
-	@UseGuards(GroupRoleGuard)
+	@UseGuards(GroupAdminGuard)
 	deleteGroup(@Param('groupId') groupId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.deleteGroup(Number(groupId), requesterId)
