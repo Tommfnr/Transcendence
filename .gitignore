@@ -28,3 +28,6 @@ dist-ssr
 secrets/
 docs/
 zhelp
+
+# Test files
+*.spec.ts

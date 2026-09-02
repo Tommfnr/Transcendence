@@ -4,8 +4,8 @@ export const REFRESH_COOKIE_NAME = 'refresh_token'
 
 export const REFRESH_COOKIE_OPTIONS: CookieOptions = {
 	httpOnly: true,
-	secure: true, // adds TLS
+	secure: true,
 	sameSite: 'strict',
-	path: '/api/auth', // cookie only sent when calling this type of endpoint
+	path: '/api/auth',
 	maxAge: 604800000,
 }

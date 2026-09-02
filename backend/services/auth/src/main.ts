@@ -1,12 +1,16 @@
-// Main file : launches the app to wait on 0.0.0.0:3000
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
+import cookieParser from 'cookie-parser'
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
-	app.setGlobalPrefix('api') // Any calls to this app will be made through /api/ routes so we can put this here to avoid repeating
+	app.set('trust proxy', 1)
+	app.use(cookieParser())
+	app.setGlobalPrefix('api', { exclude: ['internal/*path'] })
 	await app.listen(3000, '0.0.0.0')
 }
-bootstrap() // This is what launches everything
+bootstrap()

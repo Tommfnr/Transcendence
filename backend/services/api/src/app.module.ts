@@ -3,18 +3,14 @@
 import { Module } from '@nestjs/common'
 import { DatabaseModule } from './database/database.module'
 import { ObjectsModule } from './objects/objects.module'
-import { UsersModule } from './users/users.module'
-import { AuthModule } from './auth/auth.module'
 import { GroupsModule } from './groups/groups.module'
 import { LendingModule } from './lending/lending.module'
+import { JwtModule } from '@nestjs/jwt'
 import { APP_PIPE } from '@nestjs/core'
-import { createZodValidationPipe } from 'nestjs-zod'
-import { zodExceptionFactory } from './zod/zod-exception.factory'
-
-const CustomZodPipe = createZodValidationPipe({ createValidationException: zodExceptionFactory })
+import { SharedZodValidationPipe } from '@pep/shared'
 
 @Module({
-	imports: [DatabaseModule, ObjectsModule, UsersModule, AuthModule, GroupsModule, LendingModule],
-	providers: [{ provide: APP_PIPE, useClass: CustomZodPipe }]
+	imports: [DatabaseModule, ObjectsModule, GroupsModule, LendingModule, JwtModule.register({ global: true })],
+	providers: [{ provide: APP_PIPE, useClass: SharedZodValidationPipe }]
 })
 export class AppModule {}

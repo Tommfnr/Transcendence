@@ -9,7 +9,11 @@ COPY package*.json ./
 
 RUN npm ci
 
+RUN rm -rf /shared/node_modules/@nestjs /shared/node_modules/express /shared/node_modules/reflect-metadata /shared/node_modules/zod
+
 COPY . .
+
+ENV NODE_OPTIONS=--preserve-symlinks
 
 EXPOSE 3000
 

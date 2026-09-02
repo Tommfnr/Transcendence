@@ -16,9 +16,7 @@ export class AuthController {
 	@Post('login')
 	async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
 		const { access_token, refresh_token } = await this.authService.signIn(dto.username, dto.password)
-
 		res.cookie(REFRESH_COOKIE_NAME, refresh_token, REFRESH_COOKIE_OPTIONS)
-
 		return { access_token }
 	}
 
@@ -26,15 +24,11 @@ export class AuthController {
 	@Post('refresh')
 	async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
 		const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME]
-
 		if (!refreshToken) {
 			throw new UnauthorizedException('Missing refresh token')
 		}
-		
 		const { access_token, refresh_token } = await this.authService.refresh(refreshToken)
-
 		res.cookie(REFRESH_COOKIE_NAME, refresh_token, REFRESH_COOKIE_OPTIONS)
-
 		return { access_token }
 	}
 
@@ -47,14 +41,10 @@ export class AuthController {
 	@Post('logout')
 	async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
 		const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME]
-
 		if (refreshToken) {
 			await this.authService.logout(refreshToken)
 		}
-
 		res.clearCookie(REFRESH_COOKIE_NAME, { path: REFRESH_COOKIE_OPTIONS.path })
-
 		return { message: 'Logged out' }
 	}
 }
-

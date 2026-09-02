@@ -7,6 +7,16 @@ pep.localhost {
 	tls internal
 
 	# This will handle correct reverse proxying to the backend
+	@authRoutes path /api/auth /api/auth/*
+	handle @authRoutes {
+		reverse_proxy auth:3000
+	}
+
+	@usersRoutes path /api/users /api/users/*
+	handle @usersRoutes {
+		reverse_proxy auth:3000
+	}
+
 	handle /api/* {
 		reverse_proxy api:3000
 	}
