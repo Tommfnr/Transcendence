@@ -2,7 +2,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
+import { GroupsService } from '../../services/groups.service';
 import { CreateObjectData } from '../../models/object-data.model';
+import { Group } from '../../models/groups.model';
 import { ButtonComponent } from '../../components/button/button';
 
 @Component({
@@ -12,11 +14,15 @@ import { ButtonComponent } from '../../components/button/button';
 })
 export class EditAddObject implements OnInit {
   private objectService = inject(ObjectService);
+  private groupsService = inject(GroupsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   private objectId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.objectId;
+
+  readonly myGroups = signal<Group[]>([]);
+  readonly selectedGroupIds = signal<number[]>([]);
 
   objectModel = signal<CreateObjectData>({
     name: '',
@@ -42,6 +48,21 @@ export class EditAddObject implements OnInit {
           isAvailable: data.isAvailable,
         });
       });
+    } else {
+      this.groupsService.findMy().subscribe((groups) => {
+        this.myGroups.set(groups);
+      });
+    }
+  }
+
+  onGroupToggle(event: Event, groupId: number): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const ids = this.selectedGroupIds();
+
+    if (checked) {
+      this.selectedGroupIds.set([...ids, groupId]);
+    } else {
+      this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
     }
   }
 
@@ -56,7 +77,14 @@ export class EditAddObject implements OnInit {
         request = this.objectService.create(this.objectModel());
       }
 
-      request.subscribe(() => {
+      request.subscribe((response) => {
+        if (!this.objectId) {
+          const newObjectId = response[0].id;
+          for (const groupId of this.selectedGroupIds()) {
+            this.groupsService.grantObject(groupId, newObjectId).subscribe();
+          }
+        }
+
         this.router.navigate(['/app/catalog']);
       });
     });
