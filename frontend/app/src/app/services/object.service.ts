@@ -24,4 +24,8 @@ export class ObjectService {
 	update(id: number, body: CreateObjectData) {
 		return this.http.put<ObjectData[]>(`/api/objects/${id}`, body);
 	}
+
+	remove(id: number) {
+		return this.http.delete<void>(`/api/objects/${id}`);
+	}
 }
