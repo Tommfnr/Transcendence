@@ -78,6 +78,10 @@ export class EditAddObject implements OnInit {
       }
 
       request.subscribe((response) => {
+        if (response.length === 0) {
+          return;
+        }
+
         if (!this.objectId) {
           const newObjectId = response[0].id;
           for (const groupId of this.selectedGroupIds()) {
