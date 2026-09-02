@@ -13,7 +13,15 @@ export class ObjectService {
 		return this.http.get<ObjectData[]>('/api/objects/my');
 	}
 
+	findOne(id: number) {
+		return this.http.get<ObjectData>(`/api/objects/${id}`);
+	}
+
 	create(body: CreateObjectData) {
 		return this.http.post<ObjectData[]>('/api/objects', body);
+	}
+
+	update(id: number, body: CreateObjectData) {
+		return this.http.put<ObjectData[]>(`/api/objects/${id}`, body);
 	}
 }

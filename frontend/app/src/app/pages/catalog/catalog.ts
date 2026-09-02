@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectData } from '../../models/object-data.model';
+import { ButtonDirective } from '../../components/button/button.directive';
 
 @Component({
   selector: 'app-catalog',
-  imports: [RouterLink],
+  imports: [RouterLink, ButtonDirective],
   templateUrl: './catalog.html',
 })
 
