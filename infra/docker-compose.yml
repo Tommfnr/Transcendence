@@ -51,6 +51,84 @@ services:
       postgres:
         condition: service_healthy
 
+  gateway:
+    build:
+      context: ../backend/services/gateway
+      dockerfile: ../../../infra/services/gateway/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: gateway
+    restart: unless-stopped
+    env_file:
+      - ../.env
+
+  auth:
+    build:
+      context: ../backend/services/auth
+      dockerfile: ../../../infra/services/auth/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: auth
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  users:
+    build:
+      context: ../backend/services/users
+      dockerfile: ../../../infra/services/users/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: users
+    restart: unless-stopped
+    env_file:
+      - ../.env
+
+  objects:
+    build:
+      context: ../backend/services/objects
+      dockerfile: ../../../infra/services/objects/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: objects
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  groups:
+    build:
+      context: ../backend/services/groups
+      dockerfile: ../../../infra/services/groups/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: groups
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  lending:
+    build:
+      context: ../backend/services/lending
+      dockerfile: ../../../infra/services/lending/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: lending
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   orm:
     build:
       context: ../backend/services/orm
