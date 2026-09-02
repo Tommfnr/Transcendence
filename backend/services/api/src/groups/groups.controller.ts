@@ -6,6 +6,7 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
 import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { GroupAdminGuard } from './guards/group-admin.guard'
+import { GroupMemberGuard } from './guards/group-member.guard'
 
 @UseGuards(AuthGuard)
 @Controller('groups')
@@ -57,14 +58,14 @@ export class GroupsController {
 	}
 
 	@Post(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupAdminGuard)
+	@UseGuards(GroupMemberGuard)
 	grantObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.grantObject(Number(groupId), Number(objectId), requesterId)
 	}
 
 	@Delete(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupAdminGuard)
+	@UseGuards(GroupMemberGuard)
 	revokeObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
 		const requesterId = req.user.sub
 		return this.groupsService.revokeObject(Number(groupId), Number(objectId), requesterId)
