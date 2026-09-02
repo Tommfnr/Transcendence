@@ -1,9 +1,13 @@
-// DTO : Data Transfer Object : made encapsulate data for transfer between different layers of an application
-// See : https://learn.microsoft.com/en-us/previous-versions/msp-n-p/ff649585(v=pandp.10)
+import { z } from 'zod'
+import { createZodDto } from 'nestjs-zod'
 
-export class CreateObjectDto {
-	brand!: string
-	type!: string
-	description?: string
-	condition?: string
-}
+const createObjectSchema = z.object({
+	name:			z.string().min(1, 'Name required').max(20, 'Max 20 characters'),
+	type:			z.string().min(1, 'Type required').max(20, 'Max 20 characters'),
+	description:	z.string().max(500, 'Max 500 characters').optional(),
+	condition:		z.enum(['new', 'good', 'worn']),
+	isAvailable:	z.boolean(),
+
+})
+
+export class CreateObjectDto extends createZodDto(createObjectSchema) {}

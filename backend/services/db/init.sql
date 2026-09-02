@@ -11,16 +11,23 @@ CREATE TABLE IF NOT EXISTS users (
 	H_PASSWORD			VARCHAR(255) NOT NULL
 );
 
+DO $$
+BEGIN
+	CREATE TYPE object_condition AS ENUM ('new', 'good', 'worn');
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
+
 CREATE TABLE IF NOT EXISTS objects (
-	id                     SERIAL PRIMARY KEY,
-	brand                VARCHAR(20) NOT NULL,
-	owner_id             INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	type                VARCHAR(20) NOT NULL,
-	description          VARCHAR(500),
-	condition            VARCHAR(50),
-	is_available         BOOLEAN DEFAULT true,
-	created_at           TIMESTAMP DEFAULT NOW(),
-	updated_at           TIMESTAMP DEFAULT NOW()
+	id					SERIAL PRIMARY KEY,
+	name				VARCHAR(20) NOT NULL,
+	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+	type				VARCHAR(20) NOT NULL,
+	description			VARCHAR(500),
+	condition			object_condition NOT NULL,
+	is_available		BOOLEAN NOT NULL,
+	created_at			TIMESTAMP DEFAULT NOW() NOT NULL,
+	updated_at			TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS groups (

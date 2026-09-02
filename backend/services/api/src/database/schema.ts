@@ -19,16 +19,18 @@ export const users = pgTable('users', {
 	h_password: varchar('h_password', { length: 255 }).notNull()
 })
 
+export const objectConditionEnum = pgEnum('object_condition', ['new', 'good', 'worn'])
+
 export const objects = pgTable('objects', {
 	id:				serial('id').primaryKey(),
-	brand:			varchar('brand', { length:20 }).notNull(),
+	name:			varchar('name', { length:20 }).notNull(),
     ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
 	type:			varchar('type', { length:20 }).notNull(),
 	description:	varchar('description', { length:500 }),
-	condition:		varchar('condition', { length:50 }),
-	isAvailable:	boolean('is_available').default(true),
-	createdAt:		timestamp('created_at').defaultNow(),
-	updatedAt:		timestamp('updated_at').defaultNow()
+	condition:		objectConditionEnum('condition').notNull(),
+	isAvailable:	boolean('is_available').notNull(),
+	createdAt:		timestamp('created_at').notNull().defaultNow(),
+	updatedAt:		timestamp('updated_at').notNull().defaultNow()
 })
 
 export const groups = pgTable('groups', {

@@ -40,7 +40,7 @@ export class GroupsService {
 		return this.db
 			.select({
 				id: objects.id,
-				brand: objects.brand,
+				name: objects.name,
 				type: objects.type,
 				description: objects.description,
 				ownerId: objects.ownerId,
