@@ -41,6 +41,8 @@ services:
     build:
       context: ../backend/services/api
       dockerfile: ../../../infra/services/api/Dockerfile
+      additional_contexts:
+        shared: ../backend
     container_name: api
     restart: unless-stopped
     env_file:
