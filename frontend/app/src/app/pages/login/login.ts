@@ -4,7 +4,8 @@ import { LoginData } from '../../models/login-data.model';
 import { Router } from '@angular/router'
 import { RefreshService } from '../../services/refresh.service';
 import { ButtonComponent } from "../../components/button/button";
-
+import { firstValueFrom } from 'rxjs';
+import { isAuthError, isZodValidationError, mapAuthErrorToBanner, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,8 @@ import { ButtonComponent } from "../../components/button/button";
 export class Login {
   private refreshService = inject(RefreshService)
   private router = inject(Router)
+
+  bannerErrors = signal<string[]>([]);
 
   loginModel = signal<LoginData>({
     identifier: '',
@@ -37,21 +40,35 @@ export class Login {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    submit(this.loginForm, async () => {
-      const { identifier, password, rememberMe } = this.loginModel()
+    submit(this.loginForm, async (field) => {
+      const { identifier, password, rememberMe } = this.loginModel();
+      const body = {identifier, password, rememberMe };
 
-      this.refreshService.login(identifier, password, rememberMe).subscribe({
-        next: () => {
-          this.refreshService.getMe().subscribe({
-            next: () => this.router.navigate(['/app']),
-            error: (err) => console.log('Failed to fetch profile', err)
-          })
-        },
-        error: (err) => console.log('Invalid creds (FRONTEND)', err)
-      })
+      try {
+        this.bannerErrors.set([]);
+        await firstValueFrom(this.refreshService.login(body));
+        await firstValueFrom(this.refreshService.getMe());
+        this.router.navigate(['/app']);
+        return (undefined);
+      }
+      catch (err) {
+        if (isZodValidationError(err)) {
+          //console.log('Backend validation error:', err.error);
+          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
+        }
+        if (isAuthError(err)) {
+          const { fieldErrors, bannerErrors } = mapAuthErrorToBanner(err.error);
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
+        }
+        console.log('Invalid creds (FRONTEND)', err);
+        this.bannerErrors.set(['Something went wrong, please try again']);
+        return (undefined);
+      }
     })
   };
-
 }
 
 

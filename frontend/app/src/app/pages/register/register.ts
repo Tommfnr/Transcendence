@@ -14,9 +14,11 @@ import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
+  private authService = inject(AuthService)
   private router = inject(Router)
 
   readonly registrationSuccess = signal(false);
+  bannerErrors = signal<string[]>([]);
 
   registerModel = signal<RegisterData>({
     email: '',
@@ -32,8 +34,6 @@ export class Register {
     required(fieldPath.h_password, { message: 'Password is required' });
   });
 
-  constructor(private authService: AuthService) { }
-
   onSubmit(event: Event) {
     event.preventDefault();
 
@@ -42,18 +42,21 @@ export class Register {
       const body = {username, email, h_password };
 
       try {
+        this.bannerErrors.set([]);
         await firstValueFrom(this.authService.register(body));
         this.registrationSuccess.set(true);
-        setTimeout(() => this.router.navigate(['/login']), 3000);
-        return undefined;
+        setTimeout(() => this.router.navigate(['/login']), 2500);
+        return (undefined);
       } 
       catch (err) {
         if (isZodValidationError(err)) {
-          const { fieldErrors } = mapZodErrorsToFieldTree(err.error, field);
-          return fieldErrors;
+          console.log('Backend validation error:', err.error);
+          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
         }
         console.log('Registration failed (FRONTEND)', err);
-        return undefined;
+        return (undefined);
       }
     });
   }

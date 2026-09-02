@@ -1,3 +1,10 @@
+@if (bannerErrors().length > 0) {
+  <div class="banner-error">
+    @for (msg of bannerErrors(); track msg) {
+      <p>{{ msg }}</p>
+    }
+  </div>
+}
 <form (submit)="onSubmit($event)">
   <div>
     <label class="block">

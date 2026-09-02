@@ -10,10 +10,28 @@ interface ZodErrorBody {
 	formErrors: string[];
 }
 
+interface AuthErrorBody {
+    statusCode: number;
+    message: string;
+}
+
 export function isZodValidationError(err: unknown): err is HttpErrorResponse & { error: ZodErrorBody } {
 	return (
 		err instanceof HttpErrorResponse && err.status === 400 && typeof err.error?.errors === 'object' && Array.isArray(err.error?.formErrors)
 	);
+}
+
+export function isAuthError(err: unknown): err is HttpErrorResponse & { error: AuthErrorBody } {
+    return (
+		err instanceof HttpErrorResponse && err.status === 401 && typeof err.error?.message === 'string'
+	);
+}
+
+function getFieldByKey<T>(field: FieldTree<T, string | number, 'writable'>, key: string) {
+	const target = (field as Record<string, unknown>)[key] as
+		| FieldTree<unknown, string | number, 'writable'>
+		| undefined;
+	return (target);
 }
 
 export function mapZodErrorsToFieldTree<T>(body: ZodErrorBody, field: FieldTree<T, string | number, 'writable'>) {
@@ -21,9 +39,8 @@ export function mapZodErrorsToFieldTree<T>(body: ZodErrorBody, field: FieldTree<
 	const bannerErrors: string[] = [...body.formErrors];
 
 	for (const [dtoKey, messages] of Object.entries(body.errors)) {
-		const target = (field as Record<string, unknown>)[dtoKey] as
-			| FieldTree<unknown, string | number, 'writable'>
-			| undefined;
+		const target = getFieldByKey(field, dtoKey);
+
 		if (target) {
 			messages.forEach((message) => fieldErrors.push({ fieldTree: target, kind: 'server', message }));
 		}
@@ -33,4 +50,10 @@ export function mapZodErrorsToFieldTree<T>(body: ZodErrorBody, field: FieldTree<
 	}
 
 	return { fieldErrors, bannerErrors };
+}
+
+export function mapAuthErrorToBanner(body: AuthErrorBody) {
+	const fieldErrors: ValidationError.WithOptionalFieldTree[] = [];
+	
+    return { fieldErrors, bannerErrors: [body.message] };
 }
