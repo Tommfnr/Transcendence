@@ -37,6 +37,8 @@ export const groups = pgTable('groups', {
 	id:			serial('id').primaryKey(),
 	ownerId:	integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
 	name:		varchar('name', { length:50 }).notNull(),
+	createdAt:	timestamp('created_at').notNull().defaultNow(),
+	updatedAt:	timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniqueOwnerName: unique().on(table.ownerId, table.name),
 }));
@@ -48,6 +50,8 @@ export const groupMembers = pgTable('group_members', {
 	groupId:	integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
 	userId:		integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	role:		groupRoleEnum('role').notNull().default('member'),
+	createdAt:	timestamp('created_at').notNull().defaultNow(),
+	updatedAt:	timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniqueMembership: unique().on(table.groupId, table.userId),
 }));
@@ -107,6 +111,8 @@ export const groupObjectGrants = pgTable('group_object_grants', {
 	groupId:			integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
 	objectId:			integer('object_id').notNull().references(() => objects.id, { onDelete: 'cascade' }),
 	grantedBy:			integer('granted_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+	createdAt:			timestamp('created_at').notNull().defaultNow(),
+	updatedAt:			timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniqueGroupObjectGrant: unique().on(table.groupId, table.objectId),
 }));

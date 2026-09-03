@@ -109,7 +109,7 @@ export class GroupsService {
 
 			const [updated] = await t
 				.update(groups)
-				.set({ name: dto.name })
+				.set({ name: dto.name, updatedAt: new Date() })
 				.where(eq(groups.id, groupId))
 				.returning()
 
@@ -187,7 +187,7 @@ export class GroupsService {
 		}
 
 		const [updated] = await this.db.update(groupMembers)
-			.set({ role })
+			.set({ role, updatedAt: new Date() })
 			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
 			.returning()
 
