@@ -86,6 +86,11 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      AUTH_INTERNAL_URL: http://auth:3000
+    depends_on:
+      auth:
+        condition: service_started
 
   objects:
     build:
