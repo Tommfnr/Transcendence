@@ -1,4 +1,4 @@
-export interface Group {
+export interface GroupData {
     id: number;
     name: string;
     ownerId: number;

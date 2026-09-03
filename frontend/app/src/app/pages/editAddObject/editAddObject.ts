@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
 import { CreateObjectData } from '../../models/object-data.model';
-import { Group } from '../../models/groups.model';
+import { GroupData } from '../../models/group-data.model';
 import { ButtonComponent } from '../../components/button/button';
 
 @Component({
@@ -21,7 +21,7 @@ export class EditAddObject implements OnInit {
   private objectId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.objectId;
 
-  readonly myGroups = signal<Group[]>([]);
+  readonly myGroups = signal<GroupData[]>([]);
   readonly selectedGroupIds = signal<number[]>([]);
 
   objectModel = signal<CreateObjectData>({
