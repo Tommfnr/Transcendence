@@ -1,6 +1,8 @@
-import { Controller, Get, Delete, HttpCode, NotFoundException, Param } from '@nestjs/common'
+import { Controller, Get, Delete, HttpCode, NotFoundException, Param, UseGuards } from '@nestjs/common'
+import { InternalAuthGuard } from '@pep/shared'
 import { UsersService } from '../users/users.service'
 
+@UseGuards(InternalAuthGuard)
 @Controller('internal/users')
 export class InternalUsersController {
 	constructor(private readonly usersService: UsersService) {}

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
-import { InternalServiceClient, InternalServiceError } from '@pep/shared'
+import { InternalServiceClient, InternalServiceError, requireEnv } from '@pep/shared'
 
 export interface UserView {
 	id: number
@@ -16,6 +16,7 @@ export class UsersProxyService {
 	constructor() {
 		this.client = new InternalServiceClient({
 			baseUrl: process.env.AUTH_INTERNAL_URL ?? DEFAULT_AUTH_URL,
+			apiKey: requireEnv('INTERNAL_API_KEY'),
 		})
 	}
 

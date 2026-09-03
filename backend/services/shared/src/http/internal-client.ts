@@ -9,6 +9,7 @@ export class InternalServiceError extends Error {
 
 export interface InternalClientConfig {
 	baseUrl: string
+	apiKey: string
 	timeoutMs?: number
 }
 
@@ -16,10 +17,12 @@ const DEFAULT_TIMEOUT_MS = 3000
 
 export class InternalServiceClient {
 	private readonly baseUrl: string
+	private readonly apiKey: string
 	private readonly timeoutMs: number
 
 	constructor(config: InternalClientConfig) {
 		this.baseUrl = config.baseUrl.replace(/\/$/, '')
+		this.apiKey = config.apiKey
 		this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS
 	}
 
@@ -35,11 +38,16 @@ export class InternalServiceClient {
 		const controller = new AbortController()
 		const timer = setTimeout(() => controller.abort(), this.timeoutMs)
 
+		const headers: Record<string, string> = { Authorization: `Bearer ${this.apiKey}` }
+		if (body) {
+			headers['Content-Type'] = 'application/json'
+		}
+
 		let res: Response
 		try {
 			res = await fetch(`${this.baseUrl}${path}`, {
 				method,
-				headers: body ? { 'Content-Type': 'application/json' } : undefined,
+				headers,
 				body: body ? JSON.stringify(body) : undefined,
 				signal: controller.signal,
 			})
