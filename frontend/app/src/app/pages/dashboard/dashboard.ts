@@ -72,4 +72,14 @@ export class Dashboard {
     // TODO: send the offer of help once the API endpoint exists.
     void request;
   }
+
+  readonly fabOpen = signal(false);
+
+  toggleFab(): void {
+    this.fabOpen.update(open => !open);
+  }
+
+  closeFab(): void {
+    this.fabOpen.set(false);
+  }
 }
