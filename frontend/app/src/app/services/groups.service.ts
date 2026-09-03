@@ -9,4 +9,8 @@ export class GroupsService {
     findMy() {
         return this.http.get<Group[]>('/api/groups/my');
     }
+
+    grantObject(groupId: number, objectId: number) {
+        return this.http.post(`/api/groups/${groupId}/objects/${objectId}/grant`, {});
+    }
 }

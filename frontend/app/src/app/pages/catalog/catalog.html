@@ -12,6 +12,8 @@
         <p>isAvailable: {{ object.isAvailable }}</p>
         <p>createdAt: {{ object.createdAt }}</p>
         <p>updatedAt: {{ object.updatedAt }}</p>
+        <a appButton [routerLink]="['/app/editAddObject', object.id]" variant="primary">Update Object</a>
+        <app-button type="button" variant="secondary" (click)="deleteObject(object.id)">Delete Object</app-button>
       </li>
     } @empty {
       <li>No objects yet.</li>

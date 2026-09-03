@@ -61,6 +61,10 @@ export const routes: Routes = [
         component: EditAddObject
       },
       {
+        path: 'editAddObject/:id',
+        component: EditAddObject
+      },
+      {
         path: 'groupParameter',
         component: GroupParameter
       },
