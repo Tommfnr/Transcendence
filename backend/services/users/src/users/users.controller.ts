@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Param, UseGuards, ForbiddenException } from '@nestjs/common'
+import { Controller, Get, Delete, HttpCode, Param, UseGuards, ForbiddenException } from '@nestjs/common'
 import { SharedAuthGuard, CurrentUser } from '@pep/shared'
 import { UsersProxyService } from './users-proxy.service'
 
@@ -18,6 +18,7 @@ export class UsersController {
 	}
 
 	@Delete(':id')
+	@HttpCode(204)
 	remove(@Param('id') id: string, @CurrentUser('sub') userId: number) {
 		if (Number(id) !== userId)
 			throw new ForbiddenException()
