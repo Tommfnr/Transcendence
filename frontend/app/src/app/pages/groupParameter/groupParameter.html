@@ -1,5 +1,17 @@
-<div class="flex flex-1 flex-col gap-4 px-3">
-   <h1>Page: groupParameter</h1>
-  <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
+  <h1>Page: My Groups</h1>
 
-</div>
+  <ul>
+    @for (group of groupData(); track group.id) {
+      <li>
+        <h2 class="text-2xl font-bold">{{ group.name }}</h2>
+        <p>role: {{ group.role }}</p>
+        <a appButton [routerLink]="['/app/editAddGroup', group.id]" variant="primary">Update group</a>
+      </li>
+    } @empty {
+      <li>No groups yet.</li>
+    }
+  </ul>
+
+  <app-button type ="button" routerLink="/app/editAddGroup" variant="primary">Add group</app-button>
+</main>
