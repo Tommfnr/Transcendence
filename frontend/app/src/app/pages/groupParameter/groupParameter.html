@@ -7,6 +7,7 @@
         <h2 class="text-2xl font-bold">{{ group.name }}</h2>
         <p>role: {{ group.role }}</p>
         <a appButton [routerLink]="['/app/editAddGroup', group.id]" variant="primary">Update group</a>
+        <app-button type="button" variant="secondary" (click)="deleteGroup(group.id)">Delete group</app-button>
       </li>
     } @empty {
       <li>No groups yet.</li>

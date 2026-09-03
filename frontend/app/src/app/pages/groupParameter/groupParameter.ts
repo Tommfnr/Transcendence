@@ -18,4 +18,10 @@ export class GroupParameter implements OnInit {
   ngOnInit(): void {
     this.groupsService.findMy().subscribe((data) => { this.groupData.set(data); });
   }
+
+  deleteGroup(id: number): void {
+    this.groupsService.deleteGroup(id).subscribe(() => {
+      this.groupData.update((groups) => groups.filter((group) => group.id !== id));
+    });
+  }
 }
