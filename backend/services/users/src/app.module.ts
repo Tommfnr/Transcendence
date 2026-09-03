@@ -1,6 +1,7 @@
-// Defines the root module AppModule that will be instantiated in main.ts
-
 import { Module } from '@nestjs/common'
+import { UsersModule } from './users/users.module'
 
-@Module({})
+@Module({
+	imports: [UsersModule],
+})
 export class AppModule {}
