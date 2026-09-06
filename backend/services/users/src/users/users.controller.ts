@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, HttpCode, Param, UseGuards, ForbiddenException } from '@nestjs/common'
+import { Controller, Get, Delete, HttpCode, Param, ParseIntPipe, UseGuards, ForbiddenException } from '@nestjs/common'
 import { SharedAuthGuard, CurrentUser } from '@pep/shared'
 import { UsersProxyService } from './users-proxy.service'
 
@@ -13,15 +13,15 @@ export class UsersController {
 	}
 
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return (this.usersProxy.findById(Number(id)))
+	findOne(@Param('id', ParseIntPipe) id: number) {
+		return (this.usersProxy.findById(id))
 	}
 
 	@Delete(':id')
 	@HttpCode(204)
-	remove(@Param('id') id: string, @CurrentUser('sub') userId: number) {
-		if (Number(id) !== userId)
+	remove(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
+		if (id !== userId)
 			throw new ForbiddenException()
-		return (this.usersProxy.remove(Number(id)))
+		return (this.usersProxy.remove(id))
 	}
 }

@@ -1,28 +1,19 @@
-import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
-import { InternalServiceClient, InternalServiceError, requireEnv } from '@pep/shared'
-
-export interface UserView {
-	id: number
-	username: string
-	email: string
-}
-
-const DEFAULT_AUTH_URL = 'http://auth:3000'
+import { Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import { InternalServiceClient, InternalServiceError, UserView } from '@pep/shared'
+import { AUTH_INTERNAL_CLIENT } from './users.tokens'
 
 @Injectable()
 export class UsersProxyService {
-	private readonly client: InternalServiceClient
+	private readonly logger = new Logger(UsersProxyService.name)
 
-	constructor() {
-		this.client = new InternalServiceClient({
-			baseUrl: process.env.AUTH_INTERNAL_URL ?? DEFAULT_AUTH_URL,
-			apiKey: requireEnv('INTERNAL_API_KEY'),
-		})
-	}
+	constructor(@Inject(AUTH_INTERNAL_CLIENT) private readonly client: InternalServiceClient) {}
 
 	async findAll(): Promise<UserView[]> {
 		const users = await this.call(() => this.client.get<UserView[]>('/internal/users'))
-		return (users ?? [])
+		if (users === null) {
+			throw new ServiceUnavailableException('auth service unavailable')
+		}
+		return (users)
 	}
 
 	async findById(id: number): Promise<UserView> {
@@ -42,7 +33,8 @@ export class UsersProxyService {
 			return (await fn())
 		} catch (err) {
 			if (err instanceof InternalServiceError) {
-				throw new ServiceUnavailableException('auth service unavailable')
+				this.logger.error(`internal call to auth failed (status ${err.status}): ${err.message}`)
+				throw new ServiceUnavailableException('auth service unavailable', { cause: err })
 			}
 			throw err
 		}

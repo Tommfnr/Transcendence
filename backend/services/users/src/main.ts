@@ -9,4 +9,7 @@ async function bootstrap() {
 	app.setGlobalPrefix('api') // Any calls to this app will be made through /api/ routes so we can put this here to avoid repeating
 	await app.listen(3000, '0.0.0.0')
 }
-bootstrap() // This is what launches everything
+void bootstrap().catch((err) => {
+	console.error(err)
+	process.exit(1)
+})

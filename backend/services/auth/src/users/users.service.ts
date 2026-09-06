@@ -6,7 +6,7 @@ import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
 import * as argon2 from 'argon2'
 import { EventPublisherService } from '../events/event-publisher.service'
-import { EVENT, makeEvent } from '@pep/shared'
+import { EVENT, makeEvent, UserView } from '@pep/shared'
 
 @Injectable()
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
 		private readonly eventPublisher: EventPublisherService,
 	) {}
 
-	findAll() {
+	findAll(): Promise<UserView[]> {
 		return (this.db.select({ id: users.id, username: users.username, email: users.email }).from(users).orderBy(users.id))
 	}
 
@@ -26,8 +26,12 @@ export class UsersService {
 			return (this.db.select().from(users).where(eq(users.username, loginIdentifier)))
 	}
 
-	findById(id: number) {
-		return (this.db.select({ id: users.id, username: users.username, email: users.email }).from(users).where(eq(users.id, id)))
+	async findById(id: number): Promise<UserView | undefined> {
+		const [user] = await this.db
+			.select({ id: users.id, username: users.username, email: users.email })
+			.from(users)
+			.where(eq(users.id, id))
+		return (user)
 	}
 
 	async create(dto: RegisterDto) {
@@ -42,9 +46,12 @@ export class UsersService {
 		return (safeUser)
 	}
 
-	async remove(id: number) {
-		const result = await this.db.delete(users).where(eq(users.id, id))
+	async remove(id: number): Promise<boolean> {
+		const deleted = await this.db.delete(users).where(eq(users.id, id)).returning({ id: users.id })
+		if (deleted.length === 0) {
+			return (false)
+		}
 		await this.eventPublisher.publish(makeEvent(EVENT.UserDeleted, 'auth', { userId: id }))
-		return (result)
+		return (true)
 	}
 }
