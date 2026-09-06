@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createObjectSchema } from './create-objects.dto'
+import { createObjectSchema } from './create-object.dto'
 import { createZodDto } from 'nestjs-zod'
 
 export const updateObjectSchema = createObjectSchema

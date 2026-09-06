@@ -73,4 +73,11 @@ export class ObjectsService {
 			)
 	}
 
+	async removeAllByOwner(ownerId: number): Promise<number> {
+		const deleted = await this.db
+			.delete(objects)
+			.where(eq(objects.ownerId, ownerId))
+			.returning({ id: objects.id })
+		return (deleted.length)
+	}
 }
