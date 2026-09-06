@@ -1,7 +1,7 @@
 // Controller files handle the HTTP request mapping
 // You'll find here GET/POST/DELETE requests calling functions through the ORM instance
 
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Put, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Put, ParseIntPipe } from '@nestjs/common'
 import { ObjectsService } from './objects.service'
 import { CreateObjectDto } from './dto/create-object.dto'
 import { UpdateObjectDto } from './dto/update-object.dto'
@@ -24,7 +24,7 @@ export class ObjectsController {
 	
 	@Get(':id')
 	findOne(@Param('id', ParseIntPipe) id: number) {
-			return (this.objectsService.findByIdOrThrow(Number(id)))
+			return (this.objectsService.findByIdOrThrow(id))
 	}
 	
 	@Post()
@@ -40,12 +40,12 @@ export class ObjectsController {
 			@Param('id', ParseIntPipe) id: number,
 			@Body() dto: UpdateObjectDto
 	) {
-			return (this.objectsService.update(Number(id), userId, dto))
+			return (this.objectsService.update(id, userId, dto))
 	}       
 
 	@Delete(':id')
 	@UseGuards(SharedAuthGuard)
 	remove(@CurrentUser('sub') userId: number, @Param('id', ParseIntPipe) id: number) {
-			return (this.objectsService.remove(Number(id), userId))
+			return (this.objectsService.remove(id, userId))
 	}
 }
