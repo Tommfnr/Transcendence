@@ -23,7 +23,7 @@ export class ObjectsController {
 	}
 	
 	@Get(':id')
-	findOne(@Param('id') id: string) {
+	findOne(@Param('id', ParseIntPipe) id: number) {
 			return (this.objectsService.findByIdOrThrow(Number(id)))
 	}
 	
