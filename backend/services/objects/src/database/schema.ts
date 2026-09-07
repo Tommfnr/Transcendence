@@ -9,7 +9,7 @@ export const objects = pgTable('objects', {
 	type:					varchar('type', { length:20 }).notNull(),
 	description:	varchar('description', { length:500 }),
 	condition:		varchar('condition', { length:50 }),
-	isAvailable:	boolean('is_available').default(true),
+	isAvailable:	boolean('is_available').notNull().default(true),
 	createdAt:		timestamptz('created_at').defaultNow(),
 	updatedAt:		timestamptz('updated_at').defaultNow()
 })

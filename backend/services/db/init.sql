@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS objects (
 	type                VARCHAR(20) NOT NULL,
 	description          VARCHAR(500),
 	condition            VARCHAR(50),
-	is_available         BOOLEAN DEFAULT true,
+	is_available         BOOLEAN NOT NULL DEFAULT true,
 	created_at           TIMESTAMPTZ DEFAULT NOW(),
 	updated_at           TIMESTAMPTZ DEFAULT NOW()
 );

@@ -36,41 +36,47 @@ export class ObjectsService {
 		return (result[0])
 	}
 
-	create(userId: number, dto: CreateObjectDto) {
-			return (this.db
-					.insert(objects)
-					.values({
-							...dto,
-							ownerId: userId
-					})
-					.returning()
-			)
+	async create(userId: number, dto: CreateObjectDto) {
+		const result = await this.db
+				.insert(objects)
+				.values({
+						...dto,
+						ownerId: userId
+				})
+				.returning()
+		return (result[0])
 	}
 
-	update(id: number, userId: number, dto: UpdateObjectDto) {
-			return (this.db
-					.update(objects)
-					.set(dto)
-					.where(
-							and(
-									eq(objects.id, id),
-									eq(objects.ownerId, userId)
-							)
-					)       
-					.returning()
-			)       
+	async update(id: number, userId: number, dto: UpdateObjectDto) {
+		const result = await this.db
+				.update(objects)
+				.set({ ...dto, updatedAt: new Date() })
+				.where(
+						and(
+								eq(objects.id, id),
+								eq(objects.ownerId, userId)
+						)
+				)
+				.returning()
+		if (result.length === 0) {
+			throw new NotFoundException(`Object ${id} not found`)
+		}
+		return (result[0])
 	}
 
-	remove(id: number, userId: number) {
-			return (this.db
-					.delete(objects)
-					.where(
-							and(
-									eq(objects.id, id),
-									eq(objects.ownerId, userId)
-							)
-					)
-			)
+	async remove(id: number, userId: number): Promise<void> {
+		const deleted = await this.db
+				.delete(objects)
+				.where(
+						and(
+								eq(objects.id, id),
+								eq(objects.ownerId, userId)
+						)
+				)
+				.returning({ id: objects.id })
+		if (deleted.length === 0) {
+			throw new NotFoundException(`Object ${id} not found`)
+		}
 	}
 
 	async removeAllByOwner(ownerId: number): Promise<number> {
