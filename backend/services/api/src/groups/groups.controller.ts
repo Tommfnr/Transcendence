@@ -77,13 +77,6 @@ export class GroupsController {
 		return this.groupsService.updateMemberRole(Number(groupId), Number(targetUserId), dto.role)
 	}
 
-	@Patch(':groupId/owner/:newOwnerId')
-	@UseGuards(GroupAdminGuard)
-	transferOwnership(@Param('groupId') groupId: string, @Param('newOwnerId') newOwnerId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.transferOwnership(Number(groupId), Number(newOwnerId), requesterId)
-	}
-
 	@Delete(':groupId/members/:targetUserId')
 	@UseGuards(GroupAdminGuard)
 	removeMember(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string) {

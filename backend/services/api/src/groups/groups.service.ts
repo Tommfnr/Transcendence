@@ -194,35 +194,6 @@ export class GroupsService {
 		return updated
 	}
 
-	async transferOwnership(groupId: number, newOwnerId: number, requesterId: number) {
-		return this.db.transaction(async (t) => {
-			const group = await this.findOne(groupId)
-
-			if (group.ownerId !== requesterId)
-				throw new ForbiddenException('Only the current owner can transfer ownership')
-			if (newOwnerId === requesterId)
-				throw new ForbiddenException('Already the owner')
-
-			const target = await this.findMembership(groupId, newOwnerId)
-
-			if (!target)
-				throw new NotFoundException('Target user is not a member of this group')
-
-			const [updated] = await t.update(groups)
-				.set({ ownerId: newOwnerId })
-				.where(eq(groups.id, groupId))
-				.returning()
-
-			if (target.role !== 'admin') {
-				await t.update(groupMembers)
-					.set({ role: 'admin' })
-					.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, newOwnerId)))
-			}
-
-			return updated
-		})
-	}
-
 	async removeMember(groupId: number, targetUserId: number) {
 		const target = await this.findMembership(groupId, targetUserId)
 
