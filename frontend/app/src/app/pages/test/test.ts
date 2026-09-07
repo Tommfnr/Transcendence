@@ -1,5 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ChipComponent } from "../../components/chip/chip";
+
+interface Category {
+		label: string;
+		emoji: string;
+}
 
 @Component({
   selector: 'app-test',
@@ -7,4 +12,16 @@ import { ChipComponent } from "../../components/chip/chip";
   templateUrl: './test.html',
   styles: ``,
 })
-export class Test {}
+
+
+
+export class Test {
+	categories: Category[] = [
+		{ label:'DIY', emoji:'🛠️' },
+		{ label:'Garden', emoji:'🌱' },
+		{ label:'Electronic', emoji:'💻' },
+		{ label:'Leisure', emoji:'🎮' },
+		{ label:'Other', emoji:'📦' }
+	]
+	activeCategory = signal('DIY');
+}
