@@ -1,4 +1,6 @@
+import type { InjectionToken, ModuleMetadata } from '@nestjs/common'
 import type { ZodType } from 'zod'
+import type { EventName } from './event-names'
 
 export const EVENT_HANDLER_MAP = Symbol('EVENT_HANDLER_MAP')
 
@@ -8,17 +10,27 @@ export const EVENT_HANDLER_MAP = Symbol('EVENT_HANDLER_MAP')
  * handler. The handler only runs after the envelope's `data` passes `schema`.
  */
 export interface EventHandlerRegistration<TData = unknown> {
-	event: string
+	event: EventName
 	schema: ZodType<TData>
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	inject?: any[]
+	inject?: InjectionToken[]
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	useFactory: (...deps: any[]) => (data: TData) => Promise<void> | void
 }
 
+/**
+ * Identity helper: infers `TData` from `schema` so a registration whose
+ * `useFactory` handler expects a different shape than `schema` produces is
+ * rejected at the call site. `SharedEventsModuleOptions.handlers` is a
+ * heterogeneous array, so each element must be wrapped here to keep the check.
+ */
+export function defineEventHandler<TData>(
+	registration: EventHandlerRegistration<TData>,
+): EventHandlerRegistration<TData> {
+	return registration
+}
+
 export interface SharedEventsModuleOptions {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	imports?: any[]
+	imports?: ModuleMetadata['imports']
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	handlers: EventHandlerRegistration<any>[]
 }

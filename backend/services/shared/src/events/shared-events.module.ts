@@ -15,6 +15,14 @@ import {
 @Module({})
 export class SharedEventsModule {
 	static register(options: SharedEventsModuleOptions): DynamicModule {
+		const seen = new Set<string>()
+		for (const handler of options.handlers) {
+			if (seen.has(handler.event)) {
+				throw new Error(`SharedEventsModule: duplicate handler for "${handler.event}"`)
+			}
+			seen.add(handler.event)
+		}
+
 		const flatDeps = options.handlers.flatMap((handler) => handler.inject ?? [])
 
 		const handlerMapProvider = {
@@ -28,10 +36,6 @@ export class SharedEventsModule {
 					const depCount = (handler.inject ?? []).length
 					const deps = resolved.slice(cursor, cursor + depCount)
 					cursor += depCount
-
-					if (map.has(handler.event)) {
-						throw new Error(`SharedEventsModule: duplicate handler for "${handler.event}"`)
-					}
 
 					map.set(handler.event, {
 						schema: handler.schema,
