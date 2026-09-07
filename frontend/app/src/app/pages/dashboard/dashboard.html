@@ -17,9 +17,9 @@
     </a>
   </section>
 
-  <section class="flex items-center justify-center gap-x-6 py-3">
-	<app-stat-card [icon]="'hand-heart'" [count]="requestCount" [label]="'demandes'" [sublabel]="'de proches'"></app-stat-card>
-	<app-stat-card [tone]="'success'"[icon]="'bag-heart'" [count]="offerCount" [label]="'propositions d\'aide'" [sublabel]="'de proches'"></app-stat-card>
+  <section class="flex items-center justify-evenly py-1 ">
+	<app-stat-card icon="hand-heart" [count]="requestCount" label="requests" sublabel="from friends" />
+	<app-stat-card tone="success" icon="bag-heart" [count]="offerCount" label="help offers" sublabel="recent" />
   </section>
 
   <section class="flex flex-1 flex-col gap-5 px-3">
