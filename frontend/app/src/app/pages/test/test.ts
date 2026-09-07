@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ChipComponent } from "../../components/chip/chip";
+import { TextFieldComponent } from "../../components/text-field/text-field";
 
 interface Category {
 		label: string;
@@ -8,7 +9,7 @@ interface Category {
 
 @Component({
   selector: 'app-test',
-  imports: [ChipComponent],
+  imports: [ChipComponent, TextFieldComponent],
   templateUrl: './test.html',
   styles: ``,
 })
