@@ -7,7 +7,7 @@ import { AppModule } from './app.module'
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
 	app.set('trust proxy', 1)
-	app.setGlobalPrefix('api', { exclude: ['internal/*path']  }) // Any calls to this app will be made through /api/ routes so we can put this here to avoid repeating
+	app.setGlobalPrefix('api', { exclude: ['internal/*path'] }) // Any calls to this app will be made through /api/ routes so we can put this here to avoid repeating
 	await app.listen(3000, '0.0.0.0')
 }
 void bootstrap().catch((err) => {

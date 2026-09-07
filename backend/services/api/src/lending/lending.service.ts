@@ -2,21 +2,19 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
 import { and, desc, eq } from 'drizzle-orm'
-import { lending } from '../database/schema'
+import { lending, objects } from '../database/schema'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
-import { ObjectsService } from 'src/objects/objects.service'
 
 @Injectable()
 export class LendingService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase,
-							private readonly objectsService: ObjectsService) {}
+	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	async listALL_DEBUG() {
 		return (this.db.select().from(lending).orderBy(desc(lending.createdAt)));
 	}
 	
 	async newTransaction(dto: CreateTransactionDto, userId: number) {
-		const object = await this.objectsService.findByIdOrThrow(dto.objectId)
+		const [object] = await this.db.select().from(objects).where(eq(objects.id, dto.objectId))
 
 		if (!object)
 				throw new BadRequestException('Error with object')

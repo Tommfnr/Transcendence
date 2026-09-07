@@ -12,6 +12,7 @@ export class ObjectsController {
 	constructor(private readonly objectsService: ObjectsService) {}
 
 	@Get()
+	@UseGuards(SharedAuthGuard)
 	findAll() {
 		return (this.objectsService.findAll())
 	}
@@ -23,6 +24,7 @@ export class ObjectsController {
 	}
 	
 	@Get(':id')
+	@UseGuards(SharedAuthGuard)
 	findOne(@Param('id', ParseIntPipe) id: number) {
 			return (this.objectsService.findByIdOrThrow(id))
 	}

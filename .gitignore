@@ -29,6 +29,7 @@ secrets/
 docs/
 zhelp
 scripts/
+coverage/
 
 # Test files
 *.spec.ts

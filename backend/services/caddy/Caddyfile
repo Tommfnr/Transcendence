@@ -22,6 +22,11 @@ pep.localhost {
 		reverse_proxy users:3000
 	}
 
+	@objectsRoutes path /api/objects /api/objects/*
+	handle @objectsRoutes {
+		reverse_proxy objects:3000
+	}
+
 	handle /api/* {
 		reverse_proxy api:3000
 	}
