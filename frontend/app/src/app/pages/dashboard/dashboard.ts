@@ -3,12 +3,14 @@ import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
+import { StatCardComponent } from '../../components/stat-card/stat-card';
+import { AppLayout } from "../../layouts/app-layout/app-layout";
 
 type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard],
+  imports: [NgClass, RouterLink, RequestCard, StatCardComponent, AppLayout],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
