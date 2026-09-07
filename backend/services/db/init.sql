@@ -2,8 +2,6 @@ CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 -- Generalized Search Tree
 
-
-
 CREATE TABLE IF NOT EXISTS users (
 	id					SERIAL PRIMARY KEY,
 	USERNAME			VARCHAR NOT NULL,
@@ -19,8 +17,8 @@ CREATE TABLE IF NOT EXISTS objects (
 	description          VARCHAR(500),
 	condition            VARCHAR(50),
 	is_available         BOOLEAN DEFAULT true,
-	created_at           TIMESTAMP DEFAULT NOW(),
-	updated_at           TIMESTAMP DEFAULT NOW()
+	created_at           TIMESTAMPTZ DEFAULT NOW(),
+	updated_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS groups (
@@ -44,8 +42,8 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	jti					UUID NOT NULL UNIQUE,
 	user_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	revoked 		BOOLEAN NOT NULL DEFAULT false,
-	expires_at	TIMESTAMP NOT NULL,
-	created_at	TIMESTAMP NOT NULL DEFAULT NOW()
+	expires_at	TIMESTAMPTZ NOT NULL,
+	created_at	TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TYPE lending_status as ENUM (

@@ -20,8 +20,8 @@ export const objects = pgTable('objects', {
 	description:	varchar('description', { length:500 }),
 	condition:		varchar('condition', { length:50 }),
 	isAvailable:	boolean('is_available').default(true),
-	createdAt:		timestamp('created_at').defaultNow(),
-	updatedAt:		timestamp('updated_at').defaultNow()
+	createdAt:		timestamptz('created_at').defaultNow(),
+	updatedAt:		timestamptz('updated_at').defaultNow()
 })
 
 export const users = pgTable('users', {
@@ -50,8 +50,8 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	jti: 				uuid('jti').notNull().unique(),
 	userId: 		integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	revoked: 		boolean('revoked').notNull().default(false),
-	expiresAt: timestamp('expires_at').notNull(),
-	createdAt: timestamp('created_at').notNull().defaultNow(),
+	expiresAt: timestamptz('expires_at').notNull(),
+	createdAt: timestamptz('created_at').notNull().defaultNow(),
 })
 
 export const lendingStatusEnum = pgEnum('lending_status', 
