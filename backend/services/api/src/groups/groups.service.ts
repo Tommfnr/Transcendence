@@ -222,33 +222,24 @@ export class GroupsService {
 				return { message: 'Left group successfully' }
 			}
 
-			const otherMembers = await t.select().from(groupMembers).where(and(eq(groupMembers.groupId, groupId), ne(groupMembers.userId, userId)))
+			const [successor] = await t
+				.select()
+				.from(groupMembers)
+				.where(and(eq(groupMembers.groupId, groupId), ne(groupMembers.userId, userId)))
+				.orderBy(groupMembers.id)
+				.limit(1)
 
-			if (otherMembers.length === 0) {
+			if (!successor) {
 				await t.delete(groups).where(eq(groups.id, groupId))
 
 				return { message: 'Group deleted, you were the last member' }
 			}
 
-			const admins = otherMembers.filter((m) => m.role === 'admin')
-
-			let candidates = otherMembers
-			if (admins.length > 0)
-				candidates = admins
-
-			let successor = candidates[0]
-			for (const m of candidates) {
-				if (m.id < successor.id)
-					successor = m
-			}
-
 			await t.update(groups).set({ ownerId: successor.userId }).where(eq(groups.id, groupId))
 
-			if (successor.role !== 'admin') {
-				await t.update(groupMembers)
-					.set({ role: 'admin' })
-					.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, successor.userId)))
-			}
+			await t.update(groupMembers)
+				.set({ role: 'admin' })
+				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, successor.userId)))
 
 			await t.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
 
