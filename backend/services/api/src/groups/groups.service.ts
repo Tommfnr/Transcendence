@@ -11,11 +11,17 @@ export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	findAll() {
-		return this.db.select().from(groups).orderBy(groups.id)
+		return this.db
+			.select()
+			.from(groups)
+			.orderBy(groups.id)
 	}
 
 	async findOne(groupId: number) {
-		const [group] = await this.db.select().from(groups).where(eq(groups.id, groupId))
+		const [group] = await this.db
+			.select()
+			.from(groups)
+			.where(eq(groups.id, groupId))
 
 		if (!group)
 			throw new NotFoundException('Group not found')
@@ -24,7 +30,10 @@ export class GroupsService {
 	}
 
 	findMembers(groupId: number) {
-		return this.db.select().from(groupMembers).where(eq(groupMembers.groupId, groupId))
+		return this.db
+			.select()
+			.from(groupMembers)
+			.where(eq(groupMembers.groupId, groupId))
 	}
 
 	async findMembership(groupId: number, userId: number) {
@@ -85,11 +94,13 @@ export class GroupsService {
 				.values({ name: dto.name, ownerId: adminId })
 				.returning()
 
-			await t.insert(groupMembers).values({
-				groupId: group.id,
-				userId: adminId,
-				role: 'admin',
-			})
+			await t
+				.insert(groupMembers)
+				.values({
+					groupId: group.id,
+					userId: adminId,
+					role: 'admin',
+				})
 
 			return group
 		})
@@ -123,47 +134,67 @@ export class GroupsService {
 		if (existingUser)
 			throw new ForbiddenException('User already in group')
 
-		const [member] = await this.db.insert(groupMembers).values({ groupId, userId: targetUserId, role: 'member' }).returning()
+		const [member] = await this.db
+			.insert(groupMembers)
+			.values({ groupId, userId: targetUserId, role: 'member' })
+			.returning()
 
 		return member
 	}
 
 	async grantObject(groupId: number, objectId: number, requesterId: number) {
-		const [object] = await this.db.select().from(objects).where(eq(objects.id, objectId))
+		const [object] = await this.db
+			.select()
+			.from(objects)
+			.where(eq(objects.id, objectId))
 
 		if (!object)
 			throw new NotFoundException('Object not found')
 		if (object.ownerId !== requesterId)
 			throw new ForbiddenException('Only the object owner can grant it to a group')
 
-		const [existingGrant] = await this.db.select().from(groupObjectGrants).where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
+		const [existingGrant] = await this.db
+			.select()
+			.from(groupObjectGrants)
+			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
 
 		if (existingGrant)
 			throw new ForbiddenException('Object already granted to this group')
 
-		const [grant] = await this.db.insert(groupObjectGrants).values({
-			groupId,
-			objectId,
-			grantedBy: requesterId,
-		}).returning()
+		const [grant] = await this.db
+			.insert(groupObjectGrants)
+			.values({
+				groupId,
+				objectId,
+				grantedBy: requesterId,
+			})
+			.returning()
 
 		return grant
 	}
 
 	async revokeObject(groupId: number, objectId: number, requesterId: number) {
-		const [object] = await this.db.select().from(objects).where(eq(objects.id, objectId))
+		const [object] = await this.db
+			.select()
+			.from(objects)
+			.where(eq(objects.id, objectId))
 
 		if (!object)
 			throw new NotFoundException('Object not found')
 		if (object.ownerId !== requesterId)
 			throw new ForbiddenException('Only the object owner can revoke it from a group')
 
-		const [existingGrant] = await this.db.select().from(groupObjectGrants).where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
+		const [existingGrant] = await this.db
+			.select()
+			.from(groupObjectGrants)
+			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
 
 		if (!existingGrant)
 			throw new NotFoundException('Object not granted to this group')
 
-		await this.db.delete(groupObjectGrants).where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
+		await this.db
+			.delete(groupObjectGrants)
+			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
 
 		return { message: 'Object grant revoked' }
 	}
@@ -180,13 +211,17 @@ export class GroupsService {
 			throw new NotFoundException('Target user not in group')
 
 		if (target.role === 'admin' && role === 'member') {
-			const admins = await this.db.select().from(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')))
+			const admins = await this.db
+				.select()
+				.from(groupMembers)
+				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')))
 
 			if (admins.length <= 1)
 				throw new ForbiddenException('Cannot demote the only remaining admin')
 		}
 
-		const [updated] = await this.db.update(groupMembers)
+		const [updated] = await this.db
+			.update(groupMembers)
 			.set({ role, updatedAt: new Date() })
 			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
 			.returning()
@@ -202,7 +237,9 @@ export class GroupsService {
 		if (target.role == 'admin')
 			throw new ForbiddenException('Cannot remove an admin')
 
-		await this.db.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
+		await this.db
+			.delete(groupMembers)
+			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
 
 		return { message: 'Member successfully removed' }
 	}
@@ -217,7 +254,9 @@ export class GroupsService {
 				throw new NotFoundException('Not a member of this group')
 
 			if (group.ownerId !== userId) {
-				await t.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
+				await t
+					.delete(groupMembers)
+					.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
 
 				return { message: 'Left group successfully' }
 			}
@@ -230,18 +269,26 @@ export class GroupsService {
 				.limit(1)
 
 			if (!successor) {
-				await t.delete(groups).where(eq(groups.id, groupId))
+				await t
+					.delete(groups)
+					.where(eq(groups.id, groupId))
 
 				return { message: 'Group deleted, you were the last member' }
 			}
 
-			await t.update(groups).set({ ownerId: successor.userId }).where(eq(groups.id, groupId))
+			await t
+				.update(groups)
+				.set({ ownerId: successor.userId })
+				.where(eq(groups.id, groupId))
 
-			await t.update(groupMembers)
+			await t
+				.update(groupMembers)
 				.set({ role: 'admin' })
 				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, successor.userId)))
 
-			await t.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
+			await t
+				.delete(groupMembers)
+				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
 
 			return { message: 'Left group successfully' }
 		})
@@ -253,7 +300,9 @@ export class GroupsService {
 		if (group.ownerId !== requesterId)
 			throw new ForbiddenException('Only the group owner can delete this group')
 
-		await this.db.delete(groups).where(eq(groups.id, groupId))
+		await this.db
+			.delete(groups)
+			.where(eq(groups.id, groupId))
 
 		return { message: 'Group successfully deleted' }
 	}
