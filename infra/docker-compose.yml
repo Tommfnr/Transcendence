@@ -72,6 +72,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      EVENT_SUBSCRIBER_URLS: http://objects:3000
     depends_on:
       postgres:
         condition: service_healthy
