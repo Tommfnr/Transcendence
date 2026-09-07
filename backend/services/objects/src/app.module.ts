@@ -1,14 +1,29 @@
 // Defines the root module AppModule that will be instantiated in main.ts
 
 import { Module } from '@nestjs/common'
+import { APP_PIPE } from '@nestjs/core'
+import { EVENT, SharedEventsModule, SharedZodValidationPipe, userDeletedDataSchema } from '@pep/shared'
 import { DatabaseModule } from './database/database.module'
 import { ObjectsModule } from './objects/objects.module'
-import { EventsModule } from './events/events.module'
-import { SharedZodValidationPipe } from '@pep/shared'
-import { APP_PIPE } from '@nestjs/core'
+import { ObjectsService } from './objects/objects.service'
+import { userDeletedHandler } from './objects/user-deleted.handler'
 
 @Module({
-	imports: [DatabaseModule, ObjectsModule, EventsModule],
-	providers: [{ provide: APP_PIPE, useClass: SharedZodValidationPipe}]
+	imports: [
+		DatabaseModule,
+		ObjectsModule,
+		SharedEventsModule.register({
+			imports: [ObjectsModule],
+			handlers: [
+				{
+					event: EVENT.UserDeleted,
+					schema: userDeletedDataSchema,
+					inject: [ObjectsService],
+					useFactory: userDeletedHandler,
+				},
+			],
+		}),
+	],
+	providers: [{ provide: APP_PIPE, useClass: SharedZodValidationPipe }],
 })
 export class AppModule {}

@@ -1,3 +1,7 @@
 export * from './envelope'
+export * from './envelope.dto'
 export * from './event-names'
 export * from './user-events'
+export * from './shared-events.types'
+export * from './shared-events.controller'
+export * from './shared-events.module'
