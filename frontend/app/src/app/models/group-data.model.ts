@@ -9,7 +9,7 @@ export interface GroupData {
     updatedAt: string;
 }
 
-export type GroupFormData = Pick<GroupData, 'name'>;
+export type GroupForm = Pick<GroupData, 'name'>;
 
 export interface GroupMemberData {
     id: number;
@@ -19,6 +19,8 @@ export interface GroupMemberData {
     createdAt: string;
     updatedAt: string;
 }
+
+export type GroupMemberForm = Pick<GroupMemberData, 'role'>;
 
 export interface GroupObjectGrantData {
     id: number;
