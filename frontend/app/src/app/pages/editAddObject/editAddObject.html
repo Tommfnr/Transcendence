@@ -19,12 +19,12 @@
     </div>
 
     <div>
-        Type <input type="text" [formField]="objectForm.type" class="border" />
-      @if (objectForm.type().invalid() && objectForm.type().touched()) {
-          @for (error of objectForm.type().errors(); track error.kind) {
-            {{ error.message }}
-          }
-      }
+      Type
+      <select [formField]="objectForm.type" class="border">
+        @for (objectType of objectTypes; track objectType) {
+          <option [value]="objectType">{{ objectType }}</option>
+        }
+      </select>
     </div>
 
     <div> Description <input type="text" [formField]="objectForm.description" class="border" /> </div>

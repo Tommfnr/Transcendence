@@ -3,7 +3,7 @@ import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
-import { CreateObjectData } from '../../models/object-data.model';
+import { CreateObjectData, OBJECT_TYPES } from '../../models/object-data.model';
 import { GroupData } from '../../models/group-data.model';
 import { ButtonComponent } from '../../components/button/button';
 
@@ -23,10 +23,11 @@ export class EditAddObject implements OnInit {
 
   readonly myGroups = signal<GroupData[]>([]);
   readonly selectedGroupIds = signal<number[]>([]);
+  readonly objectTypes = OBJECT_TYPES;
 
   objectModel = signal<CreateObjectData>({
     name: '',
-    type: '',
+    type: OBJECT_TYPES[0],
     description: '',
     condition: 'new',
     isAvailable: true,

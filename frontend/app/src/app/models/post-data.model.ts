@@ -1,10 +1,12 @@
+import { ObjectType } from './object-data.model';
+
 export type PostStatus = 'open' | 'closed';
 
 export interface PostData {
     id: number;
     ownerId: number;
     title: string;
-    objectType: string;
+    objectType: ObjectType;
     description: string | null;
     status: PostStatus;
     createdAt: string;
@@ -15,7 +17,7 @@ export interface PostData {
 
 export interface PostForm {
     title: string;
-    objectType: string;
+    objectType: ObjectType;
     description: string | null;
     status?: PostStatus;
     fromDate: string;
