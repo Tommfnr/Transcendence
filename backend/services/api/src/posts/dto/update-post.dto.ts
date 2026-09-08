@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
+import { nameSchema, descriptionSchema, objectTypeSchema } from '../../zod/zod.schemas'
 
 const updatePostSchema = z.object({
 	title:			nameSchema(60).optional(),
 	status:			z.enum(['open', 'closed']).optional(),
-	type:			z.string().max(20).optional(),
+	objectType:		objectTypeSchema.optional(),
 	description:	descriptionSchema,
 	fromDate:		z.coerce.date().optional(),
 	toDate:			z.coerce.date().optional(),

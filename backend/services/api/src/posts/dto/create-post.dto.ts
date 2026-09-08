@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
+import { nameSchema, descriptionSchema, objectTypeSchema } from '../../zod/zod.schemas'
 
 const createPostSchema = z.object({
 	title:			nameSchema(60),
-	type:			z.string().max(20).optional(),
+	objectType:		objectTypeSchema,
 	description:	descriptionSchema,
 	fromDate:		z.coerce.date(),
 	toDate:			z.coerce.date(),

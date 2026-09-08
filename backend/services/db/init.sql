@@ -18,11 +18,27 @@ EXCEPTION
 	WHEN duplicate_object THEN null;
 END $$;
 
+DO $$
+BEGIN
+	CREATE TYPE object_type AS ENUM (
+		'Tools',
+		'Electronics',
+		'Vehicles',
+		'Outdoor & Recreation',
+		'Media',
+		'Events',
+		'Clothing & Gear'
+	);
+EXCEPTION
+	WHEN duplicate_object THEN null;
+END $$;
+
+
 CREATE TABLE IF NOT EXISTS objects (
 	id					SERIAL PRIMARY KEY,
 	name				VARCHAR(30) NOT NULL,
 	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	type				VARCHAR(20) NOT NULL,
+	type				object_type,
 	description			VARCHAR(500),
 	condition			object_condition NOT NULL,
 	is_available		BOOLEAN NOT NULL,
@@ -79,7 +95,7 @@ CREATE TABLE IF NOT EXISTS posts (
 	id					SERIAL PRIMARY KEY,
 	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	title				VARCHAR(60) NOT NULL,
-	type				VARCHAR(20),
+	object_type			object_type,
 	description			VARCHAR(500),
 	status				post_status NOT NULL DEFAULT 'open',
 	created_at			TIMESTAMP DEFAULT NOW(),
