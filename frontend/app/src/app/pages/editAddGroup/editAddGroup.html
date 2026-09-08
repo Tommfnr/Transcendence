@@ -18,6 +18,17 @@
       }
     </div>
 
+    <div>
+        Description <input type="text" [formField]="groupForm.description" class="border" />
+    </div>
+
+    @if (isEditMode) {
+      <div>
+        <input #targetUsernameInput type="text" placeholder="Username" class="border" />
+        <app-button type="button" variant="secondary" (click)="onAddMember(targetUsernameInput.value); targetUsernameInput.value = ''">Add Member</app-button>
+      </div>
+    }
+
     @if (errorMessage()) {
       <p class="text-red-600">{{ errorMessage() }}</p>
     }

@@ -2,7 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
-import { GroupFormData } from '../../models/group-data.model';
+import { UsersService } from '../../services/users.service';
+import { GroupForm } from '../../models/group-data.model';
 import { ButtonComponent } from '../../components/button/button';
 
 @Component({
@@ -12,14 +13,16 @@ import { ButtonComponent } from '../../components/button/button';
 })
 export class EditAddGroup implements OnInit {
   private groupsService = inject(GroupsService);
+  private usersService = inject(UsersService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   private groupId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.groupId;
 
-  groupModel = signal<GroupFormData>({
+  groupModel = signal<GroupForm>({
     name: '',
+    description: '',
   });
 
   readonly errorMessage = signal<string | null>(null);
@@ -31,9 +34,20 @@ export class EditAddGroup implements OnInit {
   ngOnInit(): void {
     if (this.groupId) {
       this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
-        this.groupModel.set({ name: data.name });
+        this.groupModel.set({ name: data.name, description: data.description ?? '' });
       });
     }
+  }
+
+  onAddMember(username: string): void {
+    this.usersService.findByUsername(username).subscribe({
+      next: (user) => {
+        this.groupsService.addMember(Number(this.groupId), user.id).subscribe();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message);
+      },
+    });
   }
 
   onSubmit(event: Event) {
