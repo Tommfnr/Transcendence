@@ -5,7 +5,11 @@
     @for (group of groupData(); track group.id) {
       <li>
         <h2 class="text-2xl font-bold">{{ group.name }}</h2>
+        @if (group.description) {
+          <p>{{ group.description }}</p>
+        }
         <p>role: {{ group.role }}</p>
+        <p>Members: {{ memberCounts()[group.id] ?? 0 }}</p>
         <a appButton [routerLink]="['/app/editAddGroup', group.id]" variant="primary">Update group</a>
         <app-button type="button" variant="secondary" (click)="deleteGroup(group.id)">Delete group</app-button>
       </li>
