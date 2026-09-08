@@ -37,13 +37,16 @@ export const loginIdentifierSchema = z
 			{ error: 'Invalid username or email' },
 	)
 
-export const groupNameSchema = z
+export const nameSchema = (max: number) => z
 	.string("Please input a string")
-	.min(1, 'Group name required')
-	.max(50, 'Max 50 characters')
-	.regex(/^[a-zA-Z ]{1,}$/,
-			'No special characters allowed for group name'
-	)
+	.min(1, 'Name required')
+	.max(max, `Max ${max} characters`)
+	.regex(/^[a-zA-Z0-9 ]{1,}$/, 'Only letters, digits, and spaces allowed')
+
+export const descriptionSchema = z
+	.string("Please input a string")
+	.max(500, 'Max 500 characters')
+	.optional()
 
 export const messageContentSchema = z
 	.string("Please input a string")

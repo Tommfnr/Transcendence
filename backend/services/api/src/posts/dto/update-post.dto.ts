@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
 
 const updatePostSchema = z.object({
-	title:			z.string().min(1, 'Title required').max(50, 'Max 50 characters').optional(),
+	title:			nameSchema(60).optional(),
 	status:			z.enum(['open', 'closed']).optional(),
 	type:			z.string().max(20).optional(),
-	description:	z.string().max(500).optional(),
+	description:	descriptionSchema,
 	fromDate:		z.coerce.date().optional(),
 	toDate:			z.coerce.date().optional(),
 	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group').optional(),

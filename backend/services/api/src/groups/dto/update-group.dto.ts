@@ -1,16 +1,10 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
 
 const updateGroupSchema = z.object({
-	name: z
-		.string("Please input a string")
-		.min(1, 'Group name required')
-		.max(30, 'Max 30 characters')
-		.regex(/^[a-zA-Z ]{1,}$/, 'No special characters allowed for group name'),
-	description: z
-		.string("Please input a string")
-		.max(500, 'Max 500 characters')
-		.optional()
+	name:			nameSchema(30),
+	description:	descriptionSchema
 })
 
 export class UpdateGroupDto extends createZodDto(updateGroupSchema) {}

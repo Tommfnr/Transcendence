@@ -23,7 +23,7 @@ export const objectConditionEnum = pgEnum('object_condition', ['new', 'good', 'w
 
 export const objects = pgTable('objects', {
 	id:				serial('id').primaryKey(),
-	name:			varchar('name', { length:20 }).notNull(),
+	name:			varchar('name', { length:30 }).notNull(),
     ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
 	type:			varchar('type', { length:20 }).notNull(),
 	description:	varchar('description', { length:500 }),
@@ -36,7 +36,7 @@ export const objects = pgTable('objects', {
 export const groups = pgTable('groups', {
 	id:				serial('id').primaryKey(),
 	ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
-	name:			varchar('name', { length:50 }).notNull(),
+	name:			varchar('name', { length:30 }).notNull(),
 	description:	varchar('description', { length:500 }),
 	createdAt:		timestamp('created_at').notNull().defaultNow(),
 	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
@@ -62,7 +62,7 @@ export const postStatusEnum = pgEnum('post_status', ['open', 'closed'])
 export const posts = pgTable('posts', {
 	id: 			serial('id').primaryKey(),
 	ownerId:	 	integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-	title:			varchar('title', { length:50 }).notNull(),
+	title:			varchar('title', { length:60 }).notNull(),
 	type:			varchar('type', { length:20 }),
 	description: 	varchar('description', { length:500 }),
 	status: 		postStatusEnum('status').notNull().default('open'),
