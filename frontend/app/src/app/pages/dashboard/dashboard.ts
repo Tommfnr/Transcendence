@@ -1,8 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
+import { GroupsService } from '../../services/groups.service';
+import { GroupData } from '../../models/group-data.model';
 
 type DashboardTab = 'requests' | 'offers';
 
@@ -11,8 +13,13 @@ type DashboardTab = 'requests' | 'offers';
   imports: [NgClass, RouterLink, RequestCard],
   templateUrl: './dashboard.html',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+  private groupsService = inject(GroupsService);
+
   readonly activeTab = signal<DashboardTab>('requests');
+
+  readonly groups = signal<GroupData[]>([]);
+  readonly errorMessage = signal<string | null>(null);
 
   readonly requestCount = 3;
   readonly offerCount = 2;
@@ -63,6 +70,16 @@ export class Dashboard {
       tags: [{ icon: 'calendar', label: '7 jours' }],
     },
   ]);
+
+  ngOnInit(): void {
+    this.groupsService.findMy().subscribe({
+      next: (data) => this.groups.set(data),
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Error while showing group(s)');
+      },
+    });
+  }
 
   selectTab(tab: DashboardTab): void {
     this.activeTab.set(tab);

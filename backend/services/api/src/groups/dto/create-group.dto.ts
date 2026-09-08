@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { groupNameSchema } from '../../zod/zod.schemas'
+import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
 
 const createGroupSchema = z.object({
-	name: 	groupNameSchema
+	name:			nameSchema(30),
+	description:	descriptionSchema
 })
 
 export class CreateGroupDto extends createZodDto(createGroupSchema) {}
