@@ -91,7 +91,7 @@ export class GroupsService {
 
 			const [group] = await t
 				.insert(groups)
-				.values({ name: dto.name, ownerId: adminId })
+				.values({ name: dto.name, description: dto.description, ownerId: adminId })
 				.returning()
 
 			await t
@@ -120,7 +120,7 @@ export class GroupsService {
 
 			const [updated] = await t
 				.update(groups)
-				.set({ name: dto.name, updatedAt: new Date() })
+				.set({ name: dto.name, description: dto.description, updatedAt: new Date() })
 				.where(eq(groups.id, groupId))
 				.returning()
 

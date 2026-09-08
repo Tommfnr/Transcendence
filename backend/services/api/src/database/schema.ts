@@ -34,11 +34,12 @@ export const objects = pgTable('objects', {
 })
 
 export const groups = pgTable('groups', {
-	id:			serial('id').primaryKey(),
-	ownerId:	integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
-	name:		varchar('name', { length:50 }).notNull(),
-	createdAt:	timestamp('created_at').notNull().defaultNow(),
-	updatedAt:	timestamp('updated_at').notNull().defaultNow(),
+	id:				serial('id').primaryKey(),
+	ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
+	name:			varchar('name', { length:50 }).notNull(),
+	description:	varchar('description', { length:500 }),
+	createdAt:		timestamp('created_at').notNull().defaultNow(),
+	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniqueOwnerName: unique().on(table.ownerId, table.name),
 }));
