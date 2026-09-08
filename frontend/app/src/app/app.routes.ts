@@ -8,6 +8,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Profile } from './pages/profile/profile';
 import { Catalog } from './pages/catalog/catalog';
 import { EditAddObject } from './pages/editAddObject/editAddObject';
+import { EditAddPost } from './pages/editAddPost/editAddPost';
 import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { EditAddGroup } from './pages/editAddGroup/editAddGroup';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
@@ -64,6 +65,14 @@ export const routes: Routes = [
       {
         path: 'editAddObject/:id',
         component: EditAddObject
+      },
+      {
+        path: 'editAddPost',
+        component: EditAddPost
+      },
+      {
+        path: 'editAddPost/:id',
+        component: EditAddPost
       },
       {
         path: 'groupParameter',
