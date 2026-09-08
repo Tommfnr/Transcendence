@@ -63,7 +63,7 @@ export class GroupsService {
 
 	findMy(userId: number) {
 		return this.db
-			.select({ id: groups.id, name: groups.name, ownerId: groups.ownerId, role: groupMembers.role })
+			.select({ id: groups.id, name: groups.name, description: groups.description, ownerId: groups.ownerId, role: groupMembers.role })
 			.from(groupMembers)
 			.innerJoin(groups, eq(groupMembers.groupId, groups.id))
 			.where(eq(groupMembers.userId, userId))
