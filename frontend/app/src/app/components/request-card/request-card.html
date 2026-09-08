@@ -6,18 +6,19 @@
 
     <div class="flex min-w-0 flex-1 flex-col gap-1">
       <div class="flex items-center gap-2">
-        <p class="truncate text-xs font-bold text-text-strong">
+        <p class="truncate text-xs font-bold text-strong">
           {{ request().authorName }}
           <span class="text-xs font-normal">- </span>
           <span class="text-xs font-normal italic">{{ request().groupName }}</span>
         </p>
-        <span class="ml-auto shrink-0 text-2xs font-light tracking-[-0.2px] text-text-strong">
+        <span class="ml-auto shrink-0 text-2xs font-light tracking-[-0.2px] text-strong
+">
           {{ request().timeAgo }}
         </span>
       </div>
 
       <div class="flex flex-col gap-1">
-        <h3 class="truncate text-xs font-bold text-text-strong">{{ request().title }}</h3>
+        <h3 class="truncate text-xs font-bold text-strong">{{ request().title }}</h3>
         <p class="line-clamp-2 text-xs text-text">{{ request().description }}</p>
       </div>
     </div>

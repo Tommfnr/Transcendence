@@ -4,7 +4,7 @@
       class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised"
     >
       <img src="/icons/all-inclusive.svg" alt="" class="size-4 shrink-0" />
-      <span class="text-xs font-bold text-text-strong">Tous mes groupes</span>
+      <span class="text-xs font-bold text-strong">Tous mes groupes</span>
       <img src="/icons/chevron-down.svg" alt="" class="size-4 shrink-0" />
     </a>
 
@@ -29,7 +29,7 @@
         (click)="selectTab('requests')"
         class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
         [ngClass]="
-          activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
+          activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-strong'
         "
       >
         Demandes
@@ -40,7 +40,7 @@
         (click)="selectTab('offers')"
         class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
         [ngClass]="
-          activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
+          activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-strong'
         "
       >
         Propositions d'aide

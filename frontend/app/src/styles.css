@@ -7,6 +7,7 @@
 	/* Colors*/
 	--color-primary: #FF9D2E;
 	--color-secondary: #4B5563;
+	--color-strong: #000000;
 	--color-alert: #FF7700;
 	--color-error: #EF4444;
 	--color-card: #FFFFFF;
@@ -20,11 +21,6 @@
 	   stand out. */
 	--color-background: #F8F9FA;
 	--color-field-surface: #F8F9FA;
-
-	/* Pure black. Dense mobile UI where maximum contrast is needed:
-	   card titles, stat labels, header greeting. For long-form copy
-	   prefer --color-text, which is softer on the eye. */
-	--color-text-strong: #000000;
 
 	/* Text and icons sitting ON an orange fill (primary, alert).
 	   Dark, not white: #FF9D2E is light in luminance, so white text on it

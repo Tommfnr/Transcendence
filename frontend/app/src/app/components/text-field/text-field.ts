@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 export type TextFieldTone = 'white' | 'field' | 'complementary';
 export type TextFieldType = 'text' | 'password' | 'email' | 'number' | 'search' | 'tel' | 'url';
@@ -8,22 +8,30 @@ export type TextFieldType = 'text' | 'password' | 'email' | 'number' | 'search' 
   imports: [],
   templateUrl: './text-field.html',
 })
+
 export class TextFieldComponent {
+	
 	@Input() tone: TextFieldTone = 'white';
 	@Input({ required: true }) placeholder!: string;
-	@Input() type: TextFieldType = 'text';
+	@Input() typeField: TextFieldType = 'text';
+	@Input() label?: string;
+	@Output() valueChange = new EventEmitter<string>();
 
+	private static count = 0;
+	id = `text-field-${TextFieldComponent.count++}`;
+	
 	get classes(): string {
 		const base =
-			'rounded-card border border-text-secondary px-4 py-2 text-sm font-medium '
+			'rounded-card border border-text-secondary px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
 			+
-			'outline-none focus:border-primary';
+			'focus:outline-none focus:ring-1 focus:ring-offset-background ';
 
 		const surface: Record<TextFieldTone, string> = {
-			white: 'bg-card',
-			field: 'bg-field-surface',
-			complementary: 'bg-complementary',
+			white: 'bg-card focus:border-primary focus:ring-primary text-strong ',
+			field: 'bg-field-surface focus:border-primary focus:ring-primary text-strong',
+			complementary: 'bg-complementary-surface focus:border-complementary focus:ring-complementary text-strong',
 		};
+
 		return `${base} ${surface[this.tone]}`;
 	}
 }

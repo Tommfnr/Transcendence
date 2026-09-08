@@ -16,7 +16,7 @@ export class ChipComponent {
 	
 	get classes(): string {
 		const base =
-			'inline-flex h-8 items-center gap-1 rounded-full px-3 py-2 text-xs font-bold whitespace-nowrap cursor-pointer border border-text-strong';
+			'inline-flex h-8 items-center gap-1 rounded-full px-3 py-2 text-xs font-bold whitespace-nowrap cursor-pointer border border-strong';
 
 		if (this.selected)
 			return `${base} bg-primary text-on-primary`;
