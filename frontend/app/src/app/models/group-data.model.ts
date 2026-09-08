@@ -3,13 +3,14 @@ export type GroupRole = 'admin' | 'member';
 export interface GroupData {
     id: number;
     name: string;
+    description: string | null;
     ownerId: number;
     role: GroupRole;
     createdAt: string;
     updatedAt: string;
 }
 
-export type GroupForm = Pick<GroupData, 'name'>;
+export type GroupForm = Pick<GroupData, 'name'> & { description: string };
 
 export interface GroupMemberData {
     id: number;
