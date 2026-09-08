@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { users } from '../database/schema'
@@ -12,6 +12,18 @@ export class UsersService {
 
 	findAll() {
 		return (this.db.select({ id: users.id, username: users.username, email: users.email}).from(users).orderBy(users.id))
+	}
+
+	async findByUsername(username: string) {
+		const [user] = await this.db
+			.select({ id: users.id, username: users.username, email: users.email })
+			.from(users)
+			.where(eq(users.username, username))
+
+		if (!user)
+			throw new NotFoundException('User not found')
+
+		return user
 	}
 
 	findOne(loginIdentifier: string) {
