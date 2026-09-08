@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 
@@ -8,10 +8,12 @@ type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard],
+  imports: [NgClass, RequestCard],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
+  readonly modalService = inject(ModalService);
+
   readonly activeTab = signal<DashboardTab>('requests');
 
   readonly requestCount = 3;
@@ -81,5 +83,20 @@ export class Dashboard {
 
   closeFab(): void {
     this.fabOpen.set(false);
+  }
+
+  openAddObjectModal(): void {
+    this.closeFab();
+    this.modalService.openAddObject();
+  }
+
+  openRequestModal(): void {
+    this.closeFab();
+    this.modalService.openRequest();
+  }
+
+  openGroupModal(): void {
+    this.closeFab();
+    this.modalService.openGroup();
   }
 }

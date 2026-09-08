@@ -1,25 +1,24 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
 import { CreateObjectData } from '../../models/object-data.model';
 import { Group } from '../../models/groups.model';
 import { ButtonComponent } from '../../components/button/button';
+import { Modal } from '../../components/modal/modal';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-editAddObject',
-  imports: [FormField, ButtonComponent, RouterLink],
+  imports: [FormField, ButtonComponent, Modal],
   templateUrl: './editAddObject.html',
 })
 export class EditAddObject implements OnInit {
   private objectService = inject(ObjectService);
   private groupsService = inject(GroupsService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private modalService = inject(ModalService);
 
-  private objectId = this.route.snapshot.paramMap.get('id');
-  readonly isEditMode = !!this.objectId;
+  readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
   readonly myGroups = signal<Group[]>([]);
   readonly selectedGroupIds = signal<number[]>([]);
@@ -38,8 +37,9 @@ export class EditAddObject implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.objectId) {
-      this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
+    const objectId = this.modalService.editObjectId();
+    if (objectId) {
+      this.objectService.findOne(Number(objectId)).subscribe((data) => {
         this.objectModel.set({
           name: data.name,
           type: data.type,
@@ -70,9 +70,10 @@ export class EditAddObject implements OnInit {
     event.preventDefault();
 
     submit(this.objectForm, async () => {
+      const objectId = this.modalService.editObjectId();
       let request;
-      if (this.objectId) {
-        request = this.objectService.update(Number(this.objectId), this.objectModel());
+      if (objectId) {
+        request = this.objectService.update(Number(objectId), this.objectModel());
       } else {
         request = this.objectService.create(this.objectModel());
       }
@@ -82,15 +83,19 @@ export class EditAddObject implements OnInit {
           return;
         }
 
-        if (!this.objectId) {
+        if (!objectId) {
           const newObjectId = response[0].id;
           for (const groupId of this.selectedGroupIds()) {
             this.groupsService.grantObject(groupId, newObjectId).subscribe();
           }
         }
 
-        this.router.navigate(['/app/catalog']);
+        this.modalService.close();
       });
     });
+  }
+
+  onCancel(): void {
+    this.modalService.close();
   }
 }
