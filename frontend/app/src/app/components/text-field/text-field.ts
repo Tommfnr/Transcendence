@@ -11,6 +11,7 @@ export type TextFieldType = 'text' | 'password' | 'email' | 'number' | 'search' 
 
 export class TextFieldComponent {
 	
+	@Input() value = '';
 	@Input() tone: TextFieldTone = 'white';
 	@Input({ required: true }) placeholder!: string;
 	@Input() typeField: TextFieldType = 'text';

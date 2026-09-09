@@ -2,5 +2,5 @@
 	@if (label) {
 		<label [for]="id" class="text-sm font-medium text-text">{{ label }}</label>
 	}
-	<input [id]="id" [type]="typeField" [placeholder]="placeholder" (input)="onInput($event)" [class]="classes"/>
+	<input [id]="id" [type]="typeField" [placeholder]="placeholder" [value]="value" (input)="onInput($event)" [class]="classes"/>
 </div>

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, Input } from '@angular/core';
 import { ChipComponent } from "../../components/chip/chip";
 import { TextFieldComponent } from "../../components/text-field/text-field";
 
@@ -14,12 +14,9 @@ interface Category {
   styles: ``,
 })
 
-
-
 export class Test {
 
-	username = '';
-
+	username = '';	
 	categories: Category[] = [
 		{ label:'DIY', emoji:'🛠️' },
 		{ label:'Garden', emoji:'🌱' },
