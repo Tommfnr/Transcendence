@@ -4,10 +4,11 @@ import { Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { CreateObjectData } from '../../models/object-data.model';
 import { ButtonComponent } from '../../components/button/button';
+import { TextFieldComponent } from "../../components/text-field/text-field";
 
 @Component({
   selector: 'app-editAddObject',
-  imports: [FormField, ButtonComponent, RouterLink],
+  imports: [FormField, ButtonComponent, RouterLink, TextFieldComponent],
   templateUrl: './editAddObject.html',
 })
 export class EditAddObject {
