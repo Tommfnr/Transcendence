@@ -3,7 +3,7 @@ import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
 import { CreateObjectData } from '../../models/object-data.model';
-import { Group } from '../../models/groups.model';
+import { GroupData } from '../../models/group-data.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
@@ -20,7 +20,7 @@ export class EditAddObject implements OnInit {
 
   readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
-  readonly myGroups = signal<Group[]>([]);
+  readonly myGroups = signal<GroupData[]>([]);
   readonly selectedGroupIds = signal<number[]>([]);
 
   objectModel = signal<CreateObjectData>({

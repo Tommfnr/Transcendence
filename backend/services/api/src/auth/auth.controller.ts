@@ -12,7 +12,7 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
 	async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
-		const { access_token, refresh_token } = await this.authService.signIn(dto.username, dto.password)
+		const { access_token, refresh_token } = await this.authService.signIn(dto.identifier, dto.password)
 
 		res.cookie(REFRESH_COOKIE_NAME, refresh_token, REFRESH_COOKIE_OPTIONS)
 

@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
 
 const createObjectSchema = z.object({
-	name:			z.string().min(1, 'Name required').max(20, 'Max 20 characters'),
+	name:			nameSchema(30),
 	type:			z.string().min(1, 'Type required').max(20, 'Max 20 characters'),
-	description:	z.string().max(500, 'Max 500 characters').optional(),
+	description:	descriptionSchema,
 	condition:		z.enum(['new', 'good', 'worn']),
 	isAvailable:	z.boolean(),
 

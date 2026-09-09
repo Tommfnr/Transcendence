@@ -1,12 +1,16 @@
-<section class="flex items-center justify-between gap-2 px-3">
-  <a
-    routerLink="/app/exampleGroupList"
-    class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised"
-  >
-    <img src="/icons/all-inclusive.svg" alt="" class="size-4 shrink-0" />
-    <span class="text-xs font-bold text-text-strong">Tous mes groupes</span>
-    <img src="/icons/chevron-down.svg" alt="" class="size-4 shrink-0" />
-  </a>
+  <section class="flex items-center justify-between gap-2 px-3">
+    <select class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised">
+      @if (errorMessage()) {
+        <option disabled selected>{{ errorMessage() }}</option>
+      } @else {
+        <option value="">Tous mes groupes</option>
+        @for (group of groups(); track group.id) {
+          <option [value]="group.id">{{ group.name }}</option>
+        } @empty {
+          <option disabled>Aucun groupe</option>
+        }
+      }
+    </select>
 
   <a
     routerLink="/app/groupParameter"
