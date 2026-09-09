@@ -19,6 +19,12 @@ export class TextFieldComponent {
 
 	private static count = 0;
 	id = `text-field-${TextFieldComponent.count++}`;
+
+	onInput(event: Event) {
+	
+		const field = event.target as HTMLInputElement;
+		this.valueChange.emit(field.value);
+	}
 	
 	get classes(): string {
 		const base =

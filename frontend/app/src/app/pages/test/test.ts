@@ -17,6 +17,9 @@ interface Category {
 
 
 export class Test {
+
+	username = '';
+
 	categories: Category[] = [
 		{ label:'DIY', emoji:'🛠️' },
 		{ label:'Garden', emoji:'🌱' },

@@ -12,6 +12,7 @@
 }
 </div>
 
+
 <span class="text-sm font-bold">Text field</span>
 <div class="flex flex-wrap">
 <app-text-field
@@ -19,5 +20,8 @@
 	label="Username"
 	placeholder="Type something..."
 	typeField="text"
+	(valueChange)="username = $event"
 />
+
+<p class="text-sm"> You have typed: {{ username }} </p>
 </div>
