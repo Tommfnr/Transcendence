@@ -1,8 +1,47 @@
-<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-  <h1>Page: editAddObject</h1>
-  <a routerLink="/app/profile" class="text-primary underline">Profile</a>
+<app-modal [title]="isEditMode() ? 'Edit Object' : 'Add Object'" (closed)="onCancel()">
+  <h1>Share your items to friends and family</h1>
+  <app-text-field
+    tone="white"
+    label="Item name"
+    placeholder="Ex: Driller, Bike..."
+    typeField="text"
+	[required]="true"
+  ></app-text-field>
+  <div class="gap-2 align-stretch">
+    <h2>Category</h2>
 
-  <form (submit)="onSubmit($event)" class="flex flex-col gap-3">
+    @for (cat of categories; track cat.label) {
+      <app-chip
+        [label]="cat.label"
+        [emoji]="cat.emoji"
+        [selected]="cat.label === activeCategory()"
+        (pick)="activeCategory.set(cat.label)"
+        tone="white"
+      />
+    }
+  </div>
+
+  <div>
+    <h2>State</h2>
+    @for (state of states; track state.label) {
+      <app-chip
+        [label]="state.label"
+        [selected]="state.label === activeState()"
+        (pick)="activeState.set(state.label)"
+        tone="white"
+      />
+    }
+  </div>
+  <div>
+    <app-text-field
+      tone="white"
+      label="Description (optional)"
+      placeholder="Ex: brand, accessories, additional information..."
+      typeField="text"
+    ></app-text-field>
+  </div>
+    <app-button size="large" align-self="stretch">Add Item</app-button>
+  <!-- <form (submit)="onSubmit($event)" class="flex flex-col gap-3">
     <div>
         Name <input type="text" [formField]="objectForm.name" class="border" />
       @if (objectForm.name().invalid() && objectForm.name().touched()) {
@@ -39,19 +78,27 @@
       </label>
     </div>
 
-    <app-button type="submit" variant="primary">Add Object</app-button>
-  </form>
-</main>
+    @if (!isEditMode()) {
+      <div>
+        Share with groups
+        @for (group of myGroups(); track group.id) {
+          <div>
+            <label>
+              <input type="checkbox" (change)="onGroupToggle($event, group.id)" /> {{ group.name }}
+            </label>
+          </div>
+        } @empty {
+          <p>You're not in any groups yet.</p>
+        }
+      </div>
+    }
 
-
-<main>
-	<div>
-		<h1>Add an object</h1>
-		<p>Share an object with your friends</p>
-	</div>
-	<div>
-		<app-text-field tone="white" label="Object name" type="text" placeholder="Ex: Driller, Bike...">
-
-		</app-text-field>
-	</div>
-</main>
+    <app-button type="submit" variant="primary">
+      @if (isEditMode()) {
+        Save Changes
+      } @else {
+        Add Object
+      }
+    </app-button>
+  </form> -->
+</app-modal>

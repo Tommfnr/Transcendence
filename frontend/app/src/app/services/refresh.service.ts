@@ -15,9 +15,9 @@ export class RefreshService {
 
 	readonly isLoggedIn = computed(() => this.accessToken() !== null)
 
-	login(username: string, password: string, rememberMe?: boolean): Observable<LoginResponse> {
+	login(body: {identifier: string, password: string, rememberMe?: boolean}): Observable<LoginResponse> {
 		return (this.http
-			.post<LoginResponse>('/api/auth/login', { username, password, rememberMe })
+			.post<LoginResponse>('/api/auth/login', body)
 			.pipe(tap(({ access_token }) => {
 				this.accessToken.set(access_token)
 			}))

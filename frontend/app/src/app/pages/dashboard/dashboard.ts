@@ -1,20 +1,29 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
-import { AppLayout } from "../../layouts/app-layout/app-layout";
+import { GroupsService } from '../../services/groups.service';
+import { GroupData } from '../../models/group-data.model';
 
 type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard, StatCardComponent, AppLayout],
+  imports: [NgClass, RouterLink, RequestCard, StatCardComponent],
   templateUrl: './dashboard.html',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+  private groupsService = inject(GroupsService);
+
+  readonly modalService = inject(ModalService);
+
   readonly activeTab = signal<DashboardTab>('requests');
+
+  readonly groups = signal<GroupData[]>([]);
+  readonly errorMessage = signal<string | null>(null);
 
   readonly requestCount = 3;
   readonly offerCount = 2;
@@ -66,6 +75,16 @@ export class Dashboard {
     },
   ]);
 
+  ngOnInit(): void {
+    this.groupsService.findMy().subscribe({
+      next: (data) => this.groups.set(data),
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Error while showing group(s)');
+      },
+    });
+  }
+
   selectTab(tab: DashboardTab): void {
     this.activeTab.set(tab);
   }
@@ -73,5 +92,30 @@ export class Dashboard {
   onHelp(request: HelpRequest): void {
     // TODO: send the offer of help once the API endpoint exists.
     void request;
+  }
+
+  readonly fabOpen = signal(false);
+
+  toggleFab(): void {
+    this.fabOpen.update(open => !open);
+  }
+
+  closeFab(): void {
+    this.fabOpen.set(false);
+  }
+
+  openAddObjectModal(): void {
+    this.closeFab();
+    this.modalService.openAddObject();
+  }
+
+  openRequestModal(): void {
+    this.closeFab();
+    this.modalService.openRequest();
+  }
+
+  openGroupModal(): void {
+    this.closeFab();
+    this.modalService.openGroup();
   }
 }

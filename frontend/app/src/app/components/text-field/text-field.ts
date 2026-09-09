@@ -16,6 +16,7 @@ export class TextFieldComponent {
 	@Input({ required: true }) placeholder!: string;
 	@Input() typeField: TextFieldType = 'text';
 	@Input() label?: string;
+	@Input() required = false;
 	@Output() valueChange = new EventEmitter<string>();
 
 	private static count = 0;

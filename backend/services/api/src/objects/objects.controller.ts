@@ -25,6 +25,7 @@ export class ObjectsController {
 	}
 
 	@Get(':objectId')
+	@UseGuards(AuthGuard)
 	findOne(@Param('objectId') objectId: string) {
 		return this.objectsService.findByIdOrThrow(Number(objectId))
 	}

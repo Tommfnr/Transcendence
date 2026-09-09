@@ -18,6 +18,11 @@ export class UsersController {
 		return (this.usersService.findById(req.user.sub))
 	}
 
+	@Get('username/:username')
+	findByUsername(@Param('username') username: string) {
+		return this.usersService.findByUsername(username)
+	}
+
 	@Get(':id')
 	findOne(@Param('id') id: string) {
 		return (this.usersService.findById(Number(id)))

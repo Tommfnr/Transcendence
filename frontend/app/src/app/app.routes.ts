@@ -9,6 +9,7 @@ import { Profile } from './pages/profile/profile';
 import { Catalog } from './pages/catalog/catalog';
 import { EditAddObject } from './pages/editAddObject/editAddObject';
 import { GroupParameter } from './pages/groupParameter/groupParameter';
+import { EditAddGroup } from './pages/editAddGroup/editAddGroup';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
 import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
@@ -67,8 +68,20 @@ export const routes: Routes = [
         component: EditAddObject
       },
       {
+        path: 'editAddObject/:id',
+        component: EditAddObject
+      },
+      {
         path: 'groupParameter',
         component: GroupParameter
+      },
+      {
+        path: 'editAddGroup',
+        component: EditAddGroup
+      },
+      {
+        path: 'editAddGroup/:id',
+        component: EditAddGroup
       },
       {
         path: 'iCanHelp',

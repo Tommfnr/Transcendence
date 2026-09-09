@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod'
 import { loginIdentifierSchema } from '../../zod/zod.schemas'
 
 const signInSchema = z.object({
-	username: loginIdentifierSchema,
+	identifier: loginIdentifierSchema,
 	password: z.string("Please input a string").min(1, 'Password required'),	
 })
 

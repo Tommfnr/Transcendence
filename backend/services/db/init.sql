@@ -20,7 +20,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS objects (
 	id					SERIAL PRIMARY KEY,
-	name				VARCHAR(20) NOT NULL,
+	name				VARCHAR(30) NOT NULL,
 	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
 	type				VARCHAR(20) NOT NULL,
 	description			VARCHAR(500),
@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS objects (
 CREATE TABLE IF NOT EXISTS groups (
 	id					SERIAL PRIMARY KEY,
 	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	NAME				VARCHAR(50) NOT NULL
+	NAME				VARCHAR(30) NOT NULL,
+	description			VARCHAR(500),
+	created_at			TIMESTAMP DEFAULT NOW() NOT NULL,
+	updated_at			TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 ALTER TABLE groups ADD CONSTRAINT groups_owner_name_unique UNIQUE (owner_id, name);
@@ -50,7 +53,8 @@ CREATE TABLE IF NOT EXISTS group_members (
 	group_id	INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
 	user_id		INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	role		group_role NOT NULL DEFAULT 'member',
-	created_at	TIMESTAMP DEFAULT NOW(),
+	created_at	TIMESTAMP DEFAULT NOW() NOT NULL,
+	updated_at	TIMESTAMP DEFAULT NOW() NOT NULL,
 	CONSTRAINT	unique_membership UNIQUE (group_id, user_id)
 );
 
@@ -59,7 +63,8 @@ CREATE TABLE IF NOT EXISTS group_object_grants (
 	group_id		INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
 	object_id		INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
 	granted_by		INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	created_at		TIMESTAMP DEFAULT NOW(),
+	created_at		TIMESTAMP DEFAULT NOW() NOT NULL,
+	updated_at		TIMESTAMP DEFAULT NOW() NOT NULL,
 	CONSTRAINT		unique_group_object_grant UNIQUE (group_id, object_id)
 );
 
@@ -73,7 +78,7 @@ END $$;
 CREATE TABLE IF NOT EXISTS posts (
 	id					SERIAL PRIMARY KEY,
 	owner_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	title				VARCHAR(50) NOT NULL,
+	title				VARCHAR(60) NOT NULL,
 	type				VARCHAR(20),
 	description			VARCHAR(500),
 	status				post_status NOT NULL DEFAULT 'open',

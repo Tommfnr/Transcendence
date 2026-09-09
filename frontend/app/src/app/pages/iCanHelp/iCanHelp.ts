@@ -1,9 +1,16 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Modal } from '../../components/modal/modal';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-iCanHelp',
-  imports: [RouterLink],
+  imports: [Modal],
   templateUrl: './iCanHelp.html',
 })
-export class ICanHelp {}
+export class ICanHelp {
+  private modalService = inject(ModalService);
+
+  onCancel(): void {
+    this.modalService.close();
+  }
+}
