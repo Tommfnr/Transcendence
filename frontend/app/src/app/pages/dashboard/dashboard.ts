@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 import { GroupsService } from '../../services/groups.service';
@@ -10,11 +10,13 @@ type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard],
+  imports: [NgClass, RequestCard],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
   private groupsService = inject(GroupsService);
+
+  readonly modalService = inject(ModalService);
 
   readonly activeTab = signal<DashboardTab>('requests');
 
@@ -88,5 +90,30 @@ export class Dashboard implements OnInit {
   onHelp(request: HelpRequest): void {
     // TODO: send the offer of help once the API endpoint exists.
     void request;
+  }
+
+  readonly fabOpen = signal(false);
+
+  toggleFab(): void {
+    this.fabOpen.update(open => !open);
+  }
+
+  closeFab(): void {
+    this.fabOpen.set(false);
+  }
+
+  openAddObjectModal(): void {
+    this.closeFab();
+    this.modalService.openAddObject();
+  }
+
+  openRequestModal(): void {
+    this.closeFab();
+    this.modalService.openRequest();
+  }
+
+  openGroupModal(): void {
+    this.closeFab();
+    this.modalService.openGroup();
   }
 }

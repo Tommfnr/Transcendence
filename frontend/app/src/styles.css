@@ -44,9 +44,14 @@
 	--color-success-surface:       color-mix(in srgb, var(--color-success) 15%, transparent);
 	--color-complementary-surface: color-mix(in srgb, var(--color-complementary) 15%, transparent);
 
+	--color-primary-surface-solid:       color-mix(in srgb, var(--color-primary) 15%, white);
+	--color-complementary-surface-solid: color-mix(in srgb, var(--color-complementary) 15%, white);
+	--color-success-surface-solid:       color-mix(in srgb, var(--color-success) 15%, white);
+
 	/* Their matching borders. */
-	--color-primary-border: color-mix(in srgb, var(--color-primary) 30%, transparent);
-	--color-success-border: color-mix(in srgb, var(--color-success) 30%, transparent);
+	--color-primary-border:       color-mix(in srgb, var(--color-primary) 30%, transparent);
+	--color-success-border:	      color-mix(in srgb, var(--color-success) 30%, transparent);
+	--color-complementary-border: color-mix(in srgb, var(--color-complementary) 30%, transparent);
 
 	/* Ad-hoc opacity on a brand colour is now a last resort: the three
 	   recurring tints above are named tokens. The only remaining allowed

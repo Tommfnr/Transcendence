@@ -1,5 +1,9 @@
-<div class="flex flex-1 flex-col gap-4 px-3">
-   <h1>Page: iCanHelp</h1>
+<app-modal
+  title="Faire une demande"
+  (closed)="onCancel()"
+>
+  <div class="flex flex-1 flex-col gap-4 px-3">
+  <h1>Page: iCanHelp</h1>
   <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
   <a
@@ -9,4 +13,5 @@
     I want to help!
   </a>
 
-</div>
+  </div>
+</app-modal>
