@@ -6,12 +6,7 @@
   <h1>Page: iCanHelp</h1>
   <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
-  <a
-    routerLink="/app/offerHelp"
-    class="flex h-[5000px] w-[5000px] shrink-0 items-center justify-center rounded-card rainbow rainbow:hover text-xl font-bold text-background"
-  >
-    I want to help!
-  </a>
+  <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" />
 
   </div>
 </app-modal>
