@@ -18,15 +18,14 @@ export interface PostEntity {
 export interface PostInput {
     title: string;
     objectType: ObjectType;
-    description: string | null;
-    status?: PostStatus;
+    description: string;
+    status: PostStatus;
     fromDate: string;
     toDate: string;
     groupIds?: number[];
 }
 
-export interface PostGroupEntity {
+export interface PostGroupData {
     id: number;
-    postId: number;
-    groupId: number;
+    name: string;
 }

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { PostEntity, PostInput } from '../models/post.model';
+import { PostEntity, PostInput, PostGroupData } from '../models/post.model';
 
 @Injectable({
 	providedIn: 'root'
@@ -18,7 +18,7 @@ export class PostsService {
 	}
 
 	findGroups(postId: number) {
-		return this.http.get<{ id: number; name: string }[]>(`/api/posts/${postId}/groups`);
+		return this.http.get<PostGroupData[]>(`/api/posts/${postId}/groups`);
 	}
 
 	create(body: PostInput) {
