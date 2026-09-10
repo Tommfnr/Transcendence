@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-export type RequestStatus = 'open' | 'pending' | 'done';
+export type RequestStatus = 'open' | 'pending' | 'done' | 'available' | 'lent';
 
 /**
  * Communicates the state of a request. NOT a button.
@@ -18,8 +18,10 @@ export class StatusBadgeComponent {
 	@Input({ required: true }) status!: Exclude<RequestStatus, 'open'>;
 
 	private static readonly LABELS: Record<string, string> = {
-		pending: 'En attente',
-		done: 'Terminé',
+		pending: 'Pending',
+		done: 'Done',
+		available: 'Avaible',
+		lent: 'Lent'
 	};
 
 	get label(): string {
