@@ -1,0 +1,115 @@
+@if (appearance() === 'button') {
+  <div class="flex items-center gap-2">
+    <button
+      type="button"
+      appButton
+      [disabled]="disabled()"
+      [attr.aria-expanded]="isOpen()"
+      aria-haspopup="dialog"
+      (click)="toggle()"
+    >
+      {{ display() || placeholder() }}
+    </button>
+
+    @if (value() && !disabled()) {
+      <button
+        type="button"
+        aria-label="Effacer la date"
+        (click)="clear()"
+        class="flex size-7 cursor-pointer items-center justify-center rounded-full text-text-secondary hover:text-text"
+      >
+        ✕
+      </button>
+    }
+  </div>
+} @else {
+  <!-- Own positioning context: the host grows when the calendar opens,
+       so the icon and ✕ must centre on the field, not on the host -->
+  <div class="relative">
+    <img
+      src="/icons/calendar.svg"
+      alt=""
+      class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+    />
+
+    <!-- readonly: no free typing, the calendar is the only way in -->
+    <input
+      type="text"
+      readonly
+      [value]="display()"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
+      [attr.aria-expanded]="isOpen()"
+      aria-haspopup="dialog"
+      (click)="toggle()"
+      (keydown.enter)="toggle()"
+      class="w-full cursor-pointer rounded-card border bg-card px-8 py-2 text-base text-text placeholder:text-text-secondary focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-background"
+      [class.border-error]="showError()"
+      [class.border-muted]="!showError()"
+    />
+
+    @if (value() && !disabled()) {
+      <button
+        type="button"
+        aria-label="Effacer la date"
+        (click)="clear()"
+        class="absolute top-1/2 right-1 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-text-secondary hover:text-text"
+      >
+        ✕
+      </button>
+    }
+  </div>
+}
+
+@if (isOpen()) {
+  <div
+    role="dialog"
+    aria-label="Choisir une date"
+    class="mt-1 rounded-card bg-card p-2 shadow-raised"
+  >
+    <div class="mb-2 flex items-center justify-between">
+      <button
+        type="button"
+        aria-label="Mois précédent"
+        (click)="shiftMonth(-1)"
+        class="size-7 cursor-pointer rounded-full hover:bg-primary-surface"
+      >
+        ‹
+      </button>
+      <strong class="text-sm text-text capitalize">{{ monthLabel() }}</strong>
+      <button
+        type="button"
+        aria-label="Mois suivant"
+        (click)="shiftMonth(1)"
+        class="size-7 cursor-pointer rounded-full hover:bg-primary-surface"
+      >
+        ›
+      </button>
+    </div>
+
+    <div class="grid grid-cols-7 gap-1 text-center">
+      @for (w of weekdays; track w) {
+        <span class="text-2xs text-text-secondary">{{ w }}</span>
+      }
+      @for (cell of cells(); track $index) {
+        @if (cell) {
+          <button
+            type="button"
+            [disabled]="cell.disabled"
+            (click)="pick(cell.iso)"
+            class="cursor-pointer rounded-sm py-1 text-sm hover:bg-primary-surface disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-transparent"
+            [class.bg-primary]="cell.iso === value()"
+            [class.font-bold]="cell.iso === value()"
+            [class.text-on-primary]="cell.iso === value()"
+            [class.ring-1]="cell.iso === today"
+            [class.ring-primary]="cell.iso === today"
+          >
+            {{ cell.day }}
+          </button>
+        } @else {
+          <span></span>
+        }
+      }
+    </div>
+  </div>
+}
