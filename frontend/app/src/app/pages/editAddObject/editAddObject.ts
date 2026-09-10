@@ -3,8 +3,8 @@ import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
-import { CreateObjectData, OBJECT_TYPES } from '../../models/object-data.model';
-import { GroupData } from '../../models/group-data.model';
+import { ObjectInput, OBJECT_TYPES } from '../../models/object.model';
+import { GroupEntity } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 
 @Component({
@@ -21,11 +21,11 @@ export class EditAddObject implements OnInit {
   private objectId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.objectId;
 
-  readonly myGroups = signal<GroupData[]>([]);
+  readonly myGroups = signal<GroupEntity[]>([]);
   readonly selectedGroupIds = signal<number[]>([]);
   readonly objectTypes = OBJECT_TYPES;
 
-  objectModel = signal<CreateObjectData>({
+  object = signal<ObjectInput>({
     name: '',
     type: OBJECT_TYPES[0],
     description: '',
@@ -33,15 +33,15 @@ export class EditAddObject implements OnInit {
     isAvailable: true,
   });
 
-  objectForm = form(this.objectModel, (fieldPath) => {
+  objectForm = form(this.object, (fieldPath) => {
     required(fieldPath.name, { message: 'Name is required' });
     required(fieldPath.type, { message: 'Type is required' });
   });
 
   ngOnInit(): void {
-    if (this.objectId) {
+    if (this.isEditMode) {
       this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
-        this.objectModel.set({
+        this.object.set({
           name: data.name,
           type: data.type,
           description: data.description ?? '',
@@ -49,7 +49,8 @@ export class EditAddObject implements OnInit {
           isAvailable: data.isAvailable,
         });
       });
-    } else {
+    }
+    else {
       this.groupsService.findMy().subscribe((groups) => {
         this.myGroups.set(groups);
       });
@@ -62,7 +63,8 @@ export class EditAddObject implements OnInit {
 
     if (checked) {
       this.selectedGroupIds.set([...ids, groupId]);
-    } else {
+    }
+    else {
       this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
     }
   }
@@ -72,10 +74,11 @@ export class EditAddObject implements OnInit {
 
     submit(this.objectForm, async () => {
       let request;
-      if (this.objectId) {
-        request = this.objectService.update(Number(this.objectId), this.objectModel());
-      } else {
-        request = this.objectService.create(this.objectModel());
+      if (this.isEditMode) {
+        request = this.objectService.update(Number(this.objectId), this.object());
+      }
+      else {
+        request = this.objectService.create(this.object());
       }
 
       request.subscribe((response) => {
@@ -83,7 +86,7 @@ export class EditAddObject implements OnInit {
           return;
         }
 
-        if (!this.objectId) {
+        if (!this.isEditMode) {
           const newObjectId = response[0].id;
           for (const groupId of this.selectedGroupIds()) {
             this.groupsService.grantObject(groupId, newObjectId).subscribe();

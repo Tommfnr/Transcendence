@@ -3,7 +3,7 @@ import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
 import { UsersService } from '../../services/users.service';
-import { GroupForm } from '../../models/group-data.model';
+import { GroupInput } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 
 @Component({
@@ -20,21 +20,21 @@ export class EditAddGroup implements OnInit {
   private groupId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.groupId;
 
-  groupModel = signal<GroupForm>({
+  group = signal<GroupInput>({
     name: '',
     description: '',
   });
 
   readonly errorMessage = signal<string | null>(null);
 
-  groupForm = form(this.groupModel, (fieldPath) => {
+  groupForm = form(this.group, (fieldPath) => {
     required(fieldPath.name, { message: 'Name is required' });
   });
 
   ngOnInit(): void {
-    if (this.groupId) {
+    if (this.isEditMode) {
       this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
-        this.groupModel.set({ name: data.name, description: data.description ?? '' });
+        this.group.set({ name: data.name, description: data.description ?? '' });
       });
     }
   }
@@ -55,10 +55,10 @@ export class EditAddGroup implements OnInit {
 
     submit(this.groupForm, async () => {
       let request;
-      if (this.groupId) {
-        request = this.groupsService.update(Number(this.groupId), this.groupModel());
+      if (this.isEditMode) {
+        request = this.groupsService.update(Number(this.groupId), this.group());
       } else {
-        request = this.groupsService.create(this.groupModel());
+        request = this.groupsService.create(this.group());
       }
 
       request.subscribe({

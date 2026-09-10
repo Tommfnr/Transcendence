@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
-import { GroupData } from '../../models/group-data.model';
+import { GroupEntity } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 
@@ -13,7 +13,7 @@ import { ButtonDirective } from '../../components/button/button.directive';
 
 export class GroupParameter implements OnInit {
   private groupsService = inject(GroupsService);
-  readonly groupData = signal<GroupData[]>([]);
+  readonly groupData = signal<GroupEntity[]>([]);
   readonly memberCounts = signal<Record<number, number>>({});
 
   ngOnInit(): void {

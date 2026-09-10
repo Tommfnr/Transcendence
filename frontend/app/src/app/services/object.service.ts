@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ObjectData, CreateObjectData } from '../models/object-data.model';
+import { ObjectEntity, ObjectInput } from '../models/object.model';
 
 @Injectable({
 	providedIn: 'root'
@@ -10,19 +10,19 @@ export class ObjectService {
 	private http = inject(HttpClient)
 
 	findMy() {
-		return this.http.get<ObjectData[]>('/api/objects/my');
+		return this.http.get<ObjectEntity[]>('/api/objects/my');
 	}
 
 	findOne(id: number) {
-		return this.http.get<ObjectData>(`/api/objects/${id}`);
+		return this.http.get<ObjectEntity>(`/api/objects/${id}`);
 	}
 
-	create(body: CreateObjectData) {
-		return this.http.post<ObjectData[]>('/api/objects', body);
+	create(body: ObjectInput) {
+		return this.http.post<ObjectEntity[]>('/api/objects', body);
 	}
 
-	update(id: number, body: CreateObjectData) {
-		return this.http.put<ObjectData[]>(`/api/objects/${id}`, body);
+	update(id: number, body: ObjectInput) {
+		return this.http.put<ObjectEntity[]>(`/api/objects/${id}`, body);
 	}
 
 	remove(id: number) {

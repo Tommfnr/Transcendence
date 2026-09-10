@@ -1,8 +1,8 @@
-import { ObjectType } from './object-data.model';
+import { ObjectType } from './object.model';
 
 export type PostStatus = 'open' | 'closed';
 
-export interface PostData {
+export interface PostEntity {
     id: number;
     ownerId: number;
     title: string;
@@ -15,7 +15,7 @@ export interface PostData {
     toDate: string;
 }
 
-export interface PostForm {
+export interface PostInput {
     title: string;
     objectType: ObjectType;
     description: string | null;
@@ -25,7 +25,7 @@ export interface PostForm {
     groupIds?: number[];
 }
 
-export interface PostGroupData {
+export interface PostGroupEntity {
     id: number;
     postId: number;
     groupId: number;

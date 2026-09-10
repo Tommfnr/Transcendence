@@ -12,7 +12,7 @@ export const OBJECT_TYPES = [
 
 export type ObjectType = typeof OBJECT_TYPES[number];
 
-export interface ObjectData {
+export interface ObjectEntity {
   id: number;
   name: string;
   ownerId: number;
@@ -24,7 +24,7 @@ export interface ObjectData {
   updatedAt: string;
 }
 
-export interface CreateObjectData {
+export interface ObjectInput {
   name: string;
   type: ObjectType;
   description: string;

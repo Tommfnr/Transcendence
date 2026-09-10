@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
-import { ObjectData } from '../../models/object-data.model';
+import { ObjectEntity } from '../../models/object.model';
 import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 
@@ -13,7 +13,7 @@ import { ButtonDirective } from '../../components/button/button.directive';
 
 export class Catalog implements OnInit {
   private objectService = inject(ObjectService);
-  readonly objectData = signal<ObjectData[]>([]);
+  readonly objectData = signal<ObjectEntity[]>([]);
 
   ngOnInit(): void {
     this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
