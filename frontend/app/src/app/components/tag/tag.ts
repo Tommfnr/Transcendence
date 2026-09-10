@@ -17,7 +17,7 @@ import { HelpRequestTagIcon } from '../../models/help-request.model';
 			@if (icon) {
 				<img [src]="'/icons/' + icon + '.svg'" alt="" class="size-3" />
 			}
-			<span class="whitespace-nowrap text-2xs tracking-tight text-text-strong">
+			<span class="whitespace-nowrap text-2xs tracking-tight text-strong">
 				{{ label }}
 			</span>
 		</span>

@@ -11,19 +11,9 @@ export type StatTone = 'primary' | 'success';
 @Component({
 	selector: 'app-stat-card',
 	standalone: true,
-	template: `
-		<div [class]="containerClasses">
-			<div class="flex h-full items-center px-2">
-				<img [src]="'/icons/' + icon + '.svg'" alt="" class="size-8" />
-			</div>
-			<div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
-				<span class="text-xl font-bold">{{ count }}</span>
-				<span class="text-2xs font-semibold tracking-tight">{{ label }}</span>
-				<span class="text-2xs font-light tracking-tight">{{ sublabel }}</span>
-			</div>
-		</div>
-	`,
+	templateUrl: './stat-card.html',
 })
+
 export class StatCardComponent {
 	@Input({ required: true }) icon!: string;
 	@Input({ required: true }) count!: number;

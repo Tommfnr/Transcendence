@@ -21,32 +21,9 @@
   </a>
 </section>
 
-<section class="flex items-center justify-center gap-x-6 py-3">
-  <div
-    class="flex items-center py-2 rounded-sm border border-primary-border bg-primary-surface px-1 shadow-raised"
-  >
-    <div class="flex h-full items-center px-2">
-      <img src="/icons/hand-heart.svg" alt="" class="size-8" />
-    </div>
-    <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
-      <span class="text-xl font-bold">{{ requestCount }}</span>
-      <span class="text-2xs font-semibold tracking-[-0.2px]">demandes</span>
-      <span class="text-2xs font-light tracking-[-0.08px]">de proches</span>
-    </div>
-  </div>
-
-  <div
-    class="flex items-center py-2 rounded-sm border border-success-border bg-success-surface px-1 shadow-raised"
-  >
-    <div class="flex h-full items-center px-2">
-      <img src="/icons/bag-heart.svg" alt="" class="size-8" />
-    </div>
-    <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
-      <span class="text-xl font-bold">{{ offerCount }}</span>
-      <span class="text-2xs font-semibold tracking-[-0.2px]">propositions</span>
-      <span class="text-2xs font-light tracking-[-0.08px]">d'aide recentes</span>
-    </div>
-  </div>
+<section class="flex items-center justify-evenly py-1">
+  <app-stat-card icon="hand-heart" [count]="requestCount" label="requests" sublabel="from friends" />
+  <app-stat-card tone="success" icon="bag-heart" [count]="offerCount" label="help offers" sublabel="recent" />
 </section>
 
 <section class="flex flex-1 flex-col gap-5 px-3">

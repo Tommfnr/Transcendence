@@ -7,19 +7,20 @@
 	/* Colors*/
 	--color-primary: #FF9D2E;
 	--color-secondary: #4B5563;
+	--color-strong: #000000;
 	--color-alert: #FF7700;
 	--color-error: #EF4444;
-	--color-background: #F8F9FA;
 	--color-card: #FFFFFF;
 	--color-text: #1F2937;
 	--color-text-secondary: #6B7280;
 	--color-success: #3FCD6E;
 	--color-complementary: #7043C3;
 
-	/* Pure black. Dense mobile UI where maximum contrast is needed:
-	   card titles, stat labels, header greeting. For long-form copy
-	   prefer --color-text, which is softer on the eye. */
-	--color-text-strong: #000000;
+	/* Backgrounds and surfaces. The default page background is a light grey,
+	   not white, to reduce glare. Card surfaces are white, to make them
+	   stand out. */
+	--color-background: #F8F9FA;
+	--color-field-surface: #F8F9FA;
 
 	/* Text and icons sitting ON an orange fill (primary, alert).
 	   Dark, not white: #FF9D2E is light in luminance, so white text on it

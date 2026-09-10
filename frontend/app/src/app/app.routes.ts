@@ -16,6 +16,8 @@ import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanc
 import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { authGuard } from './guards/auth.guard';
 
+import { Test } from './pages/test/test';
+
 export const routes: Routes = [
   {
     path: '',
@@ -33,6 +35,10 @@ export const routes: Routes = [
         path: 'register',
         component: Register
       },
+	  {
+		path: 'test',
+		component: Test
+	  },
     ],
   },
   {

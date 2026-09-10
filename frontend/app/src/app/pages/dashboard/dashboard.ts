@@ -1,8 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
+import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { GroupsService } from '../../services/groups.service';
 import { GroupData } from '../../models/group-data.model';
 
@@ -10,7 +12,7 @@ type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RequestCard],
+  imports: [NgClass, RouterLink, RequestCard, StatCardComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {

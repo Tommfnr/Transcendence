@@ -13,6 +13,7 @@ export type AvatarTone = 'neutral' | 'brand';
 	standalone: true,
 	template: `<span [class]="classes"></span>`,
 })
+
 export class AvatarComponent {
 	@Input() tone: AvatarTone = 'neutral';
 
