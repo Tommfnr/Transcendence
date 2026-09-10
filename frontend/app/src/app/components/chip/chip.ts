@@ -27,4 +27,5 @@ export class ChipComponent {
 		};
 		return `${base} ${surface[this.tone]} text-text-secondary`;
 	}
+	
 }
