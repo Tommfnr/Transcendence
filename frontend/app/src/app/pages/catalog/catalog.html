@@ -27,7 +27,7 @@
 
 	<!-- Tom delete the <ul> content once you are done -->
     <ul>
-        @for (object of objectData(); track object.id) {
+        @for (object of filteredObjects(); track object.id) {
             <li>
                 <h2 class="text-2xl font-bold">{{ object.name }}</h2>
                 <h3 class="text-lg font-semibold">{{ object.type }}</h3>
@@ -44,7 +44,7 @@
                 >
             </li>
         } @empty {
-            <li>No objects yet.</li>
+            <li>No objects in this category.</li>
         }
     </ul>
 	<!-- Tom delete the <ul> content once you are done -->

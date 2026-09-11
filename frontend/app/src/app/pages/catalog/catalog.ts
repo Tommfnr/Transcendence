@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -36,11 +36,21 @@ export class Catalog implements OnInit {
 
 	categories: Category[] = [
 		{ label: 'All', emoji: '👀' },
-		{ label: 'DIY', emoji: '🛠️' },
-		{ label: 'Garden', emoji: '🌱' },
-		{ label: 'Electronic', emoji: '💻' },
-		{ label: 'Leisure', emoji: '🎮' },
-		{ label: 'Other', emoji: '📦' }
+		{ label: 'Tools', emoji: '🛠️' },
+		{ label: 'Electronics', emoji: '💻' },
+		{ label: 'Vehicles', emoji: '🚗' },
+		{ label: 'Outdoor & Recreation', emoji: '🏕️' },
+		{ label: 'Media', emoji: '🎬' },
+		{ label: 'Events', emoji: '🎉' },
+		{ label: 'Clothing & Gear', emoji: '🧥' },
 	]
-	activeCategory = signal('DIY');
+	activeCategory = signal('All');
+
+	readonly filteredObjects = computed(() => {
+		const category = this.activeCategory();
+		if (category === 'All') {
+			return this.objectData();
+		}
+		return this.objectData().filter((object) => object.type === category);
+	});
 }
