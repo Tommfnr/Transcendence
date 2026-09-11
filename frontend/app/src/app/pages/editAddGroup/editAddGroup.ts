@@ -32,7 +32,7 @@ export class EditAddGroup implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.isEditMode) {
+    if (this.isEditMode()) {
       this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
         this.group.set({ name: data.name, description: data.description ?? '' });
       });
@@ -55,7 +55,7 @@ export class EditAddGroup implements OnInit {
 
     submit(this.groupForm, async () => {
       let request;
-      if (this.isEditMode) {
+      if (this.isEditMode()) {
         request = this.groupsService.update(Number(this.groupId), this.group());
       } else {
         request = this.groupsService.create(this.group());
