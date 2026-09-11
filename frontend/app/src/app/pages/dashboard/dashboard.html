@@ -1,9 +1,9 @@
   <section class="flex items-center justify-between gap-2 px-3">
-    <select class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised">
+    <select (change)="onGroupFilterChange($event)" class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-sm bg-card px-3 shadow-raised">
       @if (errorMessage()) {
         <option disabled selected>{{ errorMessage() }}</option>
       } @else {
-        <option value="">Tous mes groupes</option>
+        <option value="">All my groups</option>
         @for (group of groups(); track group.id) {
           <option [value]="group.id">{{ group.name }}</option>
         } @empty {
@@ -56,6 +56,19 @@
       <app-request-card [request]="request" (help)="onHelp($event)" />
     }
   </div>
+
+    <!-- TODO: crude placeholder, needs real styling/integration -->
+    <div class="flex flex-col gap-2">
+      @for (post of filteredPosts(); track post.id) {
+        <div class="border p-2">
+          <p><strong>{{ post.title }}</strong> ({{ post.status }})</p>
+          <p>{{ post.description }}</p>
+          <p>{{ post.objectType }} — {{ post.fromDate }} to {{ post.toDate }}</p>
+        </div>
+      } @empty {
+        <p>No posts.</p>
+      }
+    </div>
 </section>
 
 @if (fabOpen()) {

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
-import { GroupData } from '../../models/group-data.model';
+import { GroupEntity } from '../../models/group.model';
 
 @Component({
   selector: 'app-exampleGroupList',
@@ -11,7 +11,7 @@ import { GroupData } from '../../models/group-data.model';
 export class ExampleGroupList {
   private groupsService = inject(GroupsService);
 
-  readonly groups = signal<GroupData[]>([]);
+  readonly groups = signal<GroupEntity[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
   constructor() {

@@ -1,10 +1,22 @@
 export type ObjectCondition = 'new' | 'good' | 'worn';
 
-export interface ObjectData {
+export const OBJECT_TYPES = [
+	'Tools',
+	'Electronics',
+	'Vehicles',
+	'Outdoor & Recreation',
+	'Media',
+	'Events',
+	'Clothing & Gear',
+] as const;
+
+export type ObjectType = typeof OBJECT_TYPES[number];
+
+export interface ObjectEntity {
   id: number;
   name: string;
   ownerId: number;
-  type: string;
+  type: ObjectType;
   description: string | null;
   condition: ObjectCondition;
   isAvailable: boolean;
@@ -12,9 +24,9 @@ export interface ObjectData {
   updatedAt: string;
 }
 
-export interface CreateObjectData {
+export interface ObjectInput {
   name: string;
-  type: string;
+  type: ObjectType;
   description: string;
   condition: ObjectCondition;
   isAvailable: boolean;

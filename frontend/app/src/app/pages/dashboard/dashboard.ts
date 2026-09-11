@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
@@ -6,7 +6,9 @@ import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { GroupsService } from '../../services/groups.service';
-import { GroupData } from '../../models/group-data.model';
+import { GroupEntity } from '../../models/group.model';
+import { PostsService } from '../../services/posts.service';
+import { PostEntity } from '../../models/post.model';
 
 type DashboardTab = 'requests' | 'offers';
 
@@ -17,12 +19,27 @@ type DashboardTab = 'requests' | 'offers';
 })
 export class Dashboard implements OnInit {
   private groupsService = inject(GroupsService);
+  private postsService = inject(PostsService);
+
+  readonly posts = signal<PostEntity[]>([]);
+  readonly selectedGroupId = signal<number | null>(null);
+  private postGroupIds = signal<Map<number, number[]>>(new Map());
+
+  readonly filteredPosts = computed(() => {
+    const groupId = this.selectedGroupId();
+    if (groupId === null) {
+      return this.posts();
+    }
+
+    const postGroupIds = this.postGroupIds();
+    return this.posts().filter((post) => postGroupIds.get(post.id)?.includes(groupId) ?? false);
+  });
 
   readonly modalService = inject(ModalService);
 
   readonly activeTab = signal<DashboardTab>('requests');
 
-  readonly groups = signal<GroupData[]>([]);
+  readonly groups = signal<GroupEntity[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
   readonly requestCount = 3;
@@ -42,7 +59,7 @@ export class Dashboard implements OnInit {
         { icon: 'tag', label: 'Bricolage' },
       ],
     },
-    {
+ /*   {
       id: 2,
       authorName: 'Julien',
       groupName: 'Les super potes',
@@ -72,7 +89,7 @@ export class Dashboard implements OnInit {
       title: 'Je cherche une souris de depannage',
       description: "J'ai casse ma souris et ma nouvelle souris arrive dans une semaine",
       tags: [{ icon: 'calendar', label: '7 jours' }],
-    },
+    },*/
   ]);
 
   ngOnInit(): void {
@@ -83,10 +100,25 @@ export class Dashboard implements OnInit {
         this.errorMessage.set('Error while showing group(s)');
       },
     });
+
+    this.postsService.findMy().subscribe((data) => {
+      this.posts.set(data);
+
+      for (const post of data) {
+        this.postsService.findGroups(post.id).subscribe((groups) => {
+          this.postGroupIds.update((map) => new Map(map).set(post.id, groups.map((group) => group.id)));
+        });
+      }
+    });
   }
 
   selectTab(tab: DashboardTab): void {
     this.activeTab.set(tab);
+  }
+
+  onGroupFilterChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedGroupId.set(value === '' ? null : Number(value));
   }
 
   onHelp(request: HelpRequest): void {

@@ -19,7 +19,7 @@
                 <app-chip
                     [label]="cat.label"
                     [emoji]="cat.emoji"
-                    [selected]="cat.label === objectModel().type"
+                    [selected]="cat.label === object().type"
                     (pick)="setType(cat.label)"
                     tone="white"
                 />
@@ -33,7 +33,7 @@
                 @for (state of states; track state.label) {
                 <app-chip
                     [label]="state.label"
-                    [selected]="state.value === objectModel().condition"
+                    [selected]="state.value === object().condition"
                     (pick)="setCondition(state.value)"
                     tone="white"
                 />

@@ -48,6 +48,20 @@ export const descriptionSchema = z
 	.max(500, 'Max 500 characters')
 	.optional()
 
+export const objectTypeSchema = z
+	.enum([
+		'Tools',
+		'Electronics',
+		'Vehicles',
+		'Outdoor & Recreation',
+		'Media',
+		'Events',
+		'Clothing & Gear'
+	])
+
+export const objectConditionSchema = z
+	.enum(['new', 'good', 'worn'])
+
 export const messageContentSchema = z
 	.string("Please input a string")
 	.min(1, 'Message required')

@@ -21,11 +21,13 @@ export const users = pgTable('users', {
 
 export const objectConditionEnum = pgEnum('object_condition', ['new', 'good', 'worn'])
 
+export const objectTypeEnum = pgEnum('object_type', ['Tools', 'Electronics', 'Vehicles', 'Outdoor & Recreation', 'Media', 'Events', 'Clothing & Gear'])
+
 export const objects = pgTable('objects', {
 	id:				serial('id').primaryKey(),
 	name:			varchar('name', { length:30 }).notNull(),
     ownerId:		integer('owner_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
-	type:			varchar('type', { length:20 }).notNull(),
+	type:			objectTypeEnum('type'),
 	description:	varchar('description', { length:500 }),
 	condition:		objectConditionEnum('condition').notNull(),
 	isAvailable:	boolean('is_available').notNull(),
@@ -63,7 +65,7 @@ export const posts = pgTable('posts', {
 	id: 			serial('id').primaryKey(),
 	ownerId:	 	integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	title:			varchar('title', { length:60 }).notNull(),
-	type:			varchar('type', { length:20 }),
+	objectType:		objectTypeEnum('object_type'),
 	description: 	varchar('description', { length:500 }),
 	status: 		postStatusEnum('status').notNull().default('open'),
 	createdAt: 		timestamp('created_at').defaultNow(),

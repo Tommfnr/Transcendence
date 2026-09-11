@@ -2,18 +2,13 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
-import { CreateObjectData, ObjectCondition } from '../../models/object-data.model';
-import { GroupData } from '../../models/group-data.model';
+import { ObjectInput, OBJECT_TYPES, ObjectCondition, ObjectType } from '../../models/object.model';
+import { GroupEntity } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ChipComponent } from "../../components/chip/chip";
-
-interface Category {
-	label: string;
-	emoji: string;
-}
 
 @Component({
 	selector: 'app-editAddObject',
@@ -27,16 +22,19 @@ export class EditAddObject implements OnInit {
 
 	readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
-	readonly myGroups = signal<GroupData[]>([]);
+	readonly myGroups = signal<GroupEntity[]>([]);
 	readonly selectedGroupIds = signal<number[]>([]);
+	readonly objectTypes = OBJECT_TYPES;
 
-	categories: Category[] = [
-		{ label: 'DIY', emoji: '🛠️' },
-		{ label: 'Garden', emoji: '🌱' },
-		{ label: 'Electronic', emoji: '💻' },
-		{ label: 'Leisure', emoji: '🎮' },
-		{ label: 'Other', emoji: '📦' }
-	]
+	readonly categories = [
+		{ label: 'Tools', emoji: '🛠️' },
+		{ label: 'Electronics', emoji: '💻' },
+		{ label: 'Vehicles', emoji: '🚗' },
+		{ label: 'Outdoor & Recreation', emoji: '🏕️' },
+		{ label: 'Media', emoji: '🎬' },
+		{ label: 'Events', emoji: '🎉' },
+		{ label: 'Clothing & Gear', emoji: '🧥' },
+	] as const;
 
 	states = [
 		{ label: 'New', value: 'new' },
@@ -44,15 +42,15 @@ export class EditAddObject implements OnInit {
 		{ label: 'Worn', value: 'worn' }
 	] as const;
 
-	objectModel = signal<CreateObjectData>({
+	object = signal<ObjectInput>({
 		name: '',
-		type: 'Other',
+		type: OBJECT_TYPES[0],
 		description: '',
 		condition: 'new',
 		isAvailable: true,
 	});
 
-	objectForm = form(this.objectModel, (fieldPath) => {
+	objectForm = form(this.object, (fieldPath) => {
 		required(fieldPath.name, { message: 'Name is required' });
 		required(fieldPath.type, { message: 'Type is required' });
 	});
@@ -61,7 +59,7 @@ export class EditAddObject implements OnInit {
 		const objectId = this.modalService.editObjectId();
 		if (objectId) {
 			this.objectService.findOne(Number(objectId)).subscribe((data) => {
-				this.objectModel.set({
+				this.object.set({
 					name: data.name,
 					type: data.type,
 					description: data.description ?? '',
@@ -94,9 +92,9 @@ export class EditAddObject implements OnInit {
 			const objectId = this.modalService.editObjectId();
 			let request;
 			if (objectId) {
-				request = this.objectService.update(Number(objectId), this.objectModel());
+				request = this.objectService.update(Number(objectId), this.object());
 			} else {
-				request = this.objectService.create(this.objectModel());
+				request = this.objectService.create(this.object());
 			}
 
 			request.subscribe((response) => {
@@ -120,11 +118,11 @@ export class EditAddObject implements OnInit {
 		this.modalService.close();
 	}
 
-	setType(type: string) {
-		this.objectModel.update(model => ({ ...model, type }));
+	setType(type: ObjectType) {
+		this.object.update(model => ({ ...model, type }));
 	}
 
 	setCondition(condition: ObjectCondition) {
-		this.objectModel.update(model => ({ ...model, condition }));
+		this.object.update(model => ({ ...model, condition }));
 	}
 }

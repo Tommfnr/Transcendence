@@ -1,25 +1,25 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { GroupData, GroupForm, GroupMemberData, GroupMemberForm } from "../models/group-data.model";
+import { GroupEntity, GroupInput, GroupMemberEntity, GroupMemberInput } from "../models/group.model";
 
 @Injectable({ providedIn: 'root'})
 export class GroupsService {
     private http = inject(HttpClient);
 
     findMy() {
-        return this.http.get<GroupData[]>('/api/groups/my');
+        return this.http.get<GroupEntity[]>('/api/groups/my');
     }
 
     findOne(groupId: number) {
-        return this.http.get<GroupData>(`/api/groups/${groupId}`);
+        return this.http.get<GroupEntity>(`/api/groups/${groupId}`);
     }
 
     findMembers(groupId: number) {
-        return this.http.get<GroupMemberData[]>(`/api/groups/${groupId}/members`);
+        return this.http.get<GroupMemberEntity[]>(`/api/groups/${groupId}/members`);
     }
 
-    create(body: GroupForm) {
-        return this.http.post<GroupData>('/api/groups', body);
+    create(body: GroupInput) {
+        return this.http.post<GroupEntity>('/api/groups', body);
     }
 
     grantObject(groupId: number, objectId: number) {
@@ -27,15 +27,15 @@ export class GroupsService {
     }
 
     addMember(groupId: number, targetUserId: number) {
-        return this.http.post<GroupMemberData>(`/api/groups/${groupId}/members/${targetUserId}`, {});
+        return this.http.post<GroupMemberEntity>(`/api/groups/${groupId}/members/${targetUserId}`, {});
     }
 
-    update(groupId: number, body: GroupForm) {
-        return this.http.patch<GroupData>(`/api/groups/${groupId}`, body);
+    update(groupId: number, body: GroupInput) {
+        return this.http.patch<GroupEntity>(`/api/groups/${groupId}`, body);
     }
 
-    updateMemberRole(groupId: number, targetUserId: number, body: GroupMemberForm) {
-        return this.http.patch<GroupMemberData>(`/api/groups/${groupId}/members/${targetUserId}/role`, body);
+    updateMemberRole(groupId: number, targetUserId: number, body: GroupMemberInput) {
+        return this.http.patch<GroupMemberEntity>(`/api/groups/${groupId}/members/${targetUserId}/role`, body);
     }
 
     revokeObject(groupId: number, objectId: number) {
