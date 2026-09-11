@@ -15,13 +15,17 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-		<!-- Example of object card usage -->
+		<!-- Tom your part -->
         <app-object-card status="available" name="Drill"></app-object-card>
         <app-object-card status="available" name="Drill" status="lent"></app-object-card>
         <app-object-card status="available" name="Drill"></app-object-card>
         <app-object-card status="available" name="Drill"></app-object-card>
+		<!-- Tom your part -->
     </div>
+	<!-- Tom add the @empty maybe-->
 
+
+	<!-- Tom delete the <ul> content once you are done -->
     <ul>
         @for (object of objectData(); track object.id) {
             <li>
@@ -43,4 +47,5 @@
             <li>No objects yet.</li>
         }
     </ul>
+	<!-- Tom delete the <ul> content once you are done -->
 </main>
