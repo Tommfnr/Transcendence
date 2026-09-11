@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, ne, and, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { groupMembers, groupObjectGrants, groups, objects } from '../database/schema'
+import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
@@ -43,22 +43,6 @@ export class GroupsService {
 			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
 
 		return membership
-	}
-
-	findGrantedObjects(groupId: number) {
-		return this.db
-			.select({
-				id: objects.id,
-				name: objects.name,
-				type: objects.type,
-				description: objects.description,
-				ownerId: objects.ownerId,
-				isAvailable: objects.isAvailable,
-				grantedBy: groupObjectGrants.grantedBy,
-			})
-			.from(groupObjectGrants)
-			.innerJoin(objects, eq(groupObjectGrants.objectId, objects.id))
-			.where(eq(groupObjectGrants.groupId, groupId))
 	}
 
 	findMy(userId: number) {
@@ -140,63 +124,6 @@ export class GroupsService {
 			.returning()
 
 		return member
-	}
-
-	async grantObject(groupId: number, objectId: number, requesterId: number) {
-		const [object] = await this.db
-			.select()
-			.from(objects)
-			.where(eq(objects.id, objectId))
-
-		if (!object)
-			throw new NotFoundException('Object not found')
-		if (object.ownerId !== requesterId)
-			throw new ForbiddenException('Only the object owner can grant it to a group')
-
-		const [existingGrant] = await this.db
-			.select()
-			.from(groupObjectGrants)
-			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
-
-		if (existingGrant)
-			throw new ForbiddenException('Object already granted to this group')
-
-		const [grant] = await this.db
-			.insert(groupObjectGrants)
-			.values({
-				groupId,
-				objectId,
-				grantedBy: requesterId,
-			})
-			.returning()
-
-		return grant
-	}
-
-	async revokeObject(groupId: number, objectId: number, requesterId: number) {
-		const [object] = await this.db
-			.select()
-			.from(objects)
-			.where(eq(objects.id, objectId))
-
-		if (!object)
-			throw new NotFoundException('Object not found')
-		if (object.ownerId !== requesterId)
-			throw new ForbiddenException('Only the object owner can revoke it from a group')
-
-		const [existingGrant] = await this.db
-			.select()
-			.from(groupObjectGrants)
-			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
-
-		if (!existingGrant)
-			throw new NotFoundException('Object not granted to this group')
-
-		await this.db
-			.delete(groupObjectGrants)
-			.where(and(eq(groupObjectGrants.groupId, groupId), eq(groupObjectGrants.objectId, objectId)))
-
-		return { message: 'Object grant revoked' }
 	}
 
 	async updateMemberRole(groupId: number, targetUserId: number, role: 'admin' | 'member') {

@@ -1,9 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
-import { GroupsService } from '../../services/groups.service';
 import { ObjectInput, OBJECT_TYPES, ObjectCondition, ObjectType } from '../../models/object.model';
-import { GroupEntity } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
@@ -17,13 +15,10 @@ import { ChipComponent } from "../../components/chip/chip";
 })
 export class EditAddObject implements OnInit {
 	private objectService = inject(ObjectService);
-	private groupsService = inject(GroupsService);
 	private modalService = inject(ModalService);
 
 	readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
-	readonly myGroups = signal<GroupEntity[]>([]);
-	readonly selectedGroupIds = signal<number[]>([]);
 	readonly objectTypes = OBJECT_TYPES;
 
 	readonly categories = [
@@ -67,21 +62,6 @@ export class EditAddObject implements OnInit {
 					isAvailable: data.isAvailable,
 				});
 			});
-		} else {
-			this.groupsService.findMy().subscribe((groups) => {
-				this.myGroups.set(groups);
-			});
-		}
-	}
-
-	onGroupToggle(event: Event, groupId: number): void {
-		const checked = (event.target as HTMLInputElement).checked;
-		const ids = this.selectedGroupIds();
-
-		if (checked) {
-			this.selectedGroupIds.set([...ids, groupId]);
-		} else {
-			this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
 		}
 	}
 
@@ -100,13 +80,6 @@ export class EditAddObject implements OnInit {
 			request.subscribe((response) => {
 				if (response.length === 0) {
 					return;
-				}
-
-				if (!objectId) {
-					const newObjectId = response[0].id;
-					for (const groupId of this.selectedGroupIds()) {
-						this.groupsService.grantObject(groupId, newObjectId).subscribe();
-					}
 				}
 
 				this.modalService.close();

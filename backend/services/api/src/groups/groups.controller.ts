@@ -34,11 +34,6 @@ export class GroupsController {
 		return this.groupsService.findMembers(Number(groupId))
 	}
 
-	@Get(':groupId/objects')
-	findGrantedObjects(@Param('groupId') groupId: string) {
-		return this.groupsService.findGrantedObjects(Number(groupId))
-	}
-
 	@Post()
 	create(@Req() req: AuthenticatedRequest, @Body() dto: CreateGroupDto) {
 		const adminId = req.user.sub
@@ -55,20 +50,6 @@ export class GroupsController {
 	@UseGuards(GroupAdminGuard)
 	addMember(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string) {
 		return this.groupsService.addMember(Number(groupId), Number(targetUserId))
-	}
-
-	@Post(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupMemberGuard)
-	grantObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.grantObject(Number(groupId), Number(objectId), requesterId)
-	}
-
-	@Delete(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupMemberGuard)
-	revokeObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.revokeObject(Number(groupId), Number(objectId), requesterId)
 	}
 
 	@Patch(':groupId/members/:targetUserId/role')

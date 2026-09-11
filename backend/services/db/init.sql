@@ -74,16 +74,6 @@ CREATE TABLE IF NOT EXISTS group_members (
 	CONSTRAINT	unique_membership UNIQUE (group_id, user_id)
 );
 
-CREATE TABLE IF NOT EXISTS group_object_grants (
-	id				SERIAL PRIMARY KEY,
-	group_id		INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-	object_id		INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
-	granted_by		INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	created_at		TIMESTAMP DEFAULT NOW() NOT NULL,
-	updated_at		TIMESTAMP DEFAULT NOW() NOT NULL,
-	CONSTRAINT		unique_group_object_grant UNIQUE (group_id, object_id)
-);
-
 DO $$
 BEGIN
 	CREATE TYPE post_status AS ENUM ('open', 'closed');

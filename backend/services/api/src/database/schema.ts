@@ -109,17 +109,6 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
-export const groupObjectGrants = pgTable('group_object_grants', {
-	id:					serial('id').primaryKey(),
-	groupId:			integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
-	objectId:			integer('object_id').notNull().references(() => objects.id, { onDelete: 'cascade' }),
-	grantedBy:			integer('granted_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
-	createdAt:			timestamp('created_at').notNull().defaultNow(),
-	updatedAt:			timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-	uniqueGroupObjectGrant: unique().on(table.groupId, table.objectId),
-}));
-
 export const lendingStatusEnum = pgEnum('lending_status', 
 	['pending', 'accepted', 'active', 'awaiting_confirmation',
 		'returned', 'disputed', 'rejected', 'cancelled', 'overdue',

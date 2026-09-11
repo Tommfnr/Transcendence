@@ -22,12 +22,3 @@ export interface GroupMemberEntity {
 }
 
 export type GroupMemberInput = Pick<GroupMemberEntity, 'role'>;
-
-export interface GroupObjectGrantEntity {
-    id: number;
-    groupId: number;
-    objectId: number;
-    grantedBy: number;
-    createdAt: string;
-    updatedAt: string;
-}
