@@ -14,7 +14,10 @@ export class PostsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase, private readonly groupsService: GroupsService) {}
 
 	private async findAuthorizedPost(executor: Executor, postId: number, userId: number, action: string) {
-		const [post] = await executor.select().from(posts).where(eq(posts.id, postId))
+		const [post] = await executor
+				.select()
+				.from(posts)
+				.where(eq(posts.id, postId))
 
 		if (!post)
 			throw new NotFoundException('Post not found')
