@@ -1,68 +1,73 @@
-<main class="flex flex-1 flex-col gap-4 px-3">
-   <h1>
-      @if (isEditMode) {
-        Edit Post
+<app-modal
+  [title]="isEditMode() ? 'Edit Object' : 'Add Object'"
+  (closed)="onCancel()"
+>
+  <main class="flex flex-1 flex-col gap-4 px-3">
+    <h1>
+        @if (isEditMode()) {
+          Edit Post
+        }
+        @else {
+          Add Post
+        }
+    </h1>
+    <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+
+  <form (submit)="onSubmit($event)">
+    <div>
+      Title <input type="text" [formField]="postForm.title" class="border" />
+    </div>
+
+    <div>
+      Description <input type="text" [formField]="postForm.description" class="border" />
+    </div>
+
+    <div>
+      ObjectType
+      <select [formField]="postForm.objectType" class="border">
+        @for (objectType of objectTypes; track objectType) {
+          <option [value]="objectType">{{ objectType }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      Status
+      <select [formField]="postForm.status" class="border">
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+      </select>
+    </div>
+
+    <div>
+      From <input type="text" [formField]="postForm.fromDate" class="border" />
+    </div>
+
+    <div>
+      To <input type="text" [formField]="postForm.toDate" class="border" />
+    </div>
+
+    <div>
+      Which Groups:
+      @for (group of myGroups(); track group.id) {
+        <div>
+          <label>
+            <input type="checkbox" (change)="onGroupToggle($event, group.id)" /> {{ group.name }}
+          </label>
+        </div>
+      } @empty {
+        <p>You're not in any groups yet.</p>
       }
-      @else {
+    </div>
+
+    <app-button type="submit" variant="primary">
+      @if (isEditMode()) {
+        Save Changes
+      } @else {
         Add Post
       }
-   </h1>
-  <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+    </app-button>
+  </form>
 
-<form (submit)="onSubmit($event)">
-  <div>
-    Title <input type="text" [formField]="postForm.title" class="border" />
-  </div>
-
-  <div>
-    Description <input type="text" [formField]="postForm.description" class="border" />
-  </div>
-
-  <div>
-    ObjectType
-    <select [formField]="postForm.objectType" class="border">
-      @for (objectType of objectTypes; track objectType) {
-        <option [value]="objectType">{{ objectType }}</option>
-      }
-    </select>
-  </div>
-
-  <div>
-    Status
-    <select [formField]="postForm.status" class="border">
-        <option value="open">Open</option>
-        <option value="closed">Closed</option>
-    </select>
-  </div>
-
-  <div>
-    From <input type="text" [formField]="postForm.fromDate" class="border" />
-  </div>
-
-  <div>
-    To <input type="text" [formField]="postForm.toDate" class="border" />
-  </div>
-
-  <div>
-    Which Groups:
-    @for (group of myGroups(); track group.id) {
-      <div>
-        <label>
-          <input type="checkbox" (change)="onGroupToggle($event, group.id)" /> {{ group.name }}
-        </label>
-      </div>
-    } @empty {
-      <p>You're not in any groups yet.</p>
-    }
-  </div>
-
-  <app-button type="submit" variant="primary">
-    @if (isEditMode) {
-      Save Changes
-    } @else {
-      Add Post
-    }
-  </app-button>
-</form>
-
-</main>
+  </main>
+</app-modal>
