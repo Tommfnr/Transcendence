@@ -20,6 +20,7 @@
                 [name]="object.name"
                 [status]="object.isAvailable ? 'available' : 'lent'"
                 (edit)="modalService.openEditObject(object.id)"
+                (remove)="deleteObject(object.id)"
             ></app-object-card>
         } @empty {
             <p class="col-span-2">No objects in this category.</p>

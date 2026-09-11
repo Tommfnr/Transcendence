@@ -15,6 +15,7 @@ export class ObjectCard {
 	@Input() imageUrl: string | null = null;
 	@Input({ required: true }) status!: ObjectCardStatus;
 	@Output() edit = new EventEmitter<void>();
+	@Output() remove = new EventEmitter<void>();
 
 
 	get classes(): string {
