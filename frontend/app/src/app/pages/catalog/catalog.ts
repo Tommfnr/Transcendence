@@ -6,6 +6,8 @@ import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
 import { ObjectCard } from '../../components/object-card/object-card';
+import { ButtonComponent } from '../../components/button/button';
+import { ButtonDirective } from '../../components/button/button.directive';
 
 interface Category {
 	label: string;
@@ -14,7 +16,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [RouterLink, TextFieldComponent, ChipComponent, ObjectCard],
+	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
 	templateUrl: './catalog.html',
 })
 
@@ -53,4 +55,19 @@ export class Catalog implements OnInit {
 		}
 		return this.objectData().filter((object) => object.type === category);
 	});
+
+	readonly fabOpen = signal(false);
+
+	toggleFab(): void {
+		this.fabOpen.update(open => !open);
+	}
+
+	closeFab(): void {
+		this.fabOpen.set(false);
+	}
+
+	openAddObjectModal(): void {
+    	this.closeFab();
+    	this.modalService.openAddObject();
+	}
 }

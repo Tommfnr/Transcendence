@@ -1,6 +1,6 @@
 <main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
     <h1>Page: Catalog</h1>
-    <a routerLink="/app/editAddObject" class="text-primary underline">EditAddObject</a>
+    <a appButton (click)="openAddObjectModal()" variant="primary" size="small" class="self-start">Add item</a>
     <app-text-field placeholder="Ex: Driller, Bike..."></app-text-field>
     <div class="flex flex-wrap gap-2 mt-2">
         @for (cat of categories; track cat.label) {
