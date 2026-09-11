@@ -30,6 +30,7 @@ export class GroupsController {
 	}
 
 	@Get(':groupId/members')
+	@UseGuards(GroupMemberGuard)
 	findMembers(@Param('groupId') groupId: string) {
 		return this.groupsService.findMembers(Number(groupId))
 	}
