@@ -1,44 +1,49 @@
-<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-  <h1>
-    @if (isEditMode) {
-      Edit Group
-    } @else {
-      Add Group
-    }
-  </h1>
-  <a routerLink="/app/profile" class="text-primary underline">Profile</a>
-
-  <form (submit)="onSubmit($event)" class="flex flex-col gap-3">
-    <div>
-        Name <input type="text" [formField]="groupForm.name" class="border" />
-      @if (groupForm.name().invalid() && groupForm.name().touched()) {
-          @for (error of groupForm.name().errors(); track error.kind) {
-            {{ error.message }}
-          }
-      }
-    </div>
-
-    <div>
-        Description <input type="text" [formField]="groupForm.description" class="border" />
-    </div>
-
-    @if (isEditMode) {
-      <div>
-        <input #targetUsernameInput type="text" placeholder="Username" class="border" />
-        <app-button type="button" variant="secondary" (click)="onAddMember(targetUsernameInput.value); targetUsernameInput.value = ''">Add Member</app-button>
-      </div>
-    }
-
-    @if (errorMessage()) {
-      <p class="text-red-600">{{ errorMessage() }}</p>
-    }
-
-    <app-button type="submit" variant="primary">
-      @if (isEditMode) {
-        Save Changes
+<app-modal
+  [title]="isEditMode() ? 'Edit Group' : 'Add Group'"
+  (closed)="onCancel()"
+>
+  <main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
+    <h1>
+      @if (isEditMode()) {
+        Edit Group
       } @else {
         Add Group
       }
-    </app-button>
-  </form>
-</main>
+    </h1>
+    <a routerLink="/app/profile" class="text-primary underline">Profile</a>
+
+    <form (submit)="onSubmit($event)" class="flex flex-col gap-3">
+      <div>
+          Name <input type="text" [formField]="groupForm.name" class="border" />
+        @if (groupForm.name().invalid() && groupForm.name().touched()) {
+            @for (error of groupForm.name().errors(); track error.kind) {
+              {{ error.message }}
+            }
+        }
+      </div>
+
+      <div>
+          Description <input type="text" [formField]="groupForm.description" class="border" />
+      </div>
+
+      @if (isEditMode()) {
+        <div>
+          <input #targetUsernameInput type="text" placeholder="Username" class="border" />
+          <app-button type="button" variant="secondary" (click)="onAddMember(targetUsernameInput.value); targetUsernameInput.value = ''">Add Member</app-button>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <p class="text-red-600">{{ errorMessage() }}</p>
+      }
+
+      <app-button type="submit" variant="primary">
+        @if (isEditMode()) {
+          Save Changes
+        } @else {
+          Add Group
+        }
+      </app-button>
+    </form>
+  </main>
+</app-modal>

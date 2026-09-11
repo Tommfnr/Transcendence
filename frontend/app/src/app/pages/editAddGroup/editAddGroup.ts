@@ -1,24 +1,24 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
 import { UsersService } from '../../services/users.service';
 import { GroupInput } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
+import { Modal } from '../../components/modal/modal';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-editAddGroup',
-  imports: [FormField, ButtonComponent, RouterLink],
+  imports: [FormField, ButtonComponent, Modal],
   templateUrl: './editAddGroup.html',
 })
 export class EditAddGroup implements OnInit {
   private groupsService = inject(GroupsService);
   private usersService = inject(UsersService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private modalService = inject(ModalService);
 
-  private groupId = this.route.snapshot.paramMap.get('id');
-  readonly isEditMode = !!this.groupId;
+  private groupId = this.modalService.editGroupId();
+  readonly isEditMode = computed(() => this.modalService.editGroupId() !== null);
 
   group = signal<GroupInput>({
     name: '',
@@ -63,12 +63,15 @@ export class EditAddGroup implements OnInit {
 
       request.subscribe({
         next: () => {
-          this.router.navigate(['/app/groupParameter']);
+          this.modalService.close();
         },
         error: (err) => {
           this.errorMessage.set(err.error?.message);
         },
       });
     });
+  }
+  onCancel(): void {
+  this.modalService.close();
   }
 }

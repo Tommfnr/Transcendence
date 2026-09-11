@@ -148,6 +148,6 @@ export class Dashboard implements OnInit {
 
   openGroupModal(): void {
     this.closeFab();
-    this.modalService.openGroup();
+    this.modalService.openAddGroup();
   }
 }

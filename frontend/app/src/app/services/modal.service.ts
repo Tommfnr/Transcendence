@@ -1,11 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ModalKind = 'addObject' | 'request' | 'group' | null;
+export type ModalKind = 'addObject' | 'request' | 'addGroup' | null;
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
   readonly activeModal = signal<ModalKind>(null);
   readonly editObjectId = signal<number | null>(null);
+  readonly editGroupId = signal<number | null>(null);
 
   openAddObject(): void {
     this.editObjectId.set(null);
@@ -21,12 +22,19 @@ export class ModalService {
     this.activeModal.set('request');
   }
 
-  openGroup(): void {
-    this.activeModal.set('group');
+  openAddGroup(): void {
+    this.editGroupId.set(null);
+    this.activeModal.set('addGroup');
+  }
+
+  openEditGroup(id: number): void {
+    this.editGroupId.set(id);
+    this.activeModal.set('addGroup');
   }
 
   close(): void {
     this.activeModal.set(null);
     this.editObjectId.set(null);
+    this.editGroupId.set(null);
   }
 }
