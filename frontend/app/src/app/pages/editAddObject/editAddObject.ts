@@ -9,119 +9,133 @@ import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ChipComponent } from "../../components/chip/chip";
+import { firstValueFrom } from 'rxjs';
+import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 
 @Component({
-	selector: 'app-editAddObject',
-	imports: [FormField, ButtonComponent, Modal, TextFieldComponent, ChipComponent],
-	templateUrl: './editAddObject.html',
+  selector: 'app-editAddObject',
+  imports: [FormField, ButtonComponent, Modal, TextFieldComponent, ChipComponent],
+  templateUrl: './editAddObject.html',
 })
 export class EditAddObject implements OnInit {
-	private objectService = inject(ObjectService);
-	private groupsService = inject(GroupsService);
-	private modalService = inject(ModalService);
-	
-	private objectId = this.modalService.editObjectId();
-	readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
+  private objectService = inject(ObjectService);
+  private groupsService = inject(GroupsService);
+  private modalService = inject(ModalService);
 
-	readonly myGroups = signal<GroupEntity[]>([]);
-	readonly selectedGroupIds = signal<number[]>([]);
-	readonly objectTypes = OBJECT_TYPES;
+  private objectId = this.modalService.editObjectId();
+  readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
-	readonly categories = [
-		{ label: 'Tools', emoji: '🛠️' },
-		{ label: 'Electronics', emoji: '💻' },
-		{ label: 'Vehicles', emoji: '🚗' },
-		{ label: 'Outdoor & Recreation', emoji: '🏕️' },
-		{ label: 'Media', emoji: '🎬' },
-		{ label: 'Events', emoji: '🎉' },
-		{ label: 'Clothing & Gear', emoji: '🧥' },
-	] as const;
+  readonly myGroups = signal<GroupEntity[]>([]);
+  readonly selectedGroupIds = signal<number[]>([]);
+  readonly objectTypes = OBJECT_TYPES;
 
-	states = [
-		{ label: 'New', value: 'new' },
-		{ label: 'Good', value: 'good' },
-		{ label: 'Worn', value: 'worn' }
-	] as const;
+  bannerErrors = signal<string[]>([]);
 
-	object = signal<ObjectInput>({
-		name: '',
-		type: OBJECT_TYPES[0],
-		description: '',
-		condition: 'new',
-		isAvailable: true,
-	});
+  readonly categories = [
+    { label: 'Tools', emoji: '🛠️' },
+    { label: 'Electronics', emoji: '💻' },
+    { label: 'Vehicles', emoji: '🚗' },
+    { label: 'Outdoor & Recreation', emoji: '🏕️' },
+    { label: 'Media', emoji: '🎬' },
+    { label: 'Events', emoji: '🎉' },
+    { label: 'Clothing & Gear', emoji: '🧥' },
+  ] as const;
 
-	objectForm = form(this.object, (fieldPath) => {
-		required(fieldPath.name, { message: 'Name is required' });
-		required(fieldPath.type, { message: 'Type is required' });
-	});
+  states = [
+    { label: 'New', value: 'new' },
+    { label: 'Good', value: 'good' },
+    { label: 'Worn', value: 'worn' }
+  ] as const;
 
-	ngOnInit(): void {
-		if (this.objectId) {
-			this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
-				this.object.set({
-					name: data.name,
-					type: data.type,
-					description: data.description ?? '',
-					condition: data.condition,
-					isAvailable: data.isAvailable,
-				});
-			});
-		} else {
-			this.groupsService.findMy().subscribe((groups) => {
-				this.myGroups.set(groups);
-			});
-		}
-	}
+  object = signal<ObjectInput>({
+    name: '',
+    type: OBJECT_TYPES[0],
+    description: '',
+    condition: 'new',
+    isAvailable: true,
+  });
 
-	onGroupToggle(event: Event, groupId: number): void {
-		const checked = (event.target as HTMLInputElement).checked;
-		const ids = this.selectedGroupIds();
+  objectForm = form(this.object, (fieldPath) => {
+    required(fieldPath.name, { message: 'Name is required' });
+    required(fieldPath.type, { message: 'Type is required' });
+  });
 
-		if (checked) {
-			this.selectedGroupIds.set([...ids, groupId]);
-		} else {
-			this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
-		}
-	}
+  ngOnInit(): void {
+    if (this.objectId) {
+      this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
+        this.object.set({
+          name: data.name,
+          type: data.type,
+          description: data.description ?? '',
+          condition: data.condition,
+          isAvailable: data.isAvailable,
+        });
+      });
+    } else {
+      this.groupsService.findMy().subscribe((groups) => {
+        this.myGroups.set(groups);
+      });
+    }
+  }
 
-	onSubmit(event: Event) {
-		event.preventDefault();
+  onGroupToggle(event: Event, groupId: number): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const ids = this.selectedGroupIds();
 
-		submit(this.objectForm, async () => {
-			let request;
-			if (this.objectId) {
-				request = this.objectService.update(Number(this.objectId), this.object());
-			} else {
-				request = this.objectService.create(this.object());
-			}
+    if (checked) {
+      this.selectedGroupIds.set([...ids, groupId]);
+    } else {
+      this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
+    }
+  }
 
-			request.subscribe((response) => {
-				if (response.length === 0) {
-					return;
-				}
+  onSubmit(event: Event) {
+    event.preventDefault();
 
-				if (!this.objectId) {
-					const newObjectId = response[0].id;
-					for (const groupId of this.selectedGroupIds()) {
-						this.groupsService.grantObject(groupId, newObjectId).subscribe();
-					}
-				}
+    submit(this.objectForm, async (field) => {
 
-				this.modalService.close();
-			});
-		});
-	}
+      try {
+        this.bannerErrors.set([]);
 
-	onCancel(): void {
-		this.modalService.close();
-	}
+        const response = this.objectId
+          ? await firstValueFrom(this.objectService.update(Number(this.objectId), this.object()))
+          : await firstValueFrom(this.objectService.create(this.object()));
+          
+        if (response.length === 0) {
+          return (undefined);
+        }
+        if (!this.objectId) {
+          const newObjectId = response[0].id;
 
-	setType(type: ObjectType) {
-		this.object.update(model => ({ ...model, type }));
-	}
+          for (const groupId of this.selectedGroupIds()) {
+            this.groupsService.grantObject(groupId, newObjectId).subscribe();
+          }
+        }
+        this.modalService.close();
+        return (undefined);
+      } 
+      catch (err) {
+        if (isZodValidationError(err)) {
+          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
 
-	setCondition(condition: ObjectCondition) {
-		this.object.update(model => ({ ...model, condition }));
-	}
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
+        }
+        this.bannerErrors.set(['Something went wrong, please try again']);
+        return (undefined);
+      }
+    });
+  }
+
+  onCancel(): void {
+    this.modalService.close();
+  }
+
+  setType(type: ObjectType) {
+    this.object.update(model => ({ ...model, type }));
+  }
+
+  setCondition(condition: ObjectCondition) {
+    this.object.update(model => ({ ...model, condition }));
+  }
 }
