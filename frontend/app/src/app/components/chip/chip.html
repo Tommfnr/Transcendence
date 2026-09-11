@@ -1,0 +1,7 @@
+<button type="button" [class]="classes" (click)="pick.emit()">
+	@if (emoji) 
+	{
+		<span aria-hidden="true">{{ emoji }}</span>
+	}
+	{{ label }}
+</button>

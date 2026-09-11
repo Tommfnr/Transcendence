@@ -1,71 +1,75 @@
-<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-  <h1>
-    @if (isEditMode) {
-      Edit Object
-    } @else {
-      Add Object
-    }
-  </h1>
-  <a routerLink="/app/profile" class="text-primary underline">Profile</a>
+<app-modal
+    [title]="isEditMode() ? 'Edit Object' : 'Add Object'"
+    (closed)="onCancel()"
+>
+    <h1>Share your items to friends and family</h1>
+    <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
+        <app-text-field
+            tone="white"
+            label="Item name"
+            placeholder="Ex: Driller, Bike..."
+            typeField="text"
+            [formField]="objectForm.name"
+        ></app-text-field>
 
-  <form (submit)="onSubmit($event)" class="flex flex-col gap-3">
-    <div>
-        Name <input type="text" [formField]="objectForm.name" class="border" />
-      @if (objectForm.name().invalid() && objectForm.name().touched()) {
-          @for (error of objectForm.name().errors(); track error.kind) {
-            {{ error.message }}
-          }
-      }
-    </div>
+        <div class="flex flex-col gap-2">
+            <h2>Category</h2>
+            <div class="flex flex-wrap gap-2">
+                @for (cat of categories; track cat.label) {
+                <app-chip
+                    [label]="cat.label"
+                    [emoji]="cat.emoji"
+                    [selected]="cat.label === object().type"
+                    (pick)="setType(cat.label)"
+                    tone="white"
+                />
+                }
+            </div>
+        </div>
 
-    <div>
-      Type
-      <select [formField]="objectForm.type" class="border">
-        @for (objectType of objectTypes; track objectType) {
-          <option [value]="objectType">{{ objectType }}</option>
+        <div class="flex flex-col gap-2">
+            <h2>State</h2>
+            <div class="flex flex-wrap gap-2">
+                @for (state of states; track state.label) {
+                <app-chip
+                    [label]="state.label"
+                    [selected]="state.value === object().condition"
+                    (pick)="setCondition(state.value)"
+                    tone="white"
+                />
+                }
+            </div>
+        </div>
+        <div>
+            <app-text-field
+                tone="white"
+                label="Description (optional)"
+                placeholder="Ex: brand, accessories, additional information..."
+                typeField="text"
+                [formField]="objectForm.description"
+            ></app-text-field>
+        </div>
+
+        @if (!isEditMode()) {
+        <div>
+            Share with groups @for (group of myGroups(); track group.id) {
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        (change)="onGroupToggle($event, group.id)"
+                    />
+                    {{ group.name }}
+                </label>
+            </div>
+            } @empty {
+            <p>You're not in any groups yet.</p>
+            }
+        </div>
         }
-      </select>
-    </div>
 
-    <div> Description <input type="text" [formField]="objectForm.description" class="border" /> </div>
-
-    <div>
-      Condition
-      <select [formField]="objectForm.condition" class="border">
-        <option value="new">New</option>
-        <option value="good">Good</option>
-        <option value="worn">Worn</option>
-      </select>
-    </div>
-
-    <div>
-      <label>
-        <input type="checkbox" [formField]="objectForm.isAvailable" />
-        Available
-      </label>
-    </div>
-
-    @if (!isEditMode) {
-      <div>
-        Share with groups
-        @for (group of myGroups(); track group.id) {
-          <div>
-            <label>
-              <input type="checkbox" (change)="onGroupToggle($event, group.id)" /> {{ group.name }}
-            </label>
-          </div>
-        } @empty {
-          <p>You're not in any groups yet.</p>
-        }
-      </div>
-    }
-
-    <app-button type="submit" variant="primary">
-      @if (isEditMode) {
-        Save Changes
-      } @else {
-        Add Object
-      }
-    </app-button>
-  </form>
-</main>
+        <app-button type="submit" variant="primary">
+            @if (isEditMode()) { Save Changes } @else { Add Object }
+        </app-button>
+    </form>
+</app-modal>

@@ -12,73 +12,50 @@
       }
     </select>
 
-    <a
-      routerLink="/app/groupParameter"
-      aria-label="Paramètres"
-      class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded-sm bg-card shadow-raised"
+  <a
+    routerLink="/app/groupParameter"
+    aria-label="Paramètres"
+    class="flex h-10 w-[62px] shrink-0 items-center justify-center rounded-sm bg-card shadow-raised"
+  >
+    <img src="/icons/settings.svg" alt="" class="size-6" />
+  </a>
+</section>
+
+<section class="flex items-center justify-evenly py-1">
+  <app-stat-card icon="hand-heart" [count]="requestCount" label="requests" sublabel="from friends" />
+  <app-stat-card tone="success" icon="bag-heart" [count]="offerCount" label="help offers" sublabel="recent" />
+</section>
+
+<section class="flex flex-1 flex-col gap-5 px-3">
+  <div class="flex items-start justify-between px-[34px]">
+    <button
+      type="button"
+      (click)="selectTab('requests')"
+      class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
+      [ngClass]="
+        activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
+      "
     >
-      <img src="/icons/settings.svg" alt="" class="size-6" />
-    </a>
-  </section>
+      Demandes
+    </button>
 
-  <section class="flex items-center justify-center gap-x-6 py-3">
-    <div
-      class="flex items-center py-2 rounded-sm border border-primary-border bg-primary-surface px-1 shadow-raised"
+    <button
+      type="button"
+      (click)="selectTab('offers')"
+      class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
+      [ngClass]="
+        activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
+      "
     >
-      <div class="flex h-full items-center px-2">
-        <img src="/icons/hand-heart.svg" alt="" class="size-8" />
-      </div>
-      <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
-        <span class="text-xl font-bold">{{ requestCount }}</span>
-        <span class="text-2xs font-semibold tracking-[-0.2px]">demandes</span>
-        <span class="text-2xs font-light tracking-[-0.08px]">de proches</span>
-      </div>
-    </div>
+      Propositions d'aide
+    </button>
+  </div>
 
-    <div
-      class="flex items-center py-2 rounded-sm border border-success-border bg-success-surface px-1 shadow-raised"
-    >
-      <div class="flex h-full items-center px-2">
-        <img src="/icons/bag-heart.svg" alt="" class="size-8" />
-      </div>
-      <div class="flex w-20 flex-col whitespace-nowrap text-text-strong">
-        <span class="text-xl font-bold">{{ offerCount }}</span>
-        <span class="text-2xs font-semibold tracking-[-0.2px]">propositions</span>
-        <span class="text-2xs font-light tracking-[-0.08px]">d'aide recentes</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="flex flex-1 flex-col gap-5 px-3">
-    <div class="flex items-start justify-between px-[34px]">
-      <button
-        type="button"
-        (click)="selectTab('requests')"
-        class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
-        [ngClass]="
-          activeTab() === 'requests' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
-        "
-      >
-        Demandes
-      </button>
-
-      <button
-        type="button"
-        (click)="selectTab('offers')"
-        class="border-b-2 px-2 pb-1 text-xs font-bold tracking-[-0.24px]"
-        [ngClass]="
-          activeTab() === 'offers' ? 'border-primary text-primary' : 'border-transparent text-text-strong'
-        "
-      >
-        Propositions d'aide
-      </button>
-    </div>
-
-    <div class="flex flex-col gap-5">
-      @for (request of requests(); track request.id) {
-        <app-request-card [request]="request" (help)="onHelp($event)" />
-      }
-    </div>
+  <div class="flex flex-col gap-5">
+    @for (request of requests(); track request.id) {
+      <app-request-card [request]="request" (help)="onHelp($event)" />
+    }
+  </div>
 
     <!-- TODO: crude placeholder, needs real styling/integration -->
     <div class="flex flex-col gap-2">
@@ -92,13 +69,50 @@
         <p>No posts.</p>
       }
     </div>
-  </section>
+</section>
 
-  <a
-    routerLink="/app/editAddPost"
-    aria-label="Nouvelle demande"
-    class="fixed bottom-6 left-1/2 size-15 -translate-x-1/2"
+@if (fabOpen()) {
+  <div (click)="closeFab()" class="fixed inset-0 z-40 bg-black/50"></div>
+
+  <div class="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 flex-col items-end gap-3">
+    <a (click)="openAddObjectModal()" class="flex cursor-pointer items-center gap-3">
+      <span class="rounded-full bg-card px-5 py-3 text-sm font-bold text-text-strong shadow-raised">
+        Ajouter un objet
+      </span>
+      <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-surface-solid shadow-raised">
+        <img src="/icons/box-orange.svg" alt="" class="size-6" />
+      </span>
+    </a>
+    <a (click)="openRequestModal()" class="flex cursor-pointer items-center gap-3">
+      <span class="rounded-full bg-card px-5 py-3 text-sm font-bold text-text-strong shadow-raised">
+        Faire une demande
+      </span>
+      <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-complementary-surface-solid shadow-raised">
+        <img src="/icons/hand-give-helps.svg" alt="" class="size-6" />
+      </span>
+    </a>
+    <a (click)="openGroupModal()" class="flex cursor-pointer items-center gap-3">
+      <span class="rounded-full bg-card px-5 py-3 text-sm font-bold text-text-strong shadow-raised">
+        Créer / rejoindre un groupe
+      </span>
+      <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-success-surface-solid shadow-raised">
+        <img src="/icons/group-green.svg" alt="" class="size-6" />
+      </span>
+    </a>
+  </div>
+}
+
+@if (!modalService.activeModal()) {
+  <button
+    type="button"
+    (click)="toggleFab()"
+    [attr.aria-label]="fabOpen() ? 'Fermer le menu' : 'Nouvelle demande'"
+    class="fixed bottom-6 left-1/2 z-50 size-15 -translate-x-1/2"
   >
-    <img src="/icons/fab-add.svg" alt="" class="size-full" />
-  </a>
-
+    @if (fabOpen()) {
+      <img src="/icons/fab-cross.png" alt="" class="size-full" />
+    } @else {
+      <img src="/icons/fab-add.svg" alt="" class="size-full" />
+    }
+  </button>
+}
