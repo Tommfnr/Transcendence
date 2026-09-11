@@ -15,37 +15,14 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-		<!-- Tom your part -->
-        <app-object-card status="available" name="Drill"></app-object-card>
-        <app-object-card status="available" name="Drill" status="lent"></app-object-card>
-        <app-object-card status="available" name="Drill"></app-object-card>
-        <app-object-card status="available" name="Drill"></app-object-card>
-		<!-- Tom your part -->
-    </div>
-	<!-- Tom add the @empty maybe-->
-
-
-	<!-- Tom delete the <ul> content once you are done -->
-    <ul>
         @for (object of filteredObjects(); track object.id) {
-            <li>
-                <h2 class="text-2xl font-bold">{{ object.name }}</h2>
-                <h3 class="text-lg font-semibold">{{ object.type }}</h3>
-                <p>description: {{ object.description }}</p>
-                <p>condition: {{ object.condition }}</p>
-                <p>isAvailable: {{ object.isAvailable }}</p>
-                <p>createdAt: {{ object.createdAt }}</p>
-                <p>updatedAt: {{ object.updatedAt }}</p>
-                <a appButton [routerLink]="['/app/editAddObject', object.id]" variant="primary"
-                    >Update Object</a
-                >
-                <app-button type="button" variant="secondary" (click)="deleteObject(object.id)"
-                    >Delete Object</app-button
-                >
-            </li>
+            <app-object-card
+                [name]="object.name"
+                [status]="object.isAvailable ? 'available' : 'lent'"
+                (edit)="modalService.openEditObject(object.id)"
+            ></app-object-card>
         } @empty {
-            <li>No objects in this category.</li>
+            <p class="col-span-2">No objects in this category.</p>
         }
-    </ul>
-	<!-- Tom delete the <ul> content once you are done -->
+    </div>
 </main>

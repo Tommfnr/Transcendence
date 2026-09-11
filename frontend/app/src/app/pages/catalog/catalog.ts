@@ -2,8 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
-import { ButtonComponent } from '../../components/button/button';
-import { ButtonDirective } from '../../components/button/button.directive';
+import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
 import { ObjectCard } from '../../components/object-card/object-card';
@@ -15,13 +14,14 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
+	imports: [RouterLink, TextFieldComponent, ChipComponent, ObjectCard],
 	templateUrl: './catalog.html',
 })
 
 
 export class Catalog implements OnInit {
   private objectService = inject(ObjectService);
+  readonly modalService = inject(ModalService);
   readonly objectData = signal<ObjectEntity[]>([]);
 
 	ngOnInit(): void {
