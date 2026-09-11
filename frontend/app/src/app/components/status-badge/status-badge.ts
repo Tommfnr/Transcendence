@@ -34,6 +34,8 @@ export class StatusBadgeComponent {
 		const tones: Record<string, string> = {
 			pending: 'border-primary text-primary',
 			done: 'border-success text-success',
+			available: 'border-success text-success',
+			lent: 'border-primary text-primary',
 		};
 		return `${base} ${tones[this.status] ?? tones['pending']}`;
 	}

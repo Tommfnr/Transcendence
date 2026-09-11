@@ -6,7 +6,7 @@ import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
-import { CardItemCatalog } from '../../components/card-item-catalog/card-item-catalog';
+import { ObjectCard } from '../../components/object-card/object-card';
 
 interface Category {
 	label: string;
@@ -15,7 +15,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, CardItemCatalog],
+	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
 	templateUrl: './catalog.html',
 })
 

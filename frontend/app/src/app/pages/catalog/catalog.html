@@ -1,36 +1,46 @@
 <main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-  <h1>Page: Catalog</h1>
-  <a routerLink="/app/editAddObject" class="text-primary underline">EditAddObject</a>
-	<app-text-field placeholder="Ex: Driller, Bike..."></app-text-field>
-	<div class="flex flex-wrap gap-2 mt-2">
-		@for (cat of categories; track cat.label) {
-			<app-chip
-				[label]="cat.label"
-				[emoji]="cat.emoji"
-				[selected]="cat.label === activeCategory()"
-				(pick)="activeCategory.set(cat.label)"
-				tone="white"
-			/>
-		}
-	</div>
-	<app-card-item-catalog display="desktop">
-		
-	</app-card-item-catalog>
-  <ul>
-    @for (object of objectData(); track object.id) {
-      <li>
-        <h2 class="text-2xl font-bold">{{ object.name }}</h2>
-        <h3 class="text-lg font-semibold">{{ object.type }}</h3>
-        <p>description: {{ object.description }}</p>
-        <p>condition: {{ object.condition }}</p>
-        <p>isAvailable: {{ object.isAvailable }}</p>
-        <p>createdAt: {{ object.createdAt }}</p>
-        <p>updatedAt: {{ object.updatedAt }}</p>
-        <a appButton [routerLink]="['/app/editAddObject', object.id]" variant="primary">Update Object</a>
-        <app-button type="button" variant="secondary" (click)="deleteObject(object.id)">Delete Object</app-button>
-      </li>
-    } @empty {
-      <li>No objects yet.</li>
-    }
-  </ul>
+    <h1>Page: Catalog</h1>
+    <a routerLink="/app/editAddObject" class="text-primary underline">EditAddObject</a>
+    <app-text-field placeholder="Ex: Driller, Bike..."></app-text-field>
+    <div class="flex flex-wrap gap-2 mt-2">
+        @for (cat of categories; track cat.label) {
+            <app-chip
+                [label]="cat.label"
+                [emoji]="cat.emoji"
+                [selected]="cat.label === activeCategory()"
+                (pick)="activeCategory.set(cat.label)"
+                tone="white"
+            />
+        }
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+		<!-- Example of object card usage -->
+        <app-object-card status="available" name="Drill"></app-object-card>
+        <app-object-card status="available" name="Drill" status="lent"></app-object-card>
+        <app-object-card status="available" name="Drill"></app-object-card>
+        <app-object-card status="available" name="Drill"></app-object-card>
+    </div>
+
+    <ul>
+        @for (object of objectData(); track object.id) {
+            <li>
+                <h2 class="text-2xl font-bold">{{ object.name }}</h2>
+                <h3 class="text-lg font-semibold">{{ object.type }}</h3>
+                <p>description: {{ object.description }}</p>
+                <p>condition: {{ object.condition }}</p>
+                <p>isAvailable: {{ object.isAvailable }}</p>
+                <p>createdAt: {{ object.createdAt }}</p>
+                <p>updatedAt: {{ object.updatedAt }}</p>
+                <a appButton [routerLink]="['/app/editAddObject', object.id]" variant="primary"
+                    >Update Object</a
+                >
+                <app-button type="button" variant="secondary" (click)="deleteObject(object.id)"
+                    >Delete Object</app-button
+                >
+            </li>
+        } @empty {
+            <li>No objects yet.</li>
+        }
+    </ul>
 </main>
