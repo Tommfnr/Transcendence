@@ -4,10 +4,14 @@
 	  <router-outlet />
 	</main>
   <app-footer-app></app-footer-app>
+  
   @if (modalService.activeModal() === 'addObject') {
     <app-editAddObject />
   }
   @if (modalService.activeModal() === 'request') {
     <app-iCanHelp />
+  }
+  @if (modalService.activeModal() === 'addGroup') {
+    <app-editAddGroup />
   }
 </div>
