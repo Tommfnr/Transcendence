@@ -47,6 +47,7 @@ export class Catalog implements OnInit {
 		{ label: 'Clothing & Gear', emoji: '🧥' },
 	]
 	activeCategory = signal('All');
+	readonly searchTerm = signal('');
 
 	readonly filteredObjects = computed(() => {
 		const category = this.activeCategory();
@@ -54,6 +55,17 @@ export class Catalog implements OnInit {
 			return this.objectData();
 		}
 		return this.objectData().filter((object) => object.type === category);
+	});
+
+	readonly searchObjects = computed(() => {
+		const term = this.searchTerm().trim().toLowerCase();
+		if (term === '') {
+			return this.filteredObjects();
+		}
+		return this.filteredObjects().filter((object) =>
+			object.name.toLowerCase().includes(term)
+			|| (object.description?.toLowerCase().includes(term) ?? false)
+		);
 	});
 
 	readonly fabOpen = signal(false);

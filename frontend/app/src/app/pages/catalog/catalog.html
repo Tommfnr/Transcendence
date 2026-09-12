@@ -1,7 +1,7 @@
 <main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
     <h1>Page: Catalog</h1>
     <a appButton (click)="openAddObjectModal()" variant="primary" size="small" class="self-start">Add item</a>
-    <app-text-field placeholder="Ex: Driller, Bike..."></app-text-field>
+    <app-text-field placeholder="Rechercher..." typeField="search" [(value)]="searchTerm"></app-text-field>
     <div class="flex flex-wrap gap-2 mt-2">
         @for (cat of categories; track cat.label) {
             <app-chip
@@ -15,7 +15,7 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-        @for (object of filteredObjects(); track object.id) {
+        @for (object of searchObjects(); track object.id) {
             <app-object-card
                 [name]="object.name"
                 [status]="object.isAvailable ? 'available' : 'lent'"
@@ -23,7 +23,7 @@
                 (remove)="deleteObject(object.id)"
             ></app-object-card>
         } @empty {
-            <p class="col-span-2">No objects in this category.</p>
+            <p class="col-span-2">No objects match your search/filter.</p>
         }
     </div>
 </main>
