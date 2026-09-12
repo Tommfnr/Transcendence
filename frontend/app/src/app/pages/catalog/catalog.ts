@@ -69,6 +69,8 @@ export class Catalog implements OnInit {
 		);
 	});
 
+	readonly objectsCount = computed(() => this.searchObjects().length);
+
 	readonly fabOpen = signal(false);
 
 	toggleFab(): void {
