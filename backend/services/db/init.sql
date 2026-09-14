@@ -55,8 +55,6 @@ CREATE TABLE IF NOT EXISTS groups (
 	updated_at			TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-ALTER TABLE groups ADD CONSTRAINT groups_owner_name_unique UNIQUE (owner_id, name);
-
 DO $$
 BEGIN
 	CREATE TYPE group_role AS ENUM ('admin', 'member');

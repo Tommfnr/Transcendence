@@ -17,7 +17,7 @@ export class GroupsService {
 			.orderBy(groups.id)
 	}
 
-	async findOne(groupId: number) {
+	async findByIdOrThrow(groupId: number) {
 		const [group] = await this.db
 			.select()
 			.from(groups)
@@ -47,7 +47,13 @@ export class GroupsService {
 
 	findMy(userId: number) {
 		return this.db
-			.select({ id: groups.id, name: groups.name, description: groups.description, ownerId: groups.ownerId, role: groupMembers.role })
+			.select({
+				id: groups.id,
+				name: groups.name,
+				description: groups.description,
+				ownerId: groups.ownerId,
+				role: groupMembers.role
+			})
 			.from(groupMembers)
 			.innerJoin(groups, eq(groupMembers.groupId, groups.id))
 			.where(eq(groupMembers.userId, userId))
@@ -63,25 +69,15 @@ export class GroupsService {
 		return memberships.length === groupIds.length
 	}
 
-	private async assertUniqueGroupName(ownerId: number, name: string) {
-		const [existingGroup] = await this.db
-			.select()
-			.from(groups)
-			.where(and(eq(groups.ownerId, ownerId), eq(groups.name, name)))
-
-		return existingGroup
-	}
-
-	async create(dto: CreateGroupDto, adminId: number) {
+	async createGroup(adminId: number, dto: CreateGroupDto) {
 		return this.db.transaction(async (t) => {
-			const existingGroup = await this.assertUniqueGroupName(adminId, dto.name)
-
-			if (existingGroup)
-				throw new ForbiddenException('Already a group with the same name')
-
 			const [group] = await t
 				.insert(groups)
-				.values({ name: dto.name, description: dto.description, ownerId: adminId })
+				.values({
+					name: dto.name,
+					description: dto.description,
+					ownerId: adminId
+				})
 				.returning()
 
 			await t
@@ -96,23 +92,21 @@ export class GroupsService {
 		})
 	}
 
-	async update(groupId: number, dto: UpdateGroupDto) {
-		return this.db.transaction(async (t) => {
-			const group = await this.findOne(groupId)
+	async updateGroup(groupId: number, dto: UpdateGroupDto) {
+		const [updatedGroup] = await this.db
+			.update(groups)
+			.set({
+				name: dto.name,
+				description: dto.description,
+				updatedAt: new Date()
+			})
+			.where(eq(groups.id, groupId))
+			.returning()
 
-			const existingGroup = await this.assertUniqueGroupName(group.ownerId, dto.name)
+		if (!updatedGroup)
+			throw new NotFoundException('Group not found')
 
-			if (existingGroup && existingGroup.id !== groupId)
-				throw new ForbiddenException('Already a group with the same name')
-
-			const [updated] = await t
-				.update(groups)
-				.set({ name: dto.name, description: dto.description, updatedAt: new Date() })
-				.where(eq(groups.id, groupId))
-				.returning()
-
-			return updated
-		})
+		return updatedGroup
 	}
 
 	async addMember(groupId: number, targetUserId: number) {
@@ -130,7 +124,7 @@ export class GroupsService {
 	}
 
 	async updateMemberRole(groupId: number, targetUserId: number, role: 'admin' | 'member') {
-		const group = await this.findOne(groupId)
+		const group = await this.findByIdOrThrow(groupId)
 
 		if (group.ownerId === targetUserId)
 			throw new ForbiddenException('Cannot change the role of the group owner')
@@ -176,7 +170,7 @@ export class GroupsService {
 
 	async leaveGroup(groupId: number, userId: number) {
 		return this.db.transaction(async (t) => {
-			const group = await this.findOne(groupId)
+			const group = await this.findByIdOrThrow(groupId)
 
 			const membership = await this.findMembership(groupId, userId)
 

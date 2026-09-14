@@ -27,7 +27,7 @@ export class GroupsController {
 
 	@Get(':groupId')
 	findOne(@Param('groupId') groupId: string) {
-		return this.groupsService.findOne(Number(groupId))
+		return this.groupsService.findByIdOrThrow(Number(groupId))
 	}
 
 	@Get(':groupId/members')
@@ -37,21 +37,21 @@ export class GroupsController {
 	}
 
 	@Post()
-	create(@Req() req: AuthenticatedRequest, @Body() dto: CreateGroupDto) {
+	createGroup(@Req() req: AuthenticatedRequest, @Body() dto: CreateGroupDto) {
 		const adminId = req.user.sub
-		return this.groupsService.create(dto, adminId)
-	}
-
-	@Patch(':groupId')
-	@UseGuards(GroupAdminGuard)
-	update(@Param('groupId') groupId: string, @Body() dto: UpdateGroupDto) {
-		return this.groupsService.update(Number(groupId), dto)
+		return this.groupsService.createGroup(adminId, dto)
 	}
 
 	@Post(':groupId/members/:targetUserId')
 	@UseGuards(GroupAdminGuard)
 	addMember(@Param('groupId') groupId: string, @Param('targetUserId') targetUserId: string) {
 		return this.groupsService.addMember(Number(groupId), Number(targetUserId))
+	}
+
+	@Patch(':groupId')
+	@UseGuards(GroupAdminGuard)
+	updateGroup(@Param('groupId') groupId: string, @Body() dto: UpdateGroupDto) {
+		return this.groupsService.updateGroup(Number(groupId), dto)
 	}
 
 	@Patch(':groupId/members/:targetUserId/role')

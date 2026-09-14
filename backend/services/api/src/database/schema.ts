@@ -42,9 +42,7 @@ export const groups = pgTable('groups', {
 	description:	varchar('description', { length:500 }),
 	createdAt:		timestamp('created_at').notNull().defaultNow(),
 	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-	uniqueOwnerName: unique().on(table.ownerId, table.name),
-}));
+});
 
 export const groupRoleEnum = pgEnum('group_role', ['admin', 'member'])
 
