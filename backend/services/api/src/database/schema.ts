@@ -42,9 +42,7 @@ export const groups = pgTable('groups', {
 	description:	varchar('description', { length:500 }),
 	createdAt:		timestamp('created_at').notNull().defaultNow(),
 	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-	uniqueOwnerName: unique().on(table.ownerId, table.name),
-}));
+});
 
 export const groupRoleEnum = pgEnum('group_role', ['admin', 'member'])
 
@@ -76,12 +74,17 @@ export const posts = pgTable('posts', {
 
 export const conversations = pgTable('conversations', {
 	id:				serial('id').primaryKey(),
-	postId:			integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-	requesterId:	integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	createdAt:		timestamp('created_at').notNull().defaultNow(),
 	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const conversationMembers = pgTable('conversation_members', {
+	id:				serial('id').primaryKey(),
+	conversationId:	integer('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+	userId:			integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	createdAt:		timestamp('created_at').notNull().defaultNow(),
 }, (table) => ({
-	uniquePostRequester: unique().on(table.postId, table.requesterId),
+	uniqueMembership: unique().on(table.conversationId, table.userId),
 }));
 
 export const messages = pgTable('messages', {
@@ -108,17 +111,6 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	expiresAt: timestamp('expires_at').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 })
-
-export const groupObjectGrants = pgTable('group_object_grants', {
-	id:					serial('id').primaryKey(),
-	groupId:			integer('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
-	objectId:			integer('object_id').notNull().references(() => objects.id, { onDelete: 'cascade' }),
-	grantedBy:			integer('granted_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
-	createdAt:			timestamp('created_at').notNull().defaultNow(),
-	updatedAt:			timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-	uniqueGroupObjectGrant: unique().on(table.groupId, table.objectId),
-}));
 
 export const lendingStatusEnum = pgEnum('lending_status', 
 	['pending', 'accepted', 'active', 'awaiting_confirmation',

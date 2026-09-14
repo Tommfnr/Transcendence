@@ -5,7 +5,7 @@ import { nameSchema, descriptionSchema, objectTypeSchema } from '../../zod/zod.s
 const createPostSchema = z.object({
 	title:			nameSchema(60),
 	objectType:		objectTypeSchema,
-	description:	descriptionSchema,
+	description:	descriptionSchema.optional(),
 	fromDate:		z.coerce.date(),
 	toDate:			z.coerce.date(),
 	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group'),

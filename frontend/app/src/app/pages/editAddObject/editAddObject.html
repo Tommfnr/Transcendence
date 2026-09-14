@@ -50,26 +50,8 @@
           ></app-text-field>
       </div>
 
-      @if (!isEditMode()) {
-      <div>
-          Share with groups @for (group of myGroups(); track group.id) {
-          <div>
-              <label>
-                  <input
-                      type="checkbox"
-                      (change)="onGroupToggle($event, group.id)"
-                  />
-                  {{ group.name }}
-              </label>
-          </div>
-          } @empty {
-          <p>You're not in any groups yet.</p>
-          }
-      </div>
-      }
-
-      <app-button type="submit" variant="primary">
-          @if (isEditMode()) { Save Changes } @else { Add Object }
-      </app-button>
-  </form>
+        <app-button type="submit" variant="primary">
+            @if (isEditMode()) { Save Changes } @else { Add Object }
+        </app-button>
+    </form>
 </app-modal>

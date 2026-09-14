@@ -22,10 +22,6 @@ export class GroupsService {
         return this.http.post<GroupEntity>('/api/groups', body);
     }
 
-    grantObject(groupId: number, objectId: number) {
-        return this.http.post(`/api/groups/${groupId}/objects/${objectId}/grant`, {});
-    }
-
     addMember(groupId: number, targetUserId: number) {
         return this.http.post<GroupMemberEntity>(`/api/groups/${groupId}/members/${targetUserId}`, {});
     }
@@ -36,10 +32,6 @@ export class GroupsService {
 
     updateMemberRole(groupId: number, targetUserId: number, body: GroupMemberInput) {
         return this.http.patch<GroupMemberEntity>(`/api/groups/${groupId}/members/${targetUserId}/role`, body);
-    }
-
-    revokeObject(groupId: number, objectId: number) {
-        return this.http.delete<{ message: string }>(`/api/groups/${groupId}/objects/${objectId}/grant`);
     }
 
     removeMember(groupId: number, targetUserId: number) {

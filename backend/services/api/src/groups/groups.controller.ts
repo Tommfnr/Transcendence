@@ -7,6 +7,7 @@ import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { GroupAdminGuard } from './guards/group-admin.guard'
 import { GroupMemberGuard } from './guards/group-member.guard'
+import { GroupOwnerGuard } from './guards/group-owner.guard'
 
 @UseGuards(AuthGuard)
 @Controller('groups')
@@ -26,29 +27,19 @@ export class GroupsController {
 
 	@Get(':groupId')
 	findOne(@Param('groupId') groupId: string) {
-		return this.groupsService.findOne(Number(groupId))
+		return this.groupsService.findByIdOrThrow(Number(groupId))
 	}
 
 	@Get(':groupId/members')
+	@UseGuards(GroupMemberGuard)
 	findMembers(@Param('groupId') groupId: string) {
 		return this.groupsService.findMembers(Number(groupId))
 	}
 
-	@Get(':groupId/objects')
-	findGrantedObjects(@Param('groupId') groupId: string) {
-		return this.groupsService.findGrantedObjects(Number(groupId))
-	}
-
 	@Post()
-	create(@Req() req: AuthenticatedRequest, @Body() dto: CreateGroupDto) {
+	createGroup(@Req() req: AuthenticatedRequest, @Body() dto: CreateGroupDto) {
 		const adminId = req.user.sub
-		return this.groupsService.create(dto, adminId)
-	}
-
-	@Patch(':groupId')
-	@UseGuards(GroupAdminGuard)
-	update(@Param('groupId') groupId: string, @Body() dto: UpdateGroupDto) {
-		return this.groupsService.update(Number(groupId), dto)
+		return this.groupsService.createGroup(adminId, dto)
 	}
 
 	@Post(':groupId/members/:targetUserId')
@@ -57,18 +48,10 @@ export class GroupsController {
 		return this.groupsService.addMember(Number(groupId), Number(targetUserId))
 	}
 
-	@Post(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupMemberGuard)
-	grantObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.grantObject(Number(groupId), Number(objectId), requesterId)
-	}
-
-	@Delete(':groupId/objects/:objectId/grant')
-	@UseGuards(GroupMemberGuard)
-	revokeObject(@Param('groupId') groupId: string, @Param('objectId') objectId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.revokeObject(Number(groupId), Number(objectId), requesterId)
+	@Patch(':groupId')
+	@UseGuards(GroupAdminGuard)
+	updateGroup(@Param('groupId') groupId: string, @Body() dto: UpdateGroupDto) {
+		return this.groupsService.updateGroup(Number(groupId), dto)
 	}
 
 	@Patch(':groupId/members/:targetUserId/role')
@@ -90,9 +73,8 @@ export class GroupsController {
 	}
 
 	@Delete(':groupId')
-	@UseGuards(GroupAdminGuard)
-	deleteGroup(@Param('groupId') groupId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.deleteGroup(Number(groupId), requesterId)
+	@UseGuards(GroupOwnerGuard)
+	deleteGroup(@Param('groupId') groupId: string) {
+		return this.groupsService.deleteGroup(Number(groupId))
 	}
 }

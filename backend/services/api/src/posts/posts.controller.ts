@@ -4,6 +4,7 @@ import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
+import { PostOwnerGuard } from './guards/post-owner.guard'
 
 @Controller('posts')
 @UseGuards(AuthGuard)
@@ -38,14 +39,15 @@ export class PostsController {
 	}
 
 	@Put(':postId')
+	@UseGuards(PostOwnerGuard)
 	update(@Param('postId') postId: string, @Req() req: AuthenticatedRequest, @Body() dto: UpdatePostDto) {
 		const userId = req.user.sub
 		return this.postsService.update(Number(postId), userId, dto)
 	}
 
 	@Delete(':postId')
-	remove(@Param('postId') postId: string, @Req() req: AuthenticatedRequest) {
-		const userId = req.user.sub
-		return this.postsService.remove(Number(postId), userId)
+	@UseGuards(PostOwnerGuard)
+	remove(@Param('postId') postId: string) {
+		return this.postsService.remove(Number(postId))
 	}
 }

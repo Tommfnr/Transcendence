@@ -46,7 +46,6 @@ export const nameSchema = (max: number) => z
 export const descriptionSchema = z
 	.string("Please input a string")
 	.max(500, 'Max 500 characters')
-	.optional()
 
 export const objectTypeSchema = z
 	.enum([
