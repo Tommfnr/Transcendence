@@ -14,7 +14,6 @@
     "@nestjs/core": "^11.1.29",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.1.29",
-    "class-validator": "^0.15.1",
     "drizzle-orm": "^0.45.2",
     "nestjs-zod": "^5.4.0",
     "postgres": "^3.4.4",

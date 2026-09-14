@@ -1,10 +1,19 @@
 import { Module } from '@nestjs/common'
+import { internalClientProvider } from '@pep/shared'
 import { LendingService } from './lending.service'
 import { LendingController } from './lending.controller'
+import { ObjectsProxyService } from './objects-proxy.service'
+import { OBJECTS_INTERNAL_CLIENT } from './lending.tokens'
+
+const DEFAULT_OBJECTS_URL = 'http://objects:3000'
 
 @Module({
 	controllers: [LendingController],
-	providers: [LendingService],
+	providers: [
+		internalClientProvider(OBJECTS_INTERNAL_CLIENT, 'OBJECTS_INTERNAL_URL', DEFAULT_OBJECTS_URL),
+		ObjectsProxyService,
+		LendingService,
+	],
 	exports: [LendingService],
 })
 export class LendingModule {}

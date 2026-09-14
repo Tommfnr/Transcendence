@@ -13,11 +13,13 @@ import { DatabaseModule } from './database/database.module'
 import { ObjectsModule } from './objects/objects.module'
 import { ObjectsService } from './objects/objects.service'
 import { userDeletedHandler } from './objects/user-deleted.handler'
+import { InternalObjectsModule } from './internal/internal-objects.module'
 
 @Module({
 	imports: [
 		DatabaseModule,
 		ObjectsModule,
+		InternalObjectsModule,
 		SharedEventsModule.register({
 			imports: [ObjectsModule],
 			handlers: [

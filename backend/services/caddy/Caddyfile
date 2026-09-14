@@ -32,6 +32,11 @@ pep.localhost {
 		reverse_proxy groups:3000
 	}
 
+	@lendingRoutes path /api/lending /api/lending/*
+	handle @lendingRoutes {
+		reverse_proxy lending:3000
+	}
+
 	handle /api/* {
 		reverse_proxy api:3000
 	}

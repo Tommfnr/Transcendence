@@ -3,7 +3,6 @@ import { createZodDto } from 'nestjs-zod'
 
 export const createTransactionSchema = z.object({
 	objectId: z.number().int().positive(),
-	lenderId: z.number().int().positive(),
 	lendedFrom: z.iso.datetime(),
 	lendedTo: z.iso.datetime(),
 	message: z.string().trim().max(250, 'Max 250 characters').optional(),

@@ -73,7 +73,7 @@ services:
     env_file:
       - ../.env
     environment:
-      EVENT_SUBSCRIBER_URLS: http://objects:3000,http://groups:3000
+      EVENT_SUBSCRIBER_URLS: http://objects:3000,http://groups:3000,http://lending:3000
     depends_on:
       postgres:
         condition: service_healthy
@@ -132,9 +132,13 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      OBJECTS_INTERNAL_URL: http://objects:3000
     depends_on:
       postgres:
         condition: service_healthy
+      objects:
+        condition: service_started
 
   orm:
     build:

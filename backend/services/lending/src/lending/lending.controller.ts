@@ -9,8 +9,8 @@ export class LendingController {
 	constructor(private readonly lendingService: LendingService) {}
 
 	@Get()
-	listAll() {
-		return (this.lendingService.listAll())
+	listAll(@CurrentUser('sub') userId: number) {
+		return (this.lendingService.listAll(userId))
 	}
 
 	@Post()
@@ -19,12 +19,12 @@ export class LendingController {
 	}
 
 	@Get(':id')
-	findOne(@Param('id', ParseIntPipe) id: number) {
-		return (this.lendingService.findOne(id))
+	findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.findOne(id, userId))
 	}
 
 	@Patch(':id/accept')
-	acceptLend(@Param('id', ParseIntPipe) id: number) {
-		return (this.lendingService.acceptLend(id))
+	acceptLend(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.acceptLend(id, userId))
 	}
 }
