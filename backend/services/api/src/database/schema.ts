@@ -74,12 +74,17 @@ export const posts = pgTable('posts', {
 
 export const conversations = pgTable('conversations', {
 	id:				serial('id').primaryKey(),
-	postId:			integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-	requesterId:	integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	createdAt:		timestamp('created_at').notNull().defaultNow(),
 	updatedAt:		timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const conversationMembers = pgTable('conversation_members', {
+	id:				serial('id').primaryKey(),
+	conversationId:	integer('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+	userId:			integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	createdAt:		timestamp('created_at').notNull().defaultNow(),
 }, (table) => ({
-	uniquePostRequester: unique().on(table.postId, table.requesterId),
+	uniqueMembership: unique().on(table.conversationId, table.userId),
 }));
 
 export const messages = pgTable('messages', {

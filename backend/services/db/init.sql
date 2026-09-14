@@ -102,11 +102,16 @@ CREATE TABLE IF NOT EXISTS post_groups (
 
 CREATE TABLE IF NOT EXISTS conversations (
 	id				SERIAL PRIMARY KEY,
-	post_id			INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-	requester_id	INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	created_at		TIMESTAMP NOT NULL DEFAULT NOW(),
-	updated_at		TIMESTAMP NOT NULL DEFAULT NOW(),
-	CONSTRAINT		unique_post_requester UNIQUE (post_id, requester_id)
+	updated_at		TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS conversation_members (
+	id					SERIAL PRIMARY KEY,
+	conversation_id		INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+	user_id				INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	created_at			TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT			unique_conversation_member UNIQUE (conversation_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (

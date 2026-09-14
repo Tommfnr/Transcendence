@@ -1,63 +1,41 @@
-import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, and, or, desc } from 'drizzle-orm'
-import { PostgresJsDatabase, PostgresJsTransaction } from 'drizzle-orm/postgres-js'
-import { conversations, messages, posts } from '../database/schema'
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { eq, desc } from 'drizzle-orm'
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { conversations, conversationMembers, messages, users } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
-
-type Executor = PostgresJsDatabase | PostgresJsTransaction<Record<string, never>, Record<string, never>>
 
 @Injectable()
 export class ChatsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	private async findAuthorizedConversation(executor: Executor, conversationId: number, userId: number) {
-		const [conversation] = await executor
-				.select({
-					id: conversations.id,
-					postId: conversations.postId,
-					requesterId: conversations.requesterId,
-					createdAt: conversations.createdAt,
-					updatedAt: conversations.updatedAt,
-					postOwnerId: posts.ownerId,
-				})
-				.from(conversations)
-				.innerJoin(posts, eq(conversations.postId, posts.id))
-				.where(eq(conversations.id, conversationId))
-
-		if (!conversation)
-			throw new NotFoundException('Conversation not found')
-		if (conversation.requesterId !== userId && conversation.postOwnerId !== userId)
-			throw new ForbiddenException('You are not part of this conversation')
-
-		return conversation
-	}
-
 	findMy(userId: number) {
 		return this.db
 				.select({
 					id: conversations.id,
-					postId: conversations.postId,
-					requesterId: conversations.requesterId,
 					createdAt: conversations.createdAt,
 					updatedAt: conversations.updatedAt,
-					postTitle: posts.title,
-					postOwnerId: posts.ownerId,
 				})
 				.from(conversations)
-				.innerJoin(posts, eq(conversations.postId, posts.id))
-				.where(or(eq(conversations.requesterId, userId), eq(posts.ownerId, userId)))
+				.innerJoin(conversationMembers, eq(conversationMembers.conversationId, conversations.id))
+				.where(eq(conversationMembers.userId, userId))
 				.orderBy(desc(conversations.updatedAt))
 	}
 
-	findOne(conversationId: number, userId: number) {
-		return this.findAuthorizedConversation(this.db, conversationId, userId)
+	async findByIdOrThrow(conversationId: number) {
+		const [conversation] = await this.db
+				.select()
+				.from(conversations)
+				.where(eq(conversations.id, conversationId))
+
+		if (!conversation)
+			throw new NotFoundException('Conversation not found')
+
+		return conversation
 	}
 
-	async findMessages(conversationId: number, userId: number) {
-		await this.findOne(conversationId, userId)
-
+	findMessages(conversationId: number) {
 		return this.db
 				.select()
 				.from(messages)
@@ -65,42 +43,35 @@ export class ChatsService {
 				.orderBy(messages.createdAt)
 	}
 
-	async create(userId: number, dto: CreateConversationDto) {
+	async createConversation(userId: number, dto: CreateConversationDto) {
 		return this.db.transaction(async (t) => {
-			const { postId, content } = dto
+			if (dto.recipientId === userId)
+				throw new ForbiddenException('You cannot start a conversation with yourself')
 
-			const [post] = await t.select().from(posts).where(eq(posts.id, postId))
+			const [recipient] = await t.select().from(users).where(eq(users.id, dto.recipientId))
 
-			if (!post)
-				throw new NotFoundException('Post not found')
-			if (post.ownerId === userId)
-				throw new ForbiddenException('You cannot message yourself about your own post')
+			if (!recipient)
+				throw new NotFoundException('User not found')
 
-			const [existing] = await t
-					.select()
-					.from(conversations)
-					.where(and(eq(conversations.postId, postId), eq(conversations.requesterId, userId)))
+			const [conversation] = await t
+					.insert(conversations)
+					.values({})
+					.returning()
 
-			if (existing)
-				throw new ConflictException('Conversation already exists for this post')
-			if (post.status === 'closed')
-				throw new ForbiddenException('Cannot start a conversation on a closed post')
-
-			let conversation
-			try {
-				[conversation] = await t
-						.insert(conversations)
-						.values({ postId, requesterId: userId })
-						.returning()
-			} catch (err: any) {
-				if (err.code === '23505') // unique_violation, race with a concurrent create
-					throw new ConflictException('Conversation already exists for this post')
-				throw err
-			}
+			await t
+					.insert(conversationMembers)
+					.values([
+						{ conversationId: conversation.id, userId },
+						{ conversationId: conversation.id, userId: dto.recipientId },
+					])
 
 			const [message] = await t
 					.insert(messages)
-					.values({ conversationId: conversation.id, ownerId: userId, content })
+					.values({
+						conversationId: conversation.id,
+						ownerId: userId,
+						content: dto.content
+					})
 					.returning()
 
 			return ({ conversation, message })
@@ -109,11 +80,13 @@ export class ChatsService {
 
 	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {
 		return this.db.transaction(async (t) => {
-			await this.findAuthorizedConversation(t, conversationId, userId)
-
 			const [message] = await t
 					.insert(messages)
-					.values({ conversationId, ownerId: userId, content: dto.content })
+					.values({
+						conversationId,
+						ownerId: userId,
+						content: dto.content
+					})
 					.returning()
 
 			await t
