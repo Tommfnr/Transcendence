@@ -5,7 +5,7 @@ import { nameSchema, descriptionSchema, objectTypeSchema, objectConditionSchema 
 const updateObjectSchema = z.object({
 	name:			nameSchema(30).optional(),
 	type:			objectTypeSchema.optional(),
-	description:	descriptionSchema,
+	description:	descriptionSchema.optional(),
 	condition:		objectConditionSchema.optional(),
 	isAvailable:	z.boolean().optional(),
 })

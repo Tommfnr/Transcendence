@@ -6,7 +6,7 @@ const updatePostSchema = z.object({
 	title:			nameSchema(60).optional(),
 	status:			z.enum(['open', 'closed']).optional(),
 	objectType:		objectTypeSchema.optional(),
-	description:	descriptionSchema,
+	description:	descriptionSchema.optional(),
 	fromDate:		z.coerce.date().optional(),
 	toDate:			z.coerce.date().optional(),
 	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group').optional(),
