@@ -6,9 +6,9 @@ import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
 import { ObjectCard } from '../../components/object-card/object-card';
-import { ButtonComponent } from '../../components/button/button';
-import { ButtonDirective } from '../../components/button/button.directive';
 import { normalizeForSearch } from '../../shared/normalize-text';
+import { TitleBarComponent } from '../../components/title-bar/title-bar';
+import { FabActionComponent } from '../../components/fab-action/fab-action';
 
 interface Category {
 	label: string;
@@ -17,7 +17,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
+	imports: [RouterLink, TextFieldComponent, ChipComponent, ObjectCard, TitleBarComponent, FabActionComponent],
 	templateUrl: './catalog.html',
 })
 

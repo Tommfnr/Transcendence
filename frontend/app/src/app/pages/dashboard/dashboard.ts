@@ -8,13 +8,15 @@ import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
 import { PostsService } from '../../services/posts.service';
+import { HeaderAppComponent } from '../../components/header-app/header-app';
+import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { PostEntity } from '../../models/post.model';
 
 type DashboardTab = 'requests' | 'offers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard, StatCardComponent],
+  imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {

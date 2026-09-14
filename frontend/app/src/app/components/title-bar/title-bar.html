@@ -1,5 +1,5 @@
 <header [class]="classes">
-    <div class="mx-auto flex h-12 w-full max-w-[390px] items-center justify-between px-4">
+    <div class="flex h-12 w-full items-center justify-between px-4">
         <div [class]="headingClasses">
             @switch (leading) {
                 @case ('avatar') {
@@ -18,7 +18,7 @@
             }
             <h1 class="text-2xl font-bold text-text truncate">{{ title }}</h1>
             @if (meta) {
-                <span class="text-sm text-text-secondary shrink-0">{{ meta }}</span>
+                <span class="text-sm text-text-secondary shrink-0 align-bottom">{{ meta }}</span>
             }
         </div>
         <a routerLink="/app" aria-label="Home" class="cursor-pointer">

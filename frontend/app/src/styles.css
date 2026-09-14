@@ -4,6 +4,9 @@
 
 
 @theme {
+	/* Widths */
+	--container-app: 390px;
+	
 	/* Colors*/
 	--color-primary: #FF9D2E;
 	--color-secondary: #4B5563;
