@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
@@ -7,20 +7,21 @@ import { PostInput, PostGroupData } from '../../models/post.model';
 import { GroupEntity } from '../../models/group.model';
 import { OBJECT_TYPES } from '../../models/object.model';
 import { ButtonComponent } from '../../components/button/button';
+import { Modal } from '../../components/modal/modal';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-editAddPost',
-  imports: [FormField, ButtonComponent, RouterLink],
+  imports: [FormField, ButtonComponent, RouterLink, Modal],
   templateUrl: './editAddPost.html',
 })
 export class EditAddPost implements OnInit {
   private postsService = inject(PostsService);
   private groupsService = inject(GroupsService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private modalService = inject(ModalService);
 
-  private postId = this.route.snapshot.paramMap.get('id');
-  readonly isEditMode = !!this.postId;
+  private postId = this.modalService.editPostId();
+  readonly isEditMode = computed(() => this.modalService.editPostId() !== null);
 
   readonly myGroups = signal<GroupEntity[]>([]);
   readonly myPostGroups = signal<PostGroupData[]>([]);
@@ -43,7 +44,7 @@ export class EditAddPost implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.isEditMode) {
+    if (this.isEditMode()) {
       this.postsService.findOne(Number(this.postId)).subscribe((data) => {
         this.post.set({
           title: data.title,
@@ -84,7 +85,7 @@ export class EditAddPost implements OnInit {
     submit(this.postForm, async () => {
       let request;
 
-      if (this.isEditMode) {
+      if (this.isEditMode()) {
         request = this.postsService.update(Number(this.postId), this.post());
       } else {
         request = this.postsService.create(this.post());
@@ -92,9 +93,13 @@ export class EditAddPost implements OnInit {
 
       request.subscribe({
         next: () => {
-          this.router.navigate(['/app/dashboard']);
+          this.modalService.close();
         },
       });
     });
   }
+  
+  	onCancel(): void {
+		this.modalService.close();
+	}
 }

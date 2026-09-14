@@ -141,12 +141,12 @@ export class Dashboard implements OnInit {
     this.modalService.openAddObject();
   }
 
-  openRequestModal(): void {
+  openAddPostModal(): void {
     this.closeFab();
-    this.modalService.openRequest();
+    this.modalService.openAddPost();
   }
 
-  openGroupModal(): void {
+  openAddGroupModal(): void {
     this.closeFab();
     this.modalService.openAddGroup();
   }

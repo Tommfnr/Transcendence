@@ -16,7 +16,8 @@ import { ChipComponent } from "../../components/chip/chip";
 export class EditAddObject implements OnInit {
 	private objectService = inject(ObjectService);
 	private modalService = inject(ModalService);
-
+	
+	private objectId = this.modalService.editObjectId();
 	readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
 	readonly objectTypes = OBJECT_TYPES;
@@ -51,9 +52,8 @@ export class EditAddObject implements OnInit {
 	});
 
 	ngOnInit(): void {
-		const objectId = this.modalService.editObjectId();
-		if (objectId) {
-			this.objectService.findOne(Number(objectId)).subscribe((data) => {
+		if (this.objectId) {
+			this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
 				this.object.set({
 					name: data.name,
 					type: data.type,
@@ -69,10 +69,9 @@ export class EditAddObject implements OnInit {
 		event.preventDefault();
 
 		submit(this.objectForm, async () => {
-			const objectId = this.modalService.editObjectId();
 			let request;
-			if (objectId) {
-				request = this.objectService.update(Number(objectId), this.object());
+			if (this.objectId) {
+				request = this.objectService.update(Number(this.objectId), this.object());
 			} else {
 				request = this.objectService.create(this.object());
 			}
