@@ -1,6 +1,7 @@
 <app-title-bar
-    title="Catalog"
+    title="Item catalog"
     leading="back"
+	(backClick)="goBack()"
     meta="{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}"
 ></app-title-bar>
 <div class="flex flex-col gap-4 pt-14">
@@ -9,7 +10,7 @@
             (pick)="openAddObjectModal()"
 			label="Add item"
 			tone="object"
-            >Add item
+            >
 		</app-fab-action>
     </div>
 
