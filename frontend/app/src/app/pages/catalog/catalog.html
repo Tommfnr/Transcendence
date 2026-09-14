@@ -7,7 +7,7 @@
         <a appButton (click)="openAddObjectModal()" variant="primary" size="small" class="self-end truncate">Add item</a>
     </div>
 
-    <app-text-field placeholder="Rechercher..." typeField="search" [(value)]="searchTerm"></app-text-field>
+    <app-text-field placeholder="Search..." typeField="search" [(value)]="searchTerm"></app-text-field>
     <div class="flex flex-wrap gap-2 mt-2">
         @for (cat of categories; track cat.label) {
             <app-chip

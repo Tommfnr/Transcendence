@@ -9,5 +9,5 @@ import { RefreshService } from '../../services/refresh.service';
 })
 export class HeaderApp {
   private refreshService = inject(RefreshService)
-  readonly userName = computed(() => this.refreshService.user()?.username ?? 'Utilisateur');
+  readonly userName = computed(() => this.refreshService.user()?.username ?? 'User');
 }
