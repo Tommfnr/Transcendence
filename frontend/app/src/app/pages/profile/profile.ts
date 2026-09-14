@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RefreshService } from '../../services/refresh.service';
+import { TitleBarComponent } from '../../components/title-bar/title-bar';
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink],
+  imports: [RouterLink, TitleBarComponent],
   templateUrl: './profile.html',
 })
 export class Profile {
