@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, notInArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -65,7 +65,7 @@ export class GroupsService {
 		return (member)
 	}
 
-	async removeMember(gId: number, targetUserId: number, requesterId: number) {
+	async removeMember(gId: number, targetUserId: number, requesterId: number): Promise<void> {
 		const [requester] = await this.db.select().from(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
 		)
@@ -87,11 +87,9 @@ export class GroupsService {
 		await this.db.delete(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, targetUserId),),
 		)
-
-		return ( { message: 'Member successfully removed' } )
 	}
 
-	async deleteGroup(gId: number, requesterId: number) {
+	async deleteGroup(gId: number, requesterId: number): Promise<void> {
 		const [requester] = await this.db.select().from(groupMembers).where(
 			and(eq(groupMembers.groupId, gId), eq(groupMembers.userId, requesterId),),
 		)
@@ -102,7 +100,26 @@ export class GroupsService {
 			throw new ForbiddenException('Admin role needed for this action')
 
 		await this.db.delete(groups).where(eq(groups.id, gId))
-		
-		return ( { message: "Group successfully deleted" } )
+	}
+
+	async removeMembershipsForUser(userId: number): Promise<number> {
+		return (this.db.transaction(async (t) => {
+			await t.delete(groupMembers).where(eq(groupMembers.userId, userId))
+
+			const orphaned = await t
+				.delete(groups)
+				.where(
+					notInArray(
+						groups.id,
+						t
+							.selectDistinct({ id: groupMembers.groupId })
+							.from(groupMembers)
+							.where(eq(groupMembers.role, 'admin')),
+					),
+				)
+				.returning({ id: groups.id })
+
+			return (orphaned.length)
+		}))
 	}
 }

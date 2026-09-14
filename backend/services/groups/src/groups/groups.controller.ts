@@ -1,22 +1,16 @@
-import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, ParseIntPipe, HttpCode } from '@nestjs/common'
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/creategroup.dto'
-import { AuthenticatedRequest } from '../auth/types/authenticated-request'
-import { AuthGuard } from '../auth/guard'
+import { CurrentUser, SharedAuthGuard } from '@pep/shared'
 
-@UseGuards(AuthGuard)
+@UseGuards(SharedAuthGuard)
 @Controller('groups')
 export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
 
 	@Post()
-	create(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.create(dto, req.user.sub))
-	}
-
-	@Get('debug')
-	debug(@Req() req: AuthenticatedRequest) {
-		return { user : req.user }
+	create(@Body() dto: CreateGroupDto, @CurrentUser('sub') userId: number) {
+		return (this.groupsService.create(dto, userId))
 	}
 
 	@Get()
@@ -25,22 +19,24 @@ export class GroupsController {
 	}
 
 	@Get(':id/members')
-	findMembers(@Param('id') id: string) {
-		return (this.groupsService.findMembers(Number(id)))
+	findMembers(@Param('id', ParseIntPipe) id: number) {
+		return (this.groupsService.findMembers(id))
 	}
 
 	@Post(':id/members/:userId')
-	addMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.addMember(Number(id), Number(userId), req.user.sub))
+	addMember(@Param('id', ParseIntPipe) id: number, @Param('userId', ParseIntPipe) targetUserId: number, @CurrentUser('sub') requesterId: number) {
+		return (this.groupsService.addMember(id, targetUserId, requesterId))
 	}
 
 	@Delete(':id/members/:userId')
-	removeMember(@Param('id') id: string, @Param('userId') userId: string, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.removeMember(Number(id), Number(userId), req.user.sub))
+	@HttpCode(204)
+	removeMember(@Param('id', ParseIntPipe) id: number, @Param('userId', ParseIntPipe) targetUserId: number, @CurrentUser('sub') requesterId: number) {
+		return (this.groupsService.removeMember(id, targetUserId, requesterId))
 	}
 
 	@Delete(':id')
-	deleteGroup(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-		return (this.groupsService.deleteGroup(Number(id), req.user.sub))
+	@HttpCode(204)
+	deleteGroup(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.groupsService.deleteGroup(id, userId))
 	}
 }

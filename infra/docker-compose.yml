@@ -73,7 +73,7 @@ services:
     env_file:
       - ../.env
     environment:
-      EVENT_SUBSCRIBER_URLS: http://objects:3000
+      EVENT_SUBSCRIBER_URLS: http://objects:3000,http://groups:3000
     depends_on:
       postgres:
         condition: service_healthy

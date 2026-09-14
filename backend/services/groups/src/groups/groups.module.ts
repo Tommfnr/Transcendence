@@ -6,5 +6,6 @@ import { GroupsController } from './groups.controller'
 @Module({
 	controllers: [GroupsController],
 	providers: [GroupsService],
+	exports: [GroupsService],
 })
 export class GroupsModule {}

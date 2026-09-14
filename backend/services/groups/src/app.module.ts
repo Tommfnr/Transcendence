@@ -3,12 +3,32 @@
 import { Module } from '@nestjs/common'
 import { DatabaseModule } from './database/database.module'
 import { GroupsModule } from './groups/groups.module'
-import { EventsModule } from './events/events.module'
-import { SharedZodValidationPipe } from '@pep/shared'
+import {
+	EVENT,
+	defineEventHandler,
+	SharedEventsModule,
+	SharedZodValidationPipe,
+	userDeletedDataSchema
+} from '@pep/shared'
 import { APP_PIPE } from '@nestjs/core'
+import { GroupsService } from './groups/groups.service'
+import { userDeletedHandler } from './groups/user-deleted.handler'
 
 @Module({
-	imports: [DatabaseModule, GroupsModule, EventsModule],
+	imports: [DatabaseModule,
+						GroupsModule,
+						SharedEventsModule.register({
+							imports: [GroupsModule],
+							handlers: [
+								defineEventHandler({
+									event: EVENT.UserDeleted,
+									schema: userDeletedDataSchema,
+									inject: [GroupsService],
+									useFactory: userDeletedHandler
+								}),
+							],
+						}),
+	],
 	providers: [{ provide: APP_PIPE, useClass: SharedZodValidationPipe}]
 })
 export class AppModule {}
