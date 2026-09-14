@@ -36,7 +36,7 @@ export class GroupsService {
 			.where(eq(groupMembers.groupId, groupId))
 	}
 
-	async findMembership(groupId: number, userId: number) {
+	private async findMembership(groupId: number, userId: number) {
 		const [membership] = await this.db
 			.select()
 			.from(groupMembers)
@@ -63,12 +63,18 @@ export class GroupsService {
 		return memberships.length === groupIds.length
 	}
 
+	private async assertUniqueGroupName(ownerId: number, name: string) {
+		const [existingGroup] = await this.db
+			.select()
+			.from(groups)
+			.where(and(eq(groups.ownerId, ownerId), eq(groups.name, name)))
+
+		return existingGroup
+	}
+
 	async create(dto: CreateGroupDto, adminId: number) {
 		return this.db.transaction(async (t) => {
-			const [existingGroup] = await t
-				.select()
-				.from(groups)
-				.where(and(eq(groups.name, dto.name), eq(groups.ownerId, adminId)))
+			const existingGroup = await this.assertUniqueGroupName(adminId, dto.name)
 
 			if (existingGroup)
 				throw new ForbiddenException('Already a group with the same name')
@@ -94,12 +100,9 @@ export class GroupsService {
 		return this.db.transaction(async (t) => {
 			const group = await this.findOne(groupId)
 
-			const [existingGroup] = await t
-				.select()
-				.from(groups)
-				.where(and(eq(groups.ownerId, group.ownerId), eq(groups.name, dto.name), ne(groups.id, groupId)))
+			const existingGroup = await this.assertUniqueGroupName(group.ownerId, dto.name)
 
-			if (existingGroup)
+			if (existingGroup && existingGroup.id !== groupId)
 				throw new ForbiddenException('Already a group with the same name')
 
 			const [updated] = await t
@@ -221,12 +224,7 @@ export class GroupsService {
 		})
 	}
 
-	async deleteGroup(groupId: number, requesterId: number) {
-		const group = await this.findOne(groupId)
-
-		if (group.ownerId !== requesterId)
-			throw new ForbiddenException('Only the group owner can delete this group')
-
+	async deleteGroup(groupId: number) {
 		await this.db
 			.delete(groups)
 			.where(eq(groups.id, groupId))

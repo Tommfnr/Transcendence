@@ -1,31 +1,15 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
-import { PostgresJsDatabase, PostgresJsTransaction } from 'drizzle-orm/postgres-js'
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts, postGroups, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { GroupsService } from '../groups/groups.service'
 
-type Executor = PostgresJsDatabase | PostgresJsTransaction<Record<string, never>, Record<string, never>>
-
 @Injectable()
 export class PostsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase, private readonly groupsService: GroupsService) {}
-
-	private async findAuthorizedPost(executor: Executor, postId: number, userId: number, action: string) {
-		const [post] = await executor
-				.select()
-				.from(posts)
-				.where(eq(posts.id, postId))
-
-		if (!post)
-			throw new NotFoundException('Post not found')
-		if (post.ownerId !== userId)
-			throw new ForbiddenException(`Only the post owner can ${action} this post`)
-
-		return post
-	}
 
 	findAll() {
 		return this.db.select().from(posts).orderBy(posts.id)
@@ -85,17 +69,15 @@ export class PostsService {
 		if (rawGroupIds)
 			groupIds = [...new Set(rawGroupIds)]
 
-		return this.db.transaction(async (t) => {
-			const existing = await this.findAuthorizedPost(t, postId, userId, 'update')
+		let post = await this.findOne(postId)
 
+		return this.db.transaction(async (t) => {
 			if (groupIds) {
 				const isMember = await this.groupsService.isMemberOfAll(userId, groupIds)
 
 				if (!isMember)
 					throw new ForbiddenException('You can only post to groups you belong to')
 			}
-
-			let post = existing
 
 			if (Object.keys(postFields).length > 0) {
 				[post] = await t
@@ -124,9 +106,7 @@ export class PostsService {
 		})
 	}
 
-	async remove(postId: number, userId: number) {
-		await this.findAuthorizedPost(this.db, postId, userId, 'delete')
-
+	async remove(postId: number) {
 		await this.db.delete(posts).where(eq(posts.id, postId))
 
 		return { message: 'Post successfully deleted' }

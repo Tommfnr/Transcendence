@@ -7,6 +7,7 @@ import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
 import { GroupAdminGuard } from './guards/group-admin.guard'
 import { GroupMemberGuard } from './guards/group-member.guard'
+import { GroupOwnerGuard } from './guards/group-owner.guard'
 
 @UseGuards(AuthGuard)
 @Controller('groups')
@@ -72,9 +73,8 @@ export class GroupsController {
 	}
 
 	@Delete(':groupId')
-	@UseGuards(GroupAdminGuard)
-	deleteGroup(@Param('groupId') groupId: string, @Req() req: AuthenticatedRequest) {
-		const requesterId = req.user.sub
-		return this.groupsService.deleteGroup(Number(groupId), requesterId)
+	@UseGuards(GroupOwnerGuard)
+	deleteGroup(@Param('groupId') groupId: string) {
+		return this.groupsService.deleteGroup(Number(groupId))
 	}
 }
