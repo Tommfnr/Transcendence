@@ -1,4 +1,4 @@
-import { Directive, HostBinding, Input } from '@angular/core';
+import { Directive, HostBinding, Input, booleanAttribute } from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary';
 export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
@@ -18,11 +18,13 @@ export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 export class ButtonDirective {
 	@Input() variant: ButtonVariant = 'primary';
 	@Input() size: ButtonSize = 'medium';
+	@Input({ transform: booleanAttribute }) block = false;
 
 	@HostBinding('class')
 	get classes(): string {
+		const display = this.block ? 'flex w-full' : 'inline-flex';
 		const base =
-			'inline-flex cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-300 ease-in-out';
+			`${display} cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-300 ease-in-out`;
 
 		// Hover lives in the variant, not the base: turning a secondary button
 		// orange has to switch its text colour too, or white lands on #FF7700

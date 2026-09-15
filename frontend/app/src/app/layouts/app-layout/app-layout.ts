@@ -8,7 +8,7 @@ import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, FooterApp, EditAddObject, EditAddPost, EditAddGroup],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup],
   templateUrl: './app-layout.html',
 })
 export class AppLayout {
