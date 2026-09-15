@@ -37,20 +37,6 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: ../backend/services/api
-      dockerfile: ../../../infra/services/api/Dockerfile
-      additional_contexts:
-        shared: ../backend
-    container_name: api
-    restart: unless-stopped
-    env_file:
-      - ../.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   gateway:
     build:
       context: ../backend/services/gateway
@@ -61,6 +47,23 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      AUTH_SERVICE_URL: http://auth:3000
+      USERS_SERVICE_URL: http://users:3000
+      OBJECTS_SERVICE_URL: http://objects:3000
+      GROUPS_SERVICE_URL: http://groups:3000
+      LENDING_SERVICE_URL: http://lending:3000
+    depends_on:
+      auth:
+        condition: service_started
+      users:
+        condition: service_started
+      objects:
+        condition: service_started
+      groups:
+        condition: service_started
+      lending:
+        condition: service_started
 
   auth:
     build:

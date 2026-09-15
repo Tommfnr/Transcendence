@@ -11,34 +11,9 @@ pep.localhost {
 		respond 404
 	}
 
-	# This will handle correct reverse proxying to the backend
-	@authRoutes path /api/auth /api/auth/*
-	handle @authRoutes {
-		reverse_proxy auth:3000
-	}
-
-	@usersRoutes path /api/users /api/users/*
-	handle @usersRoutes {
-		reverse_proxy users:3000
-	}
-
-	@objectsRoutes path /api/objects /api/objects/*
-	handle @objectsRoutes {
-		reverse_proxy objects:3000
-	}
-
-	@groupsRoutes path /api/groups /api/groups/*
-	handle @groupsRoutes {
-		reverse_proxy groups:3000
-	}
-
-	@lendingRoutes path /api/lending /api/lending/*
-	handle @lendingRoutes {
-		reverse_proxy lending:3000
-	}
-
+	# Single entry point: gateway does the per-prefix fan-out to the domain services
 	handle /api/* {
-		reverse_proxy api:3000
+		reverse_proxy gateway:3000
 	}
 
 	# This will handle all the rest of the routes to the frontend
