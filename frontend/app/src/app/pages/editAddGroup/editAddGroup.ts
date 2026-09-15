@@ -6,6 +6,8 @@ import { GroupInput } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
+import { firstValueFrom } from 'rxjs';
+import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 
 @Component({
   selector: 'app-editAddGroup',
@@ -19,6 +21,8 @@ export class EditAddGroup implements OnInit {
 
   private groupId = this.modalService.editGroupId();
   readonly isEditMode = computed(() => this.modalService.editGroupId() !== null);
+
+  bannerErrors = signal<string[]>([]);
 
   group = signal<GroupInput>({
     name: '',
@@ -53,22 +57,27 @@ export class EditAddGroup implements OnInit {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    submit(this.groupForm, async () => {
-      let request;
-      if (this.isEditMode()) {
-        request = this.groupsService.update(Number(this.groupId), this.group());
-      } else {
-        request = this.groupsService.create(this.group());
-      }
+    submit(this.groupForm, async (field) => {
+      try {
+        this.bannerErrors.set([]);
 
-      request.subscribe({
-        next: () => {
-          this.modalService.close();
-        },
-        error: (err) => {
-          this.errorMessage.set(err.error?.message);
-        },
-      });
+        const response = this.groupId
+          ? await firstValueFrom(this.groupsService.update(Number(this.groupId), this.group()))
+          : await firstValueFrom(this.groupsService.create(this.group()));
+
+        this.modalService.close();
+        return (undefined);
+      } 
+      catch (err) {
+        if (isZodValidationError(err)) {
+          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
+
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
+        }
+        this.bannerErrors.set(['Something went wrong, please try again']);
+        return (undefined);
+      }
     });
   }
   onCancel(): void {
