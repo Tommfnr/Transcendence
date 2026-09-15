@@ -31,7 +31,7 @@ export class ButtonDirective {
 		// at 2.7:1.
 		const variants: Record<ButtonVariant, string> = {
 			primary: 'bg-primary text-on-primary hover:bg-alert',
-			secondary: 'bg-secondary text-on-secondary hover:bg-alert hover:text-on-primary',
+			secondary: 'bg-secondary text-on-secondary hover:bg-primary hover:text-on-primary',
 		};
 
 		const sizes: Record<ButtonSize, string> = {

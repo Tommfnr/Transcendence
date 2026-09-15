@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FooterApp } from '../../components/footer-app/footer-app';
 import { EditAddObject } from '../../pages/editAddObject/editAddObject';
 import { EditAddPost } from '../../pages/editAddPost/editAddPost';
 import { EditAddGroup } from '../../pages/editAddGroup/editAddGroup';
 import { ModalService } from '../../services/modal.service';
+import { EditProfile } from '../../pages/edit-profile/edit-profile';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile],
   templateUrl: './app-layout.html',
 })
 export class AppLayout {

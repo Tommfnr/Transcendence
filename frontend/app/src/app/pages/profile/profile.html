@@ -7,24 +7,32 @@
             editable
             label="Last name"
             [value]="'var name'"
+            (edit)="openEditProfileModal()"
         ></app-list-row>
-        <app-list-row editable label="First name" [value]="'var frist name'"></app-list-row>
+        <app-list-row
+            editable
+            label="First name"
+            [value]="'var frist name'"
+            (edit)="openEditProfileModal()"
+        ></app-list-row>
         <app-list-row
             editable
             label="Email address"
             [value]="'pierre.examplereallylongaddress@example.com'"
+            (edit)="openEditProfileModal()"
         ></app-list-row>
         <app-list-row
-		editable
+            editable
             label="Profile picture"
             [value]="'Edit'"
+            (edit)="openEditProfileModal()"
         ></app-list-row>
     </section>
 
     <section class="flex flex-col gap-2">
         <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">MY CONTENT</h2>
         <app-list-row
-		link="/app/catalog"
+            link="/app/catalog"
             label="Item catalog"
             [value]="'nb of items items'"
         ></app-list-row>
