@@ -4,6 +4,7 @@ import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { AuthGuard } from '../auth/guard'
 import { AuthenticatedRequest } from '../auth/types/authenticated-request'
+import { ConversationMemberGuard } from './guards/conversation-member.guard'
 
 @Controller('chats')
 @UseGuards(AuthGuard)
@@ -17,24 +18,25 @@ export class ChatsController {
 	}
 
 	@Get(':conversationId')
-	findOne(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest) {
-		const userId = req.user.sub
-		return this.chatsService.findOne(Number(conversationId), userId)
+	@UseGuards(ConversationMemberGuard)
+	findOne(@Param('conversationId') conversationId: string) {
+		return this.chatsService.findByIdOrThrow(Number(conversationId))
 	}
 
 	@Get(':conversationId/messages')
-	findMessages(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest) {
-		const userId = req.user.sub
-		return this.chatsService.findMessages(Number(conversationId), userId)
+	@UseGuards(ConversationMemberGuard)
+	findMessages(@Param('conversationId') conversationId: string) {
+		return this.chatsService.findMessages(Number(conversationId))
 	}
 
 	@Post()
 	create(@Req() req: AuthenticatedRequest, @Body() dto: CreateConversationDto) {
 		const userId = req.user.sub
-		return this.chatsService.create(userId, dto)
+		return this.chatsService.createConversation(userId, dto)
 	}
 
 	@Post(':conversationId/messages')
+	@UseGuards(ConversationMemberGuard)
 	createMessage(@Param('conversationId') conversationId: string, @Req() req: AuthenticatedRequest, @Body() dto: CreateMessageDto) {
 		const userId = req.user.sub
 		return this.chatsService.createMessage(Number(conversationId), userId, dto)

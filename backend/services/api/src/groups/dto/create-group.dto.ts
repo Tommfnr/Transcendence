@@ -4,7 +4,7 @@ import { nameSchema, descriptionSchema } from '../../zod/zod.schemas'
 
 const createGroupSchema = z.object({
 	name:			nameSchema(30),
-	description:	descriptionSchema
+	description:	descriptionSchema.optional()
 })
 
 export class CreateGroupDto extends createZodDto(createGroupSchema) {}

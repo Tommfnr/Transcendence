@@ -55,8 +55,6 @@ CREATE TABLE IF NOT EXISTS groups (
 	updated_at			TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-ALTER TABLE groups ADD CONSTRAINT groups_owner_name_unique UNIQUE (owner_id, name);
-
 DO $$
 BEGIN
 	CREATE TYPE group_role AS ENUM ('admin', 'member');
@@ -72,16 +70,6 @@ CREATE TABLE IF NOT EXISTS group_members (
 	created_at	TIMESTAMP DEFAULT NOW() NOT NULL,
 	updated_at	TIMESTAMP DEFAULT NOW() NOT NULL,
 	CONSTRAINT	unique_membership UNIQUE (group_id, user_id)
-);
-
-CREATE TABLE IF NOT EXISTS group_object_grants (
-	id				SERIAL PRIMARY KEY,
-	group_id		INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-	object_id		INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
-	granted_by		INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-	created_at		TIMESTAMP DEFAULT NOW() NOT NULL,
-	updated_at		TIMESTAMP DEFAULT NOW() NOT NULL,
-	CONSTRAINT		unique_group_object_grant UNIQUE (group_id, object_id)
 );
 
 DO $$
@@ -114,11 +102,16 @@ CREATE TABLE IF NOT EXISTS post_groups (
 
 CREATE TABLE IF NOT EXISTS conversations (
 	id				SERIAL PRIMARY KEY,
-	post_id			INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-	requester_id	INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	created_at		TIMESTAMP NOT NULL DEFAULT NOW(),
-	updated_at		TIMESTAMP NOT NULL DEFAULT NOW(),
-	CONSTRAINT		unique_post_requester UNIQUE (post_id, requester_id)
+	updated_at		TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS conversation_members (
+	id					SERIAL PRIMARY KEY,
+	conversation_id		INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+	user_id				INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	created_at			TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT			unique_conversation_member UNIQUE (conversation_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (

@@ -2,7 +2,7 @@
 // See : https://docs.nestjs.com/providers#services
 
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -14,7 +14,10 @@ export class ObjectsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
 	findAll() {
-		return this.db.select().from(objects).orderBy(objects.id)
+		return this.db
+				.select()
+				.from(objects)
+				.orderBy(objects.id)
 	}
 
 	findByUserId(userId: number) {
@@ -43,17 +46,17 @@ export class ObjectsService {
 				.returning()
 	}
 
-	update(objectId: number, userId: number, dto: UpdateObjectDto) {
+	update(objectId: number, dto: UpdateObjectDto) {
 		return this.db
 				.update(objects)
 				.set(dto)
-				.where(and(eq(objects.id, objectId), eq(objects.ownerId, userId)))
+				.where(eq(objects.id, objectId))
 				.returning()
 	}
 
-	remove(objectId: number, userId: number) {
+	remove(objectId: number) {
 		return this.db
 				.delete(objects)
-				.where(and(eq(objects.id, objectId), eq(objects.ownerId, userId)))
+				.where(eq(objects.id, objectId))
 	}
 }

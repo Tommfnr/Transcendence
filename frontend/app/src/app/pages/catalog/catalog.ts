@@ -1,12 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
-import { ButtonComponent } from '../../components/button/button';
-import { ButtonDirective } from '../../components/button/button.directive';
+import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
 import { ObjectCard } from '../../components/object-card/object-card';
+import { ButtonComponent } from '../../components/button/button';
+import { ButtonDirective } from '../../components/button/button.directive';
+import { normalizeForSearch } from '../../shared/normalize-text';
 
 interface Category {
 	label: string;
@@ -22,6 +24,7 @@ interface Category {
 
 export class Catalog implements OnInit {
   private objectService = inject(ObjectService);
+  readonly modalService = inject(ModalService);
   readonly objectData = signal<ObjectEntity[]>([]);
 
 	ngOnInit(): void {
@@ -36,11 +39,50 @@ export class Catalog implements OnInit {
 
 	categories: Category[] = [
 		{ label: 'All', emoji: '👀' },
-		{ label: 'DIY', emoji: '🛠️' },
-		{ label: 'Garden', emoji: '🌱' },
-		{ label: 'Electronic', emoji: '💻' },
-		{ label: 'Leisure', emoji: '🎮' },
-		{ label: 'Other', emoji: '📦' }
+		{ label: 'Tools', emoji: '🛠️' },
+		{ label: 'Electronics', emoji: '💻' },
+		{ label: 'Vehicles', emoji: '🚗' },
+		{ label: 'Outdoor & Recreation', emoji: '🏕️' },
+		{ label: 'Media', emoji: '🎬' },
+		{ label: 'Events', emoji: '🎉' },
+		{ label: 'Clothing & Gear', emoji: '🧥' },
 	]
-	activeCategory = signal('DIY');
+	activeCategory = signal('All');
+	readonly searchTerm = signal('');
+
+	readonly filteredObjects = computed(() => {
+		const category = this.activeCategory();
+		if (category === 'All') {
+			return this.objectData();
+		}
+		return this.objectData().filter((object) => object.type === category);
+	});
+
+	readonly searchObjects = computed(() => {
+		const term = normalizeForSearch(this.searchTerm());
+		if (term === '') {
+			return this.filteredObjects();
+		}
+		return this.filteredObjects().filter((object) =>
+			normalizeForSearch(object.name).includes(term)
+			|| (object.description !== null && normalizeForSearch(object.description).includes(term))
+		);
+	});
+
+	readonly objectsCount = computed(() => this.searchObjects().length);
+
+	readonly fabOpen = signal(false);
+
+	toggleFab(): void {
+		this.fabOpen.update(open => !open);
+	}
+
+	closeFab(): void {
+		this.fabOpen.set(false);
+	}
+
+	openAddObjectModal(): void {
+    	this.closeFab();
+    	this.modalService.openAddObject();
+	}
 }

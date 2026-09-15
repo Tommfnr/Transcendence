@@ -5,7 +5,7 @@ import { nameSchema, descriptionSchema, objectTypeSchema, objectConditionSchema 
 const createObjectSchema = z.object({
 	name:			nameSchema(30),
 	type:			objectTypeSchema,
-	description:	descriptionSchema,
+	description:	descriptionSchema.optional(),
 	condition:		objectConditionSchema,
 	isAvailable:	z.boolean(),
 

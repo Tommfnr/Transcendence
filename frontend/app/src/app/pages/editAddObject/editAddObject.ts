@@ -1,9 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
-import { GroupsService } from '../../services/groups.service';
 import { ObjectInput, OBJECT_TYPES, ObjectCondition, ObjectType } from '../../models/object.model';
-import { GroupEntity } from '../../models/group.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
@@ -18,18 +16,15 @@ import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-
   templateUrl: './editAddObject.html',
 })
 export class EditAddObject implements OnInit {
-  private objectService = inject(ObjectService);
-  private groupsService = inject(GroupsService);
-  private modalService = inject(ModalService);
+	private objectService = inject(ObjectService);
+	private modalService = inject(ModalService);
+	
+	private objectId = this.modalService.editObjectId();
+	readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
 
-  private objectId = this.modalService.editObjectId();
-  readonly isEditMode = computed(() => this.modalService.editObjectId() !== null);
+	readonly objectTypes = OBJECT_TYPES;
 
-  readonly myGroups = signal<GroupEntity[]>([]);
-  readonly selectedGroupIds = signal<number[]>([]);
-  readonly objectTypes = OBJECT_TYPES;
-
-  bannerErrors = signal<string[]>([]);
+	bannerErrors = signal<string[]>([]);
 
   readonly categories = [
     { label: 'Tools', emoji: '🛠️' },
@@ -60,34 +55,19 @@ export class EditAddObject implements OnInit {
     required(fieldPath.type, { message: 'Type is required' });
   });
 
-  ngOnInit(): void {
-    if (this.objectId) {
-      this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
-        this.object.set({
-          name: data.name,
-          type: data.type,
-          description: data.description ?? '',
-          condition: data.condition,
-          isAvailable: data.isAvailable,
-        });
-      });
-    } else {
-      this.groupsService.findMy().subscribe((groups) => {
-        this.myGroups.set(groups);
-      });
-    }
-  }
-
-  onGroupToggle(event: Event, groupId: number): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    const ids = this.selectedGroupIds();
-
-    if (checked) {
-      this.selectedGroupIds.set([...ids, groupId]);
-    } else {
-      this.selectedGroupIds.set(ids.filter((id) => id !== groupId));
-    }
-  }
+	ngOnInit(): void {
+		if (this.objectId) {
+			this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
+				this.object.set({
+					name: data.name,
+					type: data.type,
+					description: data.description ?? '',
+					condition: data.condition,
+					isAvailable: data.isAvailable,
+				});
+			});
+		}
+	}
 
   onSubmit(event: Event) {
     event.preventDefault();

@@ -1,7 +1,13 @@
 <main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-    <h1>Page: Catalog</h1>
-    <a routerLink="/app/editAddObject" class="text-primary underline">EditAddObject</a>
-    <app-text-field placeholder="Ex: Driller, Bike..."></app-text-field>
+    <div class="mx-auto flex justify-between items-center w-full">
+        <div class="mx-auto flex items-center w-full">
+            <h1 class="truncate text-lg font-bold text-strong">Catalog</h1>
+            <h3 class="text-xs ml-[2%] text-gray-500/80">{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}</h3>
+        </div>
+        <a appButton (click)="openAddObjectModal()" variant="primary" size="small" class="self-end truncate">Add item</a>
+    </div>
+
+    <app-text-field placeholder="Rechercher..." typeField="search" [(value)]="searchTerm"></app-text-field>
     <div class="flex flex-wrap gap-2 mt-2">
         @for (cat of categories; track cat.label) {
             <app-chip
@@ -15,37 +21,15 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-		<!-- Tom your part -->
-        <app-object-card status="available" name="Drill"></app-object-card>
-        <app-object-card status="available" name="Drill" status="lent"></app-object-card>
-        <app-object-card status="available" name="Drill"></app-object-card>
-        <app-object-card status="available" name="Drill"></app-object-card>
-		<!-- Tom your part -->
-    </div>
-	<!-- Tom add the @empty maybe-->
-
-
-	<!-- Tom delete the <ul> content once you are done -->
-    <ul>
-        @for (object of objectData(); track object.id) {
-            <li>
-                <h2 class="text-2xl font-bold">{{ object.name }}</h2>
-                <h3 class="text-lg font-semibold">{{ object.type }}</h3>
-                <p>description: {{ object.description }}</p>
-                <p>condition: {{ object.condition }}</p>
-                <p>isAvailable: {{ object.isAvailable }}</p>
-                <p>createdAt: {{ object.createdAt }}</p>
-                <p>updatedAt: {{ object.updatedAt }}</p>
-                <a appButton [routerLink]="['/app/editAddObject', object.id]" variant="primary"
-                    >Update Object</a
-                >
-                <app-button type="button" variant="secondary" (click)="deleteObject(object.id)"
-                    >Delete Object</app-button
-                >
-            </li>
+        @for (object of searchObjects(); track object.id) {
+            <app-object-card
+                [name]="object.name"
+                [status]="object.isAvailable ? 'available' : 'lent'"
+                (edit)="modalService.openEditObject(object.id)"
+                (remove)="deleteObject(object.id)"
+            ></app-object-card>
         } @empty {
-            <li>No objects yet.</li>
+            <p class="col-span-2">No objects match your search/filter.</p>
         }
-    </ul>
-	<!-- Tom delete the <ul> content once you are done -->
+    </div>
 </main>
