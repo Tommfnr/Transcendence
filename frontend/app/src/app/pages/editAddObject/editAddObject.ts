@@ -84,13 +84,7 @@ export class EditAddObject implements OnInit {
         if (response.length === 0) {
           return (undefined);
         }
-        if (!this.isEditMode()) {
-          const newObjectId = response[0].id;
-
-          for (const groupId of this.selectedGroupIds()) {
-            this.groupsService.grantObject(groupId, newObjectId).subscribe();
-          }
-        }
+        
         this.modalService.close();
         return (undefined);
       } 
