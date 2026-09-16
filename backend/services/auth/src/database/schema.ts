@@ -8,7 +8,7 @@ const citext = customType<{ data: string }>({
 
 export const users = pgTable('users', {
 	id: serial('id').primaryKey(),
-	username: varchar('username').notNull(),
+	username: varchar('username').notNull().unique(),
 	email: citext('email').notNull(),
 	h_password: varchar('h_password', { length: 255 }).notNull(),
 })
