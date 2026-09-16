@@ -27,6 +27,12 @@ export function isAuthError(err: unknown): err is HttpErrorResponse & { error: A
 	);
 }
 
+export function isConflictError(err: unknown): err is HttpErrorResponse & { error: AuthErrorBody } {
+    return (
+		err instanceof HttpErrorResponse && err.status === 409 && typeof err.error?.message === 'string'
+	);
+}
+
 function getFieldByKey<T>(field: FieldTree<T, string | number, 'writable'>, key: string) {
 	const target = (field as Record<string, unknown>)[key] as
 		| FieldTree<unknown, string | number, 'writable'>

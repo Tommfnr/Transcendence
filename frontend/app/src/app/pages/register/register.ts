@@ -5,7 +5,7 @@ import { RegisterData } from '../../models/register-data.model';
 import { ButtonComponent } from "../../components/button/button";
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { isZodValidationError, mapZodErrorsToFieldTree, isConflictError, mapAuthErrorToBanner } from '../../shared/zod-signal-errors';
 
 @Component({
   selector: 'app-register',
@@ -54,6 +54,11 @@ export class Register {
           const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
           this.bannerErrors.set(bannerErrors);
           return (fieldErrors);
+        }
+        if (isConflictError(err)) {
+          const { bannerErrors } = mapAuthErrorToBanner(err.error);
+          this.bannerErrors.set(bannerErrors);
+          return (undefined);
         }
         console.log('Registration failed (FRONTEND)', err);
         return (undefined);
