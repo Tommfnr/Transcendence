@@ -1,12 +1,8 @@
-<app-modal
-  title="Faire une demande"
-  (closed)="onCancel()"
->
-  <div class="flex flex-1 flex-col gap-4 px-3">
-  <h1>Page: iCanHelp</h1>
-  <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+<div class="flex flex-1 flex-col gap-4 px-3">
+<h1>Page: iCanHelp</h1>
+<a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
-  <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" />
+<app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" />
 
-  </div>
-</app-modal>
+</div>
+
