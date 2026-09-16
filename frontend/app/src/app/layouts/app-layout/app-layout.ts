@@ -4,7 +4,7 @@ import { EditAddObject } from '../../pages/editAddObject/editAddObject';
 import { EditAddPost } from '../../pages/editAddPost/editAddPost';
 import { EditAddGroup } from '../../pages/editAddGroup/editAddGroup';
 import { ModalService } from '../../services/modal.service';
-import { EditProfile } from '../../pages/edit-profile/edit-profile';
+import { EditProfile } from '../../pages/editProfile/edit-profile';
 
 @Component({
   selector: 'app-app-layout',
