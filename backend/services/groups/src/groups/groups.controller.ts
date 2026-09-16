@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseIntPipe, HttpCode } from '@nestjs/common'
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
@@ -58,6 +58,7 @@ export class GroupsController {
 	}
 
 	@Delete(':groupId/members/:targetUserId')
+	@HttpCode(204)
 	@UseGuards(GroupAdminGuard)
 	removeMember(@Param('groupId', ParseIntPipe) groupId: number, @Param('targetUserId', ParseIntPipe) targetUserId: number) {
 		return (this.groupsService.removeMember(groupId, targetUserId))

@@ -37,7 +37,7 @@ export class LendingService {
 				lendedTo: new Date(dto.lendedTo),
 			}).returning())
 		} catch (err: unknown) {
-			if (err instanceof Error && 'code' in err && err.code === '23P01') // exclusion_violation, no overlap constraint
+			if (err && typeof err === 'object' && 'code' in err && err.code === '23P01') // exclusion_violation, no overlap constraint
 				throw new ConflictException('Object already booked for that period')
 			throw err
 		}

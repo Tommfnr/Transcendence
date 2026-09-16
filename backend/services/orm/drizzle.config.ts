@@ -1,7 +1,7 @@
 import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
-	schema: './schema.ts',
+	schema: './services/*/src/database/schema.ts',
 	dialect: 'postgresql',
 	dbCredentials: {
 		host: process.env.POSTGRES_HOST!,
