@@ -17,7 +17,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [RouterLink, ButtonComponent, ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
+	imports: [ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
 	templateUrl: './catalog.html',
 })
 
