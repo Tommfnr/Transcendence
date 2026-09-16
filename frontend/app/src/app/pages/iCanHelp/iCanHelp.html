@@ -1,8 +1,16 @@
 <div class="flex flex-1 flex-col gap-4 px-3">
+
+  <div class="w-full max-w-md">
+    <div class="flex items-center justify-between mb-6">
+      <button (click)="router.navigate(['/dashboard'])" class="flex items-center gap-2 text-2xl font-bold">
+        <span>&larr;</span> Help request
+      </button>
+      <img src="/icons/logo-invisible-background.svg" alt="" class="size-10 shrink-0" />
+    </div>
 <h1>Page: iCanHelp</h1>
 <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
-<app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" />
+<!-- <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" /> -->
 
 </div>
 
