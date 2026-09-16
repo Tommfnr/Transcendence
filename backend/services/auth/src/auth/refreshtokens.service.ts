@@ -27,10 +27,10 @@ export class RefreshTokensService {
 	}
 
 	async revoke(jti: string): Promise<void> {
-		await this.db.update(refreshTokens).set({ revoked: true }).where(eq(refreshTokens.jti, jti))
+		await this.db.update(refreshTokens).set({ revoked: true, updatedAt: new Date() }).where(eq(refreshTokens.jti, jti))
 	}
 
 	async revokeAllForUser(userId: number): Promise<void> {
-		await this.db.update(refreshTokens).set({ revoked: true }).where(and(eq(refreshTokens.userId, userId), eq(refreshTokens.revoked, false)))
+		await this.db.update(refreshTokens).set({ revoked: true, updatedAt: new Date() }).where(and(eq(refreshTokens.userId, userId), eq(refreshTokens.revoked, false)))
 	}
 }
