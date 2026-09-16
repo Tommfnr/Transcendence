@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common'
-import { EventPublisherService } from '@pep/shared'
 import { UsersService } from './users.service'
+import { EventsModule } from '../events/events.module'
 
 @Module({
-	providers: [UsersService, EventPublisherService],
+	imports: [EventsModule],
+	providers: [UsersService],
 	exports: [UsersService],
 })
 export class UsersModule {}

@@ -8,13 +8,11 @@ import {
 	SharedEventsModule,
 	SharedZodValidationPipe,
 	userDeletedDataSchema,
-	groupDeletedDataSchema,
 } from '@pep/shared'
 import { DatabaseModule } from './database/database.module'
 import { ObjectsModule } from './objects/objects.module'
 import { ObjectsService } from './objects/objects.service'
 import { userDeletedHandler } from './objects/user-deleted.handler'
-import { groupDeletedHandler } from './objects/group-deleted.handler'
 import { InternalObjectsModule } from './internal/internal-objects.module'
 
 @Module({
@@ -30,12 +28,6 @@ import { InternalObjectsModule } from './internal/internal-objects.module'
 					schema: userDeletedDataSchema,
 					inject: [ObjectsService],
 					useFactory: userDeletedHandler,
-				}),
-				defineEventHandler({
-					event: EVENT.GroupDeleted,
-					schema: groupDeletedDataSchema,
-					inject: [ObjectsService],
-					useFactory: groupDeletedHandler,
 				}),
 			],
 		}),

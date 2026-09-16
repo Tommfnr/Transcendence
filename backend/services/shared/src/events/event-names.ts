@@ -1,7 +1,6 @@
 export const EVENT = {
 	UserRegistered: 'user.registered',
 	UserDeleted: 'user.deleted',
-	GroupDeleted: 'group.deleted',
 
 	// TODO add as services are carved:
 	// ObjectAvailabilityChanged: 'object.availability_changed',

@@ -5,7 +5,8 @@ import { users } from '../database/schema'
 import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
 import * as argon2 from 'argon2'
-import { EVENT, makeEvent, UserView, EventPublisherService } from '@pep/shared'
+import { EventPublisherService } from '../events/event-publisher.service'
+import { EVENT, makeEvent, UserView } from '@pep/shared'
 
 @Injectable()
 export class UsersService {

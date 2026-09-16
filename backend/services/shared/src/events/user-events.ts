@@ -15,9 +15,3 @@ export const userDeletedDataSchema = z.object({
 })
 export type UserDeletedData = z.infer<typeof userDeletedDataSchema>
 export type UserDeletedEvent = EventEnvelope<typeof EVENT.UserDeleted, UserDeletedData>
-
-export const groupDeletedDataSchema = z.object({
-	groupId: z.number().int().positive(),
-})
-export type GroupDeletedData = z.infer<typeof groupDeletedDataSchema>
-export type GroupDeletedEvent = EventEnvelope<typeof EVENT.GroupDeleted, GroupDeletedData>
