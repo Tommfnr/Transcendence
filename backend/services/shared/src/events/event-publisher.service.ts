@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { optionalEnv, requireEnv, EventEnvelope } from '@pep/shared'
+import { optionalEnv, requireEnv } from '../config/env'
+import { EventEnvelope } from './envelope'
 
 @Injectable()
 export class EventPublisherService {

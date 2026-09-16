@@ -5,6 +5,7 @@ import { Controller, Get, Post, Delete, Body, Param, UseGuards, Put, ParseIntPip
 import { ObjectsService } from './objects.service'
 import { CreateObjectDto } from './dto/create-object.dto'
 import { UpdateObjectDto } from './dto/update-object.dto'
+import { GrantObjectDto } from './dto/grant-object.dto'
 import { CurrentUser, SharedAuthGuard } from '@pep/shared'
 import { ObjectOwnerGuard } from './guards/object-owner.guard'
 
@@ -44,5 +45,30 @@ export class ObjectsController {
 	@UseGuards(ObjectOwnerGuard)
 	remove(@Param('objectId', ParseIntPipe) objectId: number) {
 		return (this.objectsService.remove(objectId))
+	}
+
+	@Post(':objectId/grants')
+	@UseGuards(ObjectOwnerGuard)
+	grantToGroup(
+		@Param('objectId', ParseIntPipe) objectId: number,
+		@CurrentUser('sub') userId: number,
+		@Body() dto: GrantObjectDto,
+	) {
+		return (this.objectsService.grantToGroup(objectId, dto.groupId, userId))
+	}
+
+	@Delete(':objectId/grants/:groupId')
+	@HttpCode(204)
+	@UseGuards(ObjectOwnerGuard)
+	revokeFromGroup(
+		@Param('objectId', ParseIntPipe) objectId: number,
+		@Param('groupId', ParseIntPipe) groupId: number,
+	) {
+		return (this.objectsService.revokeFromGroup(objectId, groupId))
+	}
+
+	@Get(':objectId/grants')
+	findGrantedGroupIds(@Param('objectId', ParseIntPipe) objectId: number) {
+		return (this.objectsService.findGrantedGroupIds(objectId))
 	}
 }

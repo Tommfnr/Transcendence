@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, serial, varchar, integer, boolean, timestamp} from 'drizzle-orm/pg-core'
+import { pgTable, pgEnum, serial, varchar, integer, boolean, timestamp, unique } from 'drizzle-orm/pg-core'
 
 const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
@@ -17,3 +17,14 @@ export const objects = pgTable('objects', {
 	createdAt:		timestamptz('created_at').notNull().defaultNow(),
 	updatedAt:		timestamptz('updated_at').notNull().defaultNow()
 })
+
+export const objectGroupGrants = pgTable('object_group_grants', {
+	id:					serial('id').primaryKey(),
+	objectId:		integer('object_id').notNull().references(() => objects.id, { onDelete: 'cascade' }),
+	groupId:		integer('group_id').notNull(),
+	grantedBy:	integer('granted_by').notNull(),
+	createdAt:	timestamptz('created_at').notNull().defaultNow(),
+	updatedAt:	timestamptz('updated_at').notNull().defaultNow()
+}, (table) => ({
+	uniqueObjectGroup: unique().on(table.objectId, table.groupId)
+}))

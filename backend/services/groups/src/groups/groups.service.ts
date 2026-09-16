@@ -5,10 +5,14 @@ import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
+import { EVENT, makeEvent, EventPublisherService } from '@pep/shared'
 
 @Injectable()
 export class GroupsService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+	constructor(
+		@Inject(DB) private db : PostgresJsDatabase,
+		private readonly eventPublisher: EventPublisherService,
+	) {}
 
 	findAll() {
 		return this.db
@@ -229,6 +233,8 @@ export class GroupsService {
 		await this.db
 			.delete(groups)
 			.where(eq(groups.id, groupId))
+
+		await this.eventPublisher.publish(makeEvent(EVENT.GroupDeleted, 'groups', { groupId }))
 
 		return { message: 'Group successfully deleted' }
 	}
