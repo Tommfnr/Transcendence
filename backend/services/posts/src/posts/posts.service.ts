@@ -116,6 +116,13 @@ export class PostsService {
 		}))
 	}
 
+	async closeInternal(postId: number) {
+		await this.db
+			.update(posts)
+			.set({ status: 'closed', updatedAt: new Date() })
+			.where(eq(posts.id, postId))
+	}
+
 	async remove(postId: number) {
 		await this.db.delete(posts).where(eq(posts.id, postId))
 

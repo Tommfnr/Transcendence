@@ -27,4 +27,9 @@ export class LendingController {
 	acceptLend(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.acceptLend(id, userId))
 	}
+
+	@Patch(':id/reject')
+	rejectLend(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.rejectLend(id, userId))
+	}
 }

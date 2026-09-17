@@ -143,10 +143,13 @@ services:
       - ../.env
     environment:
       OBJECTS_INTERNAL_URL: http://objects:3000
+      POSTS_INTERNAL_URL: http://posts:3000
     depends_on:
       postgres:
         condition: service_healthy
       objects:
+        condition: service_started
+      posts:
         condition: service_started
 
   posts:
