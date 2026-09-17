@@ -47,13 +47,4 @@ export class GroupParameter implements OnInit {
 		this.modalService.openAddGroup();
 	}
 
-	goBack(): void {
-		if (window.history.length > 1) {
-			this.location.back();
-		}
-		else {
-			this.router.navigate(['/app/dashboard']);
-		}
-	}
-
 }
