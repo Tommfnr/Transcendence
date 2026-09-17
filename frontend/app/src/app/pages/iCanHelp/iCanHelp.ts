@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Modal } from '../../components/modal/modal';
 import { DatePicker } from '../../components/date-picker/date-picker';
 import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-iCanHelp',
-  imports: [Modal, DatePicker],
+  imports: [RouterLink, Modal, DatePicker],
   templateUrl: './iCanHelp.html',
 })
 export class ICanHelp {

@@ -1,0 +1,13 @@
+<section class="flex flex-1 flex-col gap-4 px-3">
+    <h1 class="text-lg font-bold text-strong">Aperçu du chat</h1>
+
+    @if (conversationId(); as conversationId) {
+        <app-chat [conversationId]="conversationId" class="h-[70dvh]">
+            <h2 class="border-b border-muted px-3 py-2 text-sm font-bold text-strong">
+                Conversation #{{ conversationId }}
+            </h2>
+        </app-chat>
+    } @else if (loaded()) {
+        <p class="text-sm text-text-secondary">Aucune conversation pour l'instant.</p>
+    }
+</section>
