@@ -227,6 +227,18 @@ services:
     depends_on:
       - prometheus
 
+  node-exporter:
+    build:
+      context: ../infra/services/node-exporter
+      dockerfile: ./Dockerfile
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+
 volumes:
     frontend_node_modules:
     postgres_data:
