@@ -1,0 +1,104 @@
+<section class="flex flex-col gap-6 px-3">
+    <header>
+        <h1 class="text-lg font-bold text-strong">Chat : page de test</h1>
+        <p class="text-sm">
+            Connecté en tant que <b>{{ me()?.username }}</b> (id {{ me()?.id }})
+        </p>
+        <p class="text-sm">Socket : {{ socket.connected() ? '🟢 connecté' : '🔴 déconnecté' }}</p>
+    </header>
+
+    @if (error(); as message) {
+        <p class="rounded-card border border-error p-2 text-sm text-error">{{ message }}</p>
+    }
+
+    <form
+        class="flex flex-col gap-2"
+        (submit)="$event.preventDefault(); startConversation(recipient, firstMessage)"
+    >
+        <h2 class="font-bold">Nouvelle conversation</h2>
+        <select
+            #recipient
+            class="rounded-card border border-text-secondary bg-card px-3 py-2 text-sm"
+        >
+            @for (user of otherUsers(); track user.id) {
+                <option [value]="user.id">{{ user.username }} (id {{ user.id }})</option>
+            }
+        </select>
+        <input
+            #firstMessage
+            placeholder="Premier message"
+            class="rounded-card border border-text-secondary bg-card px-3 py-2 text-sm"
+        />
+        <app-button type="submit">Démarrer</app-button>
+    </form>
+
+    <div class="flex flex-col gap-2">
+        <h2 class="font-bold">Mes conversations</h2>
+        <ul class="flex flex-col gap-1">
+            @for (conversation of conversations(); track conversation.id) {
+                <li>
+                    <button
+                        type="button"
+                        class="w-full rounded-card border px-3 py-2 text-left text-sm"
+                        [class]="
+                            conversation.id === selectedId()
+                                ? 'border-primary bg-primary-surface font-bold'
+                                : 'border-text-secondary bg-card'
+                        "
+                        (click)="open(conversation.id)"
+                    >
+                        Conversation #{{ conversation.id }} · maj
+                        {{ conversation.updatedAt | date: 'HH:mm:ss' }}
+                    </button>
+                </li>
+            } @empty {
+                <li class="text-sm text-text-secondary">Aucune conversation.</li>
+            }
+        </ul>
+    </div>
+
+    @if (selectedId(); as conversationId) {
+        <div class="flex flex-col gap-2">
+            <h2 class="font-bold">Conversation #{{ conversationId }}</h2>
+            <ul class="flex max-h-80 flex-col gap-2 overflow-y-auto rounded-card bg-card p-3">
+                @for (message of messages(); track message.id) {
+                    <li
+                        class="flex max-w-[80%] flex-col rounded-card px-3 py-1 text-sm"
+                        [class]="
+                            message.ownerId === me()?.id
+                                ? 'self-end bg-primary-surface'
+                                : 'self-start bg-complementary-surface'
+                        "
+                    >
+                        <span class="text-2xs text-text-secondary">
+                            {{ usernameOf(message.ownerId) }} ·
+                            {{ message.createdAt | date: 'HH:mm:ss' }}
+                        </span>
+                        {{ message.content }}
+                    </li>
+                } @empty {
+                    <li class="text-sm text-text-secondary">Aucun message.</li>
+                }
+            </ul>
+            <form class="flex gap-2" (submit)="$event.preventDefault(); send(content)">
+                <input
+                    #content
+                    placeholder="Message"
+                    class="min-w-0 flex-1 rounded-card border border-text-secondary bg-card px-3 py-2 text-sm"
+                />
+                <app-button type="submit">Envoyer</app-button>
+            </form>
+        </div>
+    }
+
+    <div class="flex flex-col gap-2">
+        <h2 class="font-bold">Événements WebSocket reçus</h2>
+        <ul class="flex flex-col gap-1 font-mono text-2xs">
+            @for (event of events(); track $index) {
+                <li>{{ event }}</li>
+            } @empty {
+                <li class="text-text-secondary">Rien pour l'instant.</li>
+            }
+        </ul>
+    </div>
+</section>
