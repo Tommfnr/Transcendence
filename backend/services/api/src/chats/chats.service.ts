@@ -5,10 +5,23 @@ import { conversations, conversationMembers, messages, users } from '../database
 import { DB } from '../database/database.module'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
+import { ChatsGateway, CHAT_EVENTS } from './chats.gateway'
 
 @Injectable()
 export class ChatsService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+	constructor(
+		@Inject(DB) private db : PostgresJsDatabase,
+		private readonly chatsGateway: ChatsGateway,
+	) {}
+
+	private async findMemberIds(conversationId: number) {
+		const members = await this.db
+				.select({ userId: conversationMembers.userId })
+				.from(conversationMembers)
+				.where(eq(conversationMembers.conversationId, conversationId))
+
+		return members.map((member) => member.userId)
+	}
 
 	findMy(userId: number) {
 		return this.db
@@ -44,7 +57,7 @@ export class ChatsService {
 	}
 
 	async createConversation(userId: number, dto: CreateConversationDto) {
-		return this.db.transaction(async (t) => {
+		const created = await this.db.transaction(async (t) => {
 			if (dto.recipientId === userId)
 				throw new ForbiddenException('You cannot start a conversation with yourself')
 
@@ -76,10 +89,15 @@ export class ChatsService {
 
 			return ({ conversation, message })
 		})
+
+		// Emitted after commit so clients never hear about rows that could still be rolled back
+		this.chatsGateway.emitToUsers([userId, dto.recipientId], CHAT_EVENTS.conversationNew, created)
+
+		return created
 	}
 
 	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {
-		return this.db.transaction(async (t) => {
+		const message = await this.db.transaction(async (t) => {
 			const [message] = await t
 					.insert(messages)
 					.values({
@@ -96,5 +114,10 @@ export class ChatsService {
 
 			return message
 		})
+
+		const memberIds = await this.findMemberIds(conversationId)
+		this.chatsGateway.emitToUsers(memberIds, CHAT_EVENTS.messageNew, message)
+
+		return message
 	}
 }
