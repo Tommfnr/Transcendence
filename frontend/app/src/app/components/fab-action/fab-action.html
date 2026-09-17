@@ -1,0 +1,8 @@
+<button type="button" (click)="pick.emit()" class="flex cursor-pointer items-center gap-3">
+	<span class="rounded-full bg-card px-4 py-2 text-sm font-bold text-text shadow-card">
+		{{ label }}
+	</span>
+	<span [class]="circleClasses">
+		<img [src]="icon" alt="" class="size-5" />
+	</span>
+</button>

@@ -1,14 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
 import { ChipComponent } from "../../components/chip/chip";
 import { ObjectCard } from '../../components/object-card/object-card';
-import { ButtonComponent } from '../../components/button/button';
-import { ButtonDirective } from '../../components/button/button.directive';
 import { normalizeForSearch } from '../../shared/normalize-text';
+import { TitleBarComponent } from '../../components/title-bar/title-bar';
+import { FabActionComponent } from '../../components/fab-action/fab-action';
+import { Location } from '@angular/common';
 
 interface Category {
 	label: string;
@@ -17,7 +18,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [ButtonDirective, TextFieldComponent, ChipComponent, ObjectCard],
+	imports: [ TextFieldComponent, ChipComponent, ObjectCard, TitleBarComponent, FabActionComponent],
 	templateUrl: './catalog.html',
 })
 
@@ -26,6 +27,8 @@ export class Catalog implements OnInit {
   private objectService = inject(ObjectService);
   readonly modalService = inject(ModalService);
   readonly objectData = signal<ObjectEntity[]>([]);
+  private location = inject(Location);
+  private router = inject(Router);
 
 	ngOnInit(): void {
 		this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
@@ -85,4 +88,13 @@ export class Catalog implements OnInit {
     	this.closeFab();
     	this.modalService.openAddObject();
 	}
+
+	goBack(): void {
+	if (window.history.length > 1) {
+		this.location.back();
+	}
+	else {
+		this.router.navigate(['/app/dashboard']);
+	}
+}
 }

@@ -1,22 +1,26 @@
-<div (click)="onClose()" class="fixed inset-0 z-[50] bg-black/50"></div>
+<div (click)="onClose()" class="fixed inset-0 z-50 bg-black/50"></div>
 
-<div class="fixed inset-x-4 top-1/2 z-[70] mx-auto flex max-h-[85vh] w-full max-w-[390px] -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-card bg-card p-4 shadow-raised md:max-w-2xl md:p-6">
-  <div class="flex items-start justify-between">
-    <div>
-      <h2 class="text-lg font-bold text-text-strong">{{ title() }}</h2>
-      @if (subtitle()) {
-        <p class="text-xs text-text-secondary">{{ subtitle() }}</p>
-      }
+<div
+    class="fixed inset-x-0 top-12 z-70 mx-auto w-full max-w-app max-h-[85vh] flex flex-col rounded-card bg-background px-4 pt-4 pb-8 gap-5 md:max-w-2xl md:p-6"
+>
+    <div class="flex items-start justify-between">
+        <div>
+            <h2 class="text-lg font-bold text-text">{{ title() }}</h2>
+            @if (subtitle()) {
+                <p class="text-xs text-text-secondary">{{ subtitle() }}</p>
+            }
+        </div>
+        <button
+			block
+            type="button"
+            (click)="onClose()"
+            aria-label="Close"
+            class="flex size-8 shrink-0 items-center justify-center rounded-full bg-card"
+        >
+            <img src="/icons/fab-cross.png" alt="" class="size-4 cursor-pointer" />
+        </button>
     </div>
-    <button
-      type="button"
-      (click)="onClose()"
-      aria-label="Fermer"
-      class="flex size-8 shrink-0 items-center justify-center rounded-full bg-background"
-    >
-      <img src="/icons/fab-cross.png" alt="" class="size-4" />
-    </button>
-  </div>
-
-  <ng-content />
+    <div class="min-h-0 flex-1 overflow-y-auto">
+        <ng-content />
+    </div>
 </div>
