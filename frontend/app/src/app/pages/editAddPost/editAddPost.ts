@@ -9,6 +9,9 @@ import { OBJECT_TYPES } from '../../models/object.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
+import { firstValueFrom } from 'rxjs';
+import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+
 
 @Component({
   selector: 'app-editAddPost',
@@ -26,6 +29,8 @@ export class EditAddPost implements OnInit {
   readonly myGroups = signal<GroupEntity[]>([]);
   readonly myPostGroups = signal<PostGroupData[]>([]);
   readonly objectTypes = OBJECT_TYPES;
+
+  bannerErrors = signal<string[]>([]);
 
   private post = signal<PostInput>({
     title: '',
@@ -82,20 +87,27 @@ export class EditAddPost implements OnInit {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    submit(this.postForm, async () => {
-      let request;
+    submit(this.postForm, async (field) => {
+      try {
+        this.bannerErrors.set([]);
 
-      if (this.isEditMode()) {
-        request = this.postsService.update(Number(this.postId), this.post());
-      } else {
-        request = this.postsService.create(this.post());
+        const response = this.postId
+          ? await firstValueFrom(this.postsService.update(Number(this.postId), this.post()))
+          : await firstValueFrom(this.postsService.create(this.post()));
+
+        this.modalService.close();
+        return (undefined)
       }
+      catch (err) {
+        if (isZodValidationError(err)) {
+          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
 
-      request.subscribe({
-        next: () => {
-          this.modalService.close();
-        },
-      });
+          this.bannerErrors.set(bannerErrors);
+          return (fieldErrors);
+        }
+        this.bannerErrors.set(['Something went wrong, please try again']);
+        return (undefined);
+      }
     });
   }
   
