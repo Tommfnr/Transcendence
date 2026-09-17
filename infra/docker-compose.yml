@@ -201,7 +201,33 @@ services:
       postgres:
         condition: service_healthy
 
+  prometheus:
+    build:
+      context: ../infra/services/prometheus
+      dockerfile: ./Dockerfile
+    container_name: prometheus
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "9090:9090"
+    volumes:
+    - prometheus-data:/prometheus
+
+  grafana:
+    build:
+      context: ../infra/services/grafana
+      dockerfile: ./Dockerfile
+    container_name: grafana
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
 
 volumes:
     frontend_node_modules:
     postgres_data:
+    prometheus-data:
