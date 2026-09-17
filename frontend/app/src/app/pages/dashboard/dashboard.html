@@ -53,7 +53,7 @@
 
   <div class="flex flex-col gap-5">
     @for (request of requests(); track request.id) {
-      <app-request-card [request]="request" (help)="onHelp($event)" />
+      <app-request-card [request]="request" />
     }
   </div>
 

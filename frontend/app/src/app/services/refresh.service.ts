@@ -1,61 +1,78 @@
-import { Injectable, inject, signal, computed } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
-import { Observable, tap } from 'rxjs'
-import { LoginResponse, RefreshResponse } from '../models/refresh.types'
-import { User } from '../models/user.model'
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, finalize, shareReplay, tap } from 'rxjs';
+import { LoginResponse, RefreshResponse } from '../models/refresh.types';
+import { User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class RefreshService {
-	private http = inject(HttpClient)
+    private http = inject(HttpClient);
 
-	private accessToken = signal<string | null>(null)
+    private accessToken = signal<string | null>(null);
 
-	private currentUser = signal<User | null>(null)
-	readonly user = this.currentUser.asReadonly()
+    private currentUser = signal<User | null>(null);
+    readonly user = this.currentUser.asReadonly();
 
-	readonly isLoggedIn = computed(() => this.accessToken() !== null)
+    readonly isLoggedIn = computed(() => this.accessToken() !== null);
 
-	login(body: {identifier: string, password: string, rememberMe?: boolean}): Observable<LoginResponse> {
-		return (this.http
-			.post<LoginResponse>('/api/auth/login', body)
-			.pipe(tap(({ access_token }) => {
-				this.accessToken.set(access_token)
-			}))
-		)
-	}
+    login(body: {
+        identifier: string;
+        password: string;
+        rememberMe?: boolean;
+    }): Observable<LoginResponse> {
+        return this.http.post<LoginResponse>('/api/auth/login', body).pipe(
+            tap(({ access_token }) => {
+                this.accessToken.set(access_token);
+            }),
+        );
+    }
 
-	getMe(): Observable<User> {
-		return (this.http
-			.get<User>('/api/users/me')
-			.pipe(tap((user) => {
-				this.currentUser.set(user)
-			}))
-		)
-	}
+    getMe(): Observable<User> {
+        return this.http.get<User>('/api/users/me').pipe(
+            tap((user) => {
+                this.currentUser.set(user);
+            }),
+        );
+    }
 
-	refreshToken(): Observable<RefreshResponse> {
-		return (this.http
-			.post<RefreshResponse>('/api/auth/refresh', {})
-			.pipe(tap(({ access_token }) => {
-				this.accessToken.set(access_token)
-			}))
-		)
-	}
+    private refreshInFlight$: Observable<RefreshResponse> | null = null;
 
-	logout(): Observable<unknown> {
-		return (this.http
-			.post('/api/auth/logout', {})
-			.pipe(tap(() => {
-				this.accessToken.set(null)
-			}))
-		)
-	}
+    // Concurrent 401s (e.g. a page firing several guarded requests at once)
+    // must share one /api/auth/refresh call: the backend revokes the old
+    // refresh-token row on every call, so a second parallel call using the
+    // same not-yet-updated cookie hits reuse detection and kills the whole
+    // session instead of just retrying.
+    refreshToken(): Observable<RefreshResponse> {
+        if (this.refreshInFlight$) {
+            return this.refreshInFlight$;
+        }
 
-	getAccessToken(): string | null {
-		return (this.accessToken())
-	}
+        this.refreshInFlight$ = this.http.post<RefreshResponse>('/api/auth/refresh', {}).pipe(
+            tap(({ access_token }) => {
+                this.accessToken.set(access_token);
+            }),
+            finalize(() => {
+                this.refreshInFlight$ = null;
+            }),
+            shareReplay(1),
+        );
 
-	clearAccessToken(): void {
-		this.accessToken.set(null)
-	}
+        return this.refreshInFlight$;
+    }
+
+    logout(): Observable<unknown> {
+        return this.http.post('/api/auth/logout', {}).pipe(
+            tap(() => {
+                this.accessToken.set(null);
+            }),
+        );
+    }
+
+    getAccessToken(): string | null {
+        return this.accessToken();
+    }
+
+    clearAccessToken(): void {
+        this.accessToken.set(null);
+    }
 }
