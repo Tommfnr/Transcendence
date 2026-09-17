@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
-import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { GroupCardComponent } from '../../components/group-card/group-card';
@@ -13,7 +12,7 @@ import { Location } from '@angular/common';
 
 @Component({
 	selector: 'app-groupParameter',
-	imports: [RouterLink, ButtonComponent, ButtonDirective, TitleBarComponent, GroupCardComponent],
+	imports: [ ButtonDirective, TitleBarComponent, GroupCardComponent],
 	templateUrl: './groupParameter.html',
 })
 
