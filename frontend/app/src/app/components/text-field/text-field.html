@@ -8,7 +8,21 @@
     </label>
     }
 
-    <input
+	@if (multiline()){
+		<textarea
+        [id]="id"
+        [placeholder]="placeholder()"
+        [value]="value()"
+        (input)="onInput($event)"
+		[disabled]="disabled()"
+		(blur)="touch.emit()"
+		[rows]="rows()";
+        [class]="classes + ' resize-none'"
+    ></textarea>
+	}
+	@else{
+
+		<input
         [id]="id"
         [type]="typeField()"
         [placeholder]="placeholder()"
@@ -18,6 +32,7 @@
 		(blur)="touch.emit()"
         [class]="classes"
     />
+	}
 
     @if (touched() && errors().length > 0) { @for (error of errors(); track
     error.kind) {
