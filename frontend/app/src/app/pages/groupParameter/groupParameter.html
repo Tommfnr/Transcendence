@@ -1,4 +1,4 @@
-<app-title-bar title="My groups" leading="back" [meta]="groupData().length + (groupData().length > 1 ? ' groups' : ' group')" (backClick)="goBack()"></app-title-bar>
+<app-title-bar title="My groups" leading="back" [meta]="groupData().length + (groupData().length > 1 ? ' groups' : ' group')"></app-title-bar>
 
 <div class="flex flex-col gap-4 pt-12">
     @for (group of groupData(); track group.id) {

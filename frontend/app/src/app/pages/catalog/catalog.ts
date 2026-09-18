@@ -89,12 +89,4 @@ export class Catalog implements OnInit {
     	this.modalService.openAddObject();
 	}
 
-	goBack(): void {
-	if (window.history.length > 1) {
-		this.location.back();
-	}
-	else {
-		this.router.navigate(['/app/dashboard']);
-	}
-}
 }
