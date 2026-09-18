@@ -1,11 +1,13 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { conversations, conversationMembers, messages, users } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { ChatsGateway, CHAT_EVENTS } from './chats.gateway'
+
+type ConversationMember = { id: number, username: string }
 
 @Injectable()
 export class ChatsService {
@@ -23,8 +25,35 @@ export class ChatsService {
 		return members.map((member) => member.userId)
 	}
 
-	findMy(userId: number) {
-		return this.db
+	// Members of several conversations at once, so a list never queries per row
+	private async findMembersByConversation(conversationIds: number[]) {
+		const byConversation = new Map<number, ConversationMember[]>()
+
+		if (conversationIds.length === 0)
+			return byConversation
+
+		const rows = await this.db
+				.select({
+					conversationId: conversationMembers.conversationId,
+					id: users.id,
+					username: users.username,
+				})
+				.from(conversationMembers)
+				.innerJoin(users, eq(users.id, conversationMembers.userId))
+				.where(inArray(conversationMembers.conversationId, conversationIds))
+				.orderBy(conversationMembers.id)
+
+		for (const { conversationId, ...member } of rows) {
+			const members = byConversation.get(conversationId) ?? []
+			members.push(member)
+			byConversation.set(conversationId, members)
+		}
+
+		return byConversation
+	}
+
+	async findMy(userId: number) {
+		const rows = await this.db
 				.select({
 					id: conversations.id,
 					createdAt: conversations.createdAt,
@@ -34,6 +63,14 @@ export class ChatsService {
 				.innerJoin(conversationMembers, eq(conversationMembers.conversationId, conversations.id))
 				.where(eq(conversationMembers.userId, userId))
 				.orderBy(desc(conversations.updatedAt))
+
+		// The client names a conversation after the people in it, not its id
+		const membersByConversation = await this.findMembersByConversation(rows.map((row) => row.id))
+
+		return rows.map((conversation) => ({
+			...conversation,
+			members: membersByConversation.get(conversation.id) ?? [],
+		}))
 	}
 
 	async findByIdOrThrow(conversationId: number) {
@@ -90,10 +127,20 @@ export class ChatsService {
 			return ({ conversation, message })
 		})
 
-		// Emitted after commit so clients never hear about rows that could still be rolled back
-		this.chatsGateway.emitToUsers([userId, dto.recipientId], CHAT_EVENTS.conversationNew, created)
+		// Carries its members like findMy does, so a brand new conversation is named right away
+		const membersByConversation = await this.findMembersByConversation([created.conversation.id])
+		const payload = {
+			conversation: {
+				...created.conversation,
+				members: membersByConversation.get(created.conversation.id) ?? [],
+			},
+			message: created.message,
+		}
 
-		return created
+		// Emitted after commit so clients never hear about rows that could still be rolled back
+		this.chatsGateway.emitToUsers([userId, dto.recipientId], CHAT_EVENTS.conversationNew, payload)
+
+		return payload
 	}
 
 	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {

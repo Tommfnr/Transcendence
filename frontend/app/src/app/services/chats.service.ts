@@ -1,13 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ConversationCreated, ConversationEntity, MessageEntity } from '../models/chat.model';
+import {
+    ConversationCreated,
+    ConversationEntity,
+    ConversationWithMembers,
+    MessageEntity,
+} from '../models/chat.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChatsService {
     private http = inject(HttpClient);
 
     findMy() {
-        return this.http.get<ConversationEntity[]>('/api/chats/my');
+        return this.http.get<ConversationWithMembers[]>('/api/chats/my');
     }
 
     findOne(conversationId: number) {
