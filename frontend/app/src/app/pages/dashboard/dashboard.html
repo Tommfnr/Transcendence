@@ -108,7 +108,7 @@
         type="button"
         (click)="toggleFab()"
         [attr.aria-label]="fabOpen() ? 'Close menu' : 'Open actions menu'"
-        class="fixed bottom-6 left-1/2 z-50 size-15 -translate-x-1/2"
+        class="fixed bottom-6 left-1/2 z-50 size-15 -translate-x-1/2 cursor-pointer"
     >
         @if (fabOpen()) {
             <img src="/icons/fab-cross.png" alt="" class="size-full" />
