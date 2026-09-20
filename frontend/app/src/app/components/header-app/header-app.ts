@@ -7,7 +7,7 @@ import { RefreshService } from '../../services/refresh.service';
   imports: [RouterLink],
   templateUrl: './header-app.html',
 })
-export class HeaderApp {
+export class HeaderAppComponent {
   private refreshService = inject(RefreshService)
-  readonly userName = computed(() => this.refreshService.user()?.username ?? 'Utilisateur');
+  readonly userName = computed(() => this.refreshService.user()?.username ?? 'User');
 }

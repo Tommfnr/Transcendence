@@ -1,6 +1,52 @@
-<main class="flex flex-1 flex-col gap-4 px-3">
-   <h1>Page: Profile</h1>
-  <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
-  <a routerLink="/app/catalog" class="text-primary underline">Object Catalog</a>
-  <a routerLink="/app/groupParameter" class="text-primary underline">My Groups</a>
-</main>
+<app-title-bar title="My profile" leading="avatar"></app-title-bar>
+
+<div class="flex flex-col gap-6 pt-12">
+    <section class="flex flex-col gap-2">
+        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
+        <app-list-row
+            editable
+            label="Last name"
+            [value]="'var name'"
+            (edit)="openEditProfileModal()"
+        ></app-list-row>
+        <app-list-row
+            editable
+            label="First name"
+            [value]="'var frist name'"
+            (edit)="openEditProfileModal()"
+        ></app-list-row>
+        <app-list-row
+            editable
+            label="Email address"
+            [value]="'pierre.examplereallylongaddress@example.com'"
+            (edit)="openEditProfileModal()"
+        ></app-list-row>
+        <app-list-row
+            editable
+            label="Profile picture"
+            [value]="'Edit'"
+            (edit)="openEditProfileModal()"
+        ></app-list-row>
+    </section>
+
+    <section class="flex flex-col gap-2">
+        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">MY CONTENT</h2>
+        <app-list-row
+            link="/app/catalog"
+            label="Item catalog"
+            [value]="'nb of items items'"
+        ></app-list-row>
+        <app-list-row
+            link="/app/groupParameter"
+            label="My groups"
+            [value]="'nb of groups'"
+        ></app-list-row>
+    </section>
+
+    <section class="flex flex-col gap-2">
+        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">ACCOUNT</h2>
+        <app-list-row label="Settings and privacy" link="/app"></app-list-row>
+        <app-list-row label="Help and support" link="/app"></app-list-row>
+    </section>
+    <button appButton [block]="true" size="large" variant="secondary" type="button">Log out</button>
+</div>

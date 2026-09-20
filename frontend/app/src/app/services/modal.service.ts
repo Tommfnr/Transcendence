@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ModalKind = 'addObject' | 'addPost' | 'addGroup' | null;
+export type ModalKind = 'addObject' | 'addPost' | 'addGroup' | 'editProfile' | null;
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
@@ -37,6 +37,10 @@ export class ModalService {
   openEditGroup(id: number): void {
     this.editGroupId.set(id);
     this.activeModal.set('addGroup');
+  }
+
+  openEditProfile(): void {
+	this.activeModal.set('editProfile');
   }
 
   close(): void {

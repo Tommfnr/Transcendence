@@ -4,6 +4,9 @@
 
 
 @theme {
+	/* Widths */
+	--container-app: 390px;
+	
 	/* Colors*/
 	--color-primary: #FF9D2E;
 	--color-secondary: #4B5563;
@@ -72,6 +75,7 @@
 	   chip labels. Never for anything the user must read carefully. */
 	--text-2xs: 0.625rem;
 	--text-2xs--line-height: 0.875rem;
+	--text-2xs--letter-spacing: -0.02em;
 
 	/* 12px — Caption. Secondary text inside cards: descriptions,
 	   group names, metadata lines. The smallest readable size. */

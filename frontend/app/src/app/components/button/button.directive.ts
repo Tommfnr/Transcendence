@@ -1,4 +1,4 @@
-import { Directive, HostBinding, Input } from '@angular/core';
+import { Directive, HostBinding, Input, booleanAttribute } from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary';
 export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
@@ -18,18 +18,24 @@ export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 export class ButtonDirective {
 	@Input() variant: ButtonVariant = 'primary';
 	@Input() size: ButtonSize = 'medium';
+	@Input({ transform: booleanAttribute }) block = false;
 
 	@HostBinding('class')
 	get classes(): string {
+		const display = this.block ? 'flex w-full' : 'inline-flex';
+		// disabled: covers the invalid-form state on submit CTAs — muted
+		// surface, no pointer, and the variant's hover/active must not fire.
 		const base =
-			'inline-flex cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-300 ease-in-out';
+			`${display} cursor-pointer items-center justify-center rounded-card font-bold transition-colors duration-150 ease-in-out`
+			+ ' disabled:bg-muted disabled:text-secondary disabled:cursor-not-allowed'
+			+ ' disabled:hover:bg-muted disabled:active:bg-muted';
 
-		// Hover lives in the variant, not the base: turning a secondary button
-		// orange has to switch its text colour too, or white lands on #FF7700
-		// at 2.7:1.
+		// Hover and active live in the variant, not the base: turning a
+		// secondary button orange has to switch its text colour too.
+		// active: is the touch-device feedback — hover never fires there.
 		const variants: Record<ButtonVariant, string> = {
-			primary: 'bg-primary text-on-primary hover:bg-alert',
-			secondary: 'bg-secondary text-on-secondary hover:bg-alert hover:text-on-primary',
+			primary: 'bg-primary text-on-primary hover:bg-alert active:bg-alert',
+			secondary: 'bg-secondary text-on-secondary hover:bg-primary hover:text-on-primary active:bg-primary active:text-on-primary',
 		};
 
 		const sizes: Record<ButtonSize, string> = {

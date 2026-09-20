@@ -20,7 +20,7 @@ export class StatusBadgeComponent {
 	private static readonly LABELS: Record<string, string> = {
 		pending: 'Pending',
 		done: 'Done',
-		available: 'Avaible',
+		available: 'Available',
 		lent: 'Lent'
 	};
 

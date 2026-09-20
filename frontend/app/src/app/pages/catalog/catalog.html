@@ -1,14 +1,24 @@
-<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-    <div class="mx-auto flex justify-between items-center w-full">
-        <div class="mx-auto flex items-center w-full">
-            <h1 class="truncate text-lg font-bold text-strong">Catalog</h1>
-            <h3 class="text-xs ml-[2%] text-gray-500/80">{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}</h3>
-        </div>
-        <a appButton (click)="openAddObjectModal()" variant="primary" size="small" class="self-end truncate">Add item</a>
+<app-title-bar
+    title="Item catalog"
+    leading="back"
+    meta="{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}"
+></app-title-bar>
+<div class="flex flex-col gap-4 pt-14">
+    <div class="fixed bottom-6 inset-x-0 z-10 mx-auto max-w-app px-4 flex items-center justify-end">
+        <app-fab-action
+            (pick)="openAddObjectModal()"
+			label="Add item"
+			tone="object"
+            >
+		</app-fab-action>
     </div>
 
-    <app-text-field placeholder="Rechercher..." typeField="search" [(value)]="searchTerm"></app-text-field>
-    <div class="flex flex-wrap gap-2 mt-2">
+    <app-text-field
+        placeholder="Search..."
+        typeField="search"
+        [(value)]="searchTerm"
+    ></app-text-field>
+    <div class="flex flex-wrap gap-2">
         @for (cat of categories; track cat.label) {
             <app-chip
                 [label]="cat.label"
@@ -32,4 +42,4 @@
             <p class="col-span-2">No objects match your search/filter.</p>
         }
     </div>
-</main>
+</div>
