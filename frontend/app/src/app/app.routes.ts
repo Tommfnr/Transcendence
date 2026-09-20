@@ -93,7 +93,7 @@ export const routes: Routes = [
         component: EditAddGroup
       },
       {
-        path: 'iCanHelp',
+        path: 'iCanHelp/:postId',
         component: ICanHelp
       },
       {
