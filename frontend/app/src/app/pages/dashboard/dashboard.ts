@@ -11,6 +11,10 @@ import { PostsService } from '../../services/posts.service';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { PostEntity, PostGroupData } from '../../models/post.model';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../models/user.model';
+
+
 
 type DashboardTab = 'requests' | 'offers';
 
@@ -20,6 +24,10 @@ type DashboardTab = 'requests' | 'offers';
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
+
+  private usersService = inject(UsersService);
+  private authors = signal<Map<number, User>>(new Map());
+
   private groupsService = inject(GroupsService);
   private postsService = inject(PostsService);
 
@@ -64,6 +72,14 @@ export class Dashboard implements OnInit {
 
     this.postsService.findMy().subscribe((data) => {
       this.posts.set(data);
+
+      const ownerIds = new Set(data.map((post) => post.ownerId));
+      for (const ownerId of ownerIds) {
+        this.usersService.findOne(ownerId).subscribe({
+          next: (user) => this.authors.update((map) => new Map(map).set(ownerId, user)),
+          error: (err) => console.error('Failed to load author', err),
+        });
+      }
 
       for (const post of data) {
         this.postsService.findGroups(post.id).subscribe((groups) => {
@@ -112,13 +128,13 @@ export class Dashboard implements OnInit {
     this.modalService.openAddGroup();
   }
 
-    /** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
+  /** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
   private toHelpRequest(post: PostEntity): HelpRequest {
     const groups = this.postGroup().get(post.id) ?? [];
 
     return {
       id: post.id,
-      authorName: 'Moi', // TODO: remplacer par le vrai nom une fois l API user exposee
+      authorName: this.authors().get(post.ownerId)?.username ?? '',
       groupName: groups.map((g) => g.name).join(', ') || 'Aucun groupe',
       timeAgo: this.formatTimeAgo(post.createdAt),
       title: post.title,
