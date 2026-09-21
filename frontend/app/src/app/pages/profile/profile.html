@@ -1,6 +1,16 @@
-<app-title-bar title="My profile" leading="avatar"></app-title-bar>
+<app-title-bar title="My profile" leading="back"></app-title-bar>
 
 <div class="flex flex-col gap-6 pt-12">
+    <section
+        class="flex items-center gap-4 rounded-card border border-primary-border bg-primary-surface p-4"
+    >
+        <app-avatar tone="brand" size="lg"></app-avatar>
+        <div class="min-w-0">
+            <p class="truncate text-lg font-bold text-text">{{ user()?.username }}</p>
+            <p class="truncate text-xs text-text-secondary">{{ user()?.email }}</p>
+        </div>
+    </section>
+
     <section class="flex flex-col gap-2">
         <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
         <app-list-row

@@ -1,28 +1,55 @@
-<app-title-bar title="Offer my Help" leading="back"></app-title-bar>
-<div class="flex flex-col gap-4 pt-14">
+<app-title-bar title="Offer my help" leading="back"></app-title-bar>
+<div class="flex flex-col gap-4 pt-14 flex-1">
     <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
         <app-avatar tone="brand"></app-avatar>
         <div class="flex flex-col gap-1">
-            <p class="text-text-secondary text-xs">For NAME 's request has really really long name</p>
-            <p class="font-bold text-sm">Looking for OBJECT has really really long name</p>
+            <p class="text-text-secondary text-xs">
+                For NAME 's request has really really long name
+            </p>
+            <p class="font-bold text-sm">Looking for OBJECT</p>
         </div>
     </section>
     <section class="gap-2 flex flex-col">
-        <h2 class="text-sm font-bold">Pick an item from my catalog</h2>
+        <h2 class="text-sm font-bold">
+            Pick an item from my catalog
+            <span class="text-sm font-light text-alert"> (coming soon)</span>
+        </h2>
         <div class="flex gap-4">
-            <button type="button" class="flex flex-1 justify-center  bg-card rounded-card  p-3 items-center gap-2 shadow-card  cursor-pointer">
-                <img src="/icons/book.svg" class="size-4" alt="Add item" />
+            <button
+                type="button"
+                class="flex flex-1 justify-center bg-card rounded-card p-3 items-center gap-2 shadow-card cursor-pointer transition-shadow hover:shadow-raised"
+            >
+                <img src="/icons/book.svg" class="size-4" />
                 <p class="font-bold">My catalog</p>
             </button>
-            <button type="button" class="flex flex-1  justify-center rounded-card p-3 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer">
-                <img src="/icons/add.svg" class="size-4" alt="Add item" />
+            <button
+                type="button"
+                (click)="openAddObjectModal()"
+                class="flex flex-1 justify-center rounded-card p-3 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
+            >
+                <img src="/icons/add.svg" class="size-4" />
                 <p>Add an item</p>
             </button>
         </div>
-		<p class="text-xs text-text-secondary">Your items in the CATEGORY OF DEMAND </p>
+        <p class="text-xs text-text-secondary">Your items in the CATEGORY OF DEMAND</p>
+        <div class="flex flex-wrap gap-2">
+            @for (item of demoItems; track item.id) {
+                <app-object-mini
+                    [name]="item.name"
+                    [selected]="item.id === selectedObjectId()"
+                    (pick)="selectedObjectId.set(item.id)"
+                />
+            }
+        </div>
     </section>
-	<section>
-		<p>Message (optional)</p>
-		<app-text-field placeholder="Enter a description of the help you can offer" type="text-area"></app-text-field>
-	</section>
+    <section>
+        <p>Message (optional)</p>
+        <app-text-field
+            multiline
+            placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
+        ></app-text-field>
+    </section>
+    <button appButton block variant="secondary" type="button" size="large" class="mt-auto">
+        Send my offer
+    </button>
 </div>
