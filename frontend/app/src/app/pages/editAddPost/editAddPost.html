@@ -1,82 +1,85 @@
-<app-modal
-  [title]="isEditMode() ? 'Edit Post' : 'Add Post'"
-  (closed)="onCancel()"
->
-  <main class="flex flex-1 flex-col gap-4 px-3">
-    <h1>
+<app-modal [title]="isEditMode() ? 'Edit Post' : 'Add Post'" (closed)="onCancel()">
+    <main class="flex flex-1 flex-col gap-4 px-3">
         @if (isEditMode()) {
-          Edit Post
+            <h1>Edit Post</h1>
+        } @else {
+            <div class="flex items-center gap-2">
+                Write to
+                <app-select-pill tone="accent" [label]="groupsLabel()">
+                    <button type="button" (click)="toggleAllGroups()" class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background">All my groups</button>
+					<div class="h-px bg-muted"></div>
+					<div class="max-h-56 overflow-y-auto">
+						@for (group of myGroups(); track group.id)
+						{
+							<button type="button" (click)="toggleGroup(group.id)" class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background">
+								<span [class]="checkboxClasses(selectedGroupIds().has(group.id))">
+									@if (selectedGroupIds().has(group.id)) { ✓ }
+								</span>
+								{{ group.name }}
+							</button>
+						}
+					</div>
+                </app-select-pill>
+            </div>
         }
-        @else {
-          Add Post
-        }
-    </h1>
-    <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
+        <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
-  <form (submit)="onSubmit($event)">
+        <form (submit)="onSubmit($event)">
+            @if (bannerErrors().length > 0) {
+                <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+                    @for (msg of bannerErrors(); track msg) {
+                        <p>{{ msg }}</p>
+                    }
+                </div>
+            }
 
-    @if (bannerErrors().length > 0) {
-    <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
-      @for (msg of bannerErrors(); track msg) {
-      <p>{{ msg }}</p>
-      }
-    </div>
-    }
-    
-    <div>
-      Title <input type="text" [formField]="postForm.title" class="border" />
-    </div>
+            <div>Title <input type="text" [formField]="postForm.title" class="border" /></div>
 
-    <div>
-      Description <input type="text" [formField]="postForm.description" class="border" />
-    </div>
+            <div>
+                Description <input type="text" [formField]="postForm.description" class="border" />
+            </div>
 
-    <div>
-      ObjectType
-      <select [formField]="postForm.objectType" class="border">
-        @for (objectType of objectTypes; track objectType) {
-          <option [value]="objectType">{{ objectType }}</option>
-        }
-      </select>
-    </div>
+            <div>
+                ObjectType
+                <select [formField]="postForm.objectType" class="border">
+                    @for (objectType of objectTypes; track objectType) {
+                        <option [value]="objectType">{{ objectType }}</option>
+                    }
+                </select>
+            </div>
 
-    <div>
-      Status
-      <select [formField]="postForm.status" class="border">
-          <option value="open">Open</option>
-          <option value="closed">Closed</option>
-      </select>
-    </div>
+            <div>
+                Status
+                <select [formField]="postForm.status" class="border">
+                    <option value="open">Open</option>
+                    <option value="closed">Closed</option>
+                </select>
+            </div>
 
-    <div>
-      From <input type="date" [formField]="postForm.fromDate" class="border" />
-    </div>
+            <div>From <input type="date" [formField]="postForm.fromDate" class="border" /></div>
 
-    <div>
-      To <input type="date" [formField]="postForm.toDate" class="border" />
-    </div>
+            <div>To <input type="date" [formField]="postForm.toDate" class="border" /></div>
 
-    <div>
-      Which Groups:
-      @for (group of myGroups(); track group.id) {
-        <div>
-          <label>
-            <input type="checkbox" (change)="onGroupToggle($event, group.id)" /> {{ group.name }}
-          </label>
-        </div>
-      } @empty {
-        <p>You're not in any groups yet.</p>
-      }
-    </div>
+            <!-- <div>
+                Which Groups:
+                @for (group of myGroups(); track group.id) {
+                    <div>
+                        <label>
+                            <input type="checkbox" (change)="onGroupToggle($event, group.id)" />
+                            {{ group.name }}
+                        </label>
+                    </div>
+                } @empty {
+                    <p>You're not in any groups yet.</p>
+                }
+            </div> -->
 
-    <app-button type="submit" variant="primary">
-      @if (isEditMode()) {
-        Save Changes
-      } @else {
-        Add Post
-      }
-    </app-button>
-  </form>
-
-  </main>
+            
+                @if (isEditMode()) {
+                   <app-button type="submit" variant="primary"> Save Changes </app-button>
+                } @else {
+                    <button appButton block size="large" variant="secondary" type="submit" [disabled]="selectedGroupIds().size === 0">Send the request</button>
+                }
+        </form>
+    </main>
 </app-modal>
