@@ -59,7 +59,10 @@ export class LendingService {
 				message: dto.message,
 			}).returning())
 		} catch (err: unknown) {
-			if (err instanceof Error && 'code' in err && err.code === '23P01') // exclusion_violation, no overlap constraint
+			const wrappedCause = err instanceof Error ? (err as { cause?: unknown }).cause : undefined
+			const cause = wrappedCause instanceof Error ? wrappedCause : err
+
+			if (cause instanceof Error && 'code' in cause && cause.code === '23P01') // exclusion_violation, no overlap constraint
 				throw new ConflictException('Object already booked for that period')
 			throw err
 		}
