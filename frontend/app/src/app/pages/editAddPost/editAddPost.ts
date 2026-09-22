@@ -1,11 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
 import { GroupsService } from '../../services/groups.service';
 import { PostInput, PostGroupData } from '../../models/post.model';
 import { GroupEntity } from '../../models/group.model';
-import { OBJECT_TYPES } from '../../models/object.model';
+import { OBJECT_TYPES, ObjectType } from '../../models/object.model';
 import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { Modal } from '../../components/modal/modal';
@@ -13,11 +13,13 @@ import { ModalService } from '../../services/modal.service';
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { SelectPillComponent } from '../../components/select-pill/select-pill';
+import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ChipComponent } from '../../components/chip/chip';
 
 
 @Component({
 	selector: 'app-editAddPost',
-	imports: [FormField, ButtonComponent, ButtonDirective, SelectPillComponent, RouterLink, Modal],
+	imports: [FormField, ButtonDirective, SelectPillComponent, Modal, TextFieldComponent, ChipComponent],
 	templateUrl: './editAddPost.html',
 })
 export class EditAddPost implements OnInit {
@@ -32,6 +34,13 @@ export class EditAddPost implements OnInit {
 	readonly myPostGroups = signal<PostGroupData[]>([]);
 	readonly objectTypes = OBJECT_TYPES;
 
+	readonly categories = [
+		{ label: 'DIY', emoji: '🛠️' },
+		{ label: 'Electronics', emoji: '💻' },
+		{ label: 'Leisure', emoji: '🎾' },
+		{ label: 'Other', emoji: '📦' },
+	] as const;
+
 	readonly selectedGroupIds = signal<Set<number>>(new Set());
 
 	bannerErrors = signal<string[]>([]);
@@ -45,6 +54,8 @@ export class EditAddPost implements OnInit {
 		toDate: '',
 		groupIds: [],
 	});
+
+	readonly postValue = this.post.asReadonly();
 
 	postForm = form(this.post, (fieldPath) => {
 		required(fieldPath.title, { message: 'Title is required' });
@@ -151,12 +162,16 @@ export class EditAddPost implements OnInit {
 
 	readonly allSelected = computed(() =>
 		this.myGroups().length > 0 && this.selectedGroupIds().size == this.myGroups().length);
-	
+
 	toggleAllGroups(): void {
 		if (this.allSelected()) {
 			this.selectedGroupIds.set(new Set());
 		} else {
 			this.selectedGroupIds.set(new Set(this.myGroups().map((g) => g.id)));
 		}
+	}
+
+	setObjectType(type: ObjectType): void {
+		this.post.update((p) => ({ ...p, objectType: type }));
 	}
 }

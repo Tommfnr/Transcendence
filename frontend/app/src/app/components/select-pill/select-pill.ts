@@ -34,7 +34,7 @@ export class SelectPillComponent {
 	}
 
 	get classes() : string {
-		const base = 'inline-flex items-center rounded-full border pl-4 pr-3 py-2 cursor-pointer text-sm';
+		const base = 'inline-flex items-center rounded-full border pl-4 pr-3 py-2 cursor-pointer text-sm ';
 
 		const tones: Record<SelectPillTone, string> = {
 			accent: "bg-complementary-surface text-complementary",

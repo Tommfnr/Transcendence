@@ -1,37 +1,113 @@
 <app-modal [title]="isEditMode() ? 'Edit Post' : 'Add Post'" (closed)="onCancel()">
-    <main class="flex flex-1 flex-col gap-4 px-3">
+    <form (submit)="onSubmit($event)" class="flex flex-col flex-1 px-1 gap-4">
+        @if (bannerErrors().length > 0) {
+            <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+                @for (msg of bannerErrors(); track msg) {
+                    <p>{{ msg }}</p>
+                }
+            </div>
+        }
         @if (isEditMode()) {
             <h1>Edit Post</h1>
         } @else {
-            <div class="flex items-center gap-2">
-                Write to
+            <div class="flex items-center gap-2 pt-[1px]">
+                <p class="text-sm font-bold text-text-secondary">Write to</p>
                 <app-select-pill tone="accent" [label]="groupsLabel()">
-                    <button type="button" (click)="toggleAllGroups()" class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background">All my groups</button>
-					<div class="h-px bg-muted"></div>
-					<div class="max-h-56 overflow-y-auto">
-						@for (group of myGroups(); track group.id)
-						{
-							<button type="button" (click)="toggleGroup(group.id)" class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background">
-								<span [class]="checkboxClasses(selectedGroupIds().has(group.id))">
-									@if (selectedGroupIds().has(group.id)) { ✓ }
-								</span>
-								{{ group.name }}
-							</button>
-						}
-					</div>
+                    <button
+                        type="button"
+                        (click)="toggleAllGroups()"
+                        class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background"
+                    >
+                        <span [class]="checkboxClasses(allSelected())">
+                            @if (allSelected()) {
+                                ✓
+                            }
+                        </span>
+                        All my groups
+                    </button>
+                    <div class="h-px bg-muted"></div>
+                    <div class="max-h-56 overflow-y-auto">
+                        @for (group of myGroups(); track group.id) {
+                            <button
+                                type="button"
+                                (click)="toggleGroup(group.id)"
+                                class="flex w-full items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background"
+                            >
+                                <span [class]="checkboxClasses(selectedGroupIds().has(group.id))">
+                                    @if (selectedGroupIds().has(group.id)) {
+                                        ✓
+                                    }
+                                </span>
+                                {{ group.name }}
+                            </button>
+                        }
+                    </div>
                 </app-select-pill>
             </div>
         }
-        <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
-        <form (submit)="onSubmit($event)">
-            @if (bannerErrors().length > 0) {
-                <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
-                    @for (msg of bannerErrors(); track msg) {
-                        <p>{{ msg }}</p>
-                    }
-                </div>
-            }
+        <div>
+            <p>Hello everyone,</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <p class="text-lg font-bold">I'm looking for</p>
+            <div class="max-w-35 min-w-30">
+                <app-text-field
+                    placeholder="an item"
+                    tone="complementary"
+                    [formField]="postForm.title"
+                ></app-text-field>
+            </div>
+        </div>
+
+        <section class="flex flex-wrap justify-between gap-2">
+            <div class="flex flex-col gap-1">
+                <p class="text-2xs font-bold text-text-secondary">From</p>
+                <input
+                    type="date"
+                    [formField]="postForm.fromDate"
+                    class="border border-complementary rounded-card bg-complementary-surface text-secondary text-sm px-4 py-2 max-w-35 focus:outline-none focus:ring-1 focus:ring-complementary"
+                />
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <p class="text-2xs font-bold text-text-secondary">To</p>
+                <input
+                    type="date"
+                    [formField]="postForm.toDate"
+                    class="border border-complementary rounded-card bg-complementary-surface text-secondary text-sm px-4 py-2 max-w-35 focus:outline-none focus:ring-1 focus:ring-complementary"
+                />
+            </div>
+        </section>
+
+        <div class="flex flex-col gap-2">
+            <p class="text-2xs font-bold text-text-secondary">Category</p>
+            <div class="flex flex-wrap gap-2">
+                @for (cat of categories; track cat.label) {
+                    <app-chip
+                        [label]="cat.label"
+                        [emoji]="cat.emoji"
+                        [selected]="cat.label === postForm.objectType().value()"
+                        (pick)="setObjectType(cat.label)"
+                        tone="complementary"
+                    />
+                }
+            </div>
+        </div>
+
+        <div>
+            <p class="font-bold text-lg">in order to</p>
+            <app-text-field
+                multiline
+                tone="complementary"
+                placeholder="Describe the use you will do"
+                rows="3"
+                [formField]="postForm.description"
+            ></app-text-field>
+        </div>
+
+        <!-- <form (submit)="onSubmit($event)">
+
 
             <div>Title <input type="text" [formField]="postForm.title" class="border" /></div>
 
@@ -58,9 +134,9 @@
 
             <div>From <input type="date" [formField]="postForm.fromDate" class="border" /></div>
 
-            <div>To <input type="date" [formField]="postForm.toDate" class="border" /></div>
+            <div>To <input type="date" [formField]="postForm.toDate" class="border" /></div> -->
 
-            <!-- <div>
+        <!-- <div>
                 Which Groups:
                 @for (group of myGroups(); track group.id) {
                     <div>
@@ -73,13 +149,28 @@
                     <p>You're not in any groups yet.</p>
                 }
             </div> -->
-
-            
-                @if (isEditMode()) {
-                   <app-button type="submit" variant="primary"> Save Changes </app-button>
-                } @else {
-                    <button appButton block size="large" variant="secondary" type="submit" [disabled]="selectedGroupIds().size === 0">Send the request</button>
-                }
-        </form>
-    </main>
+        @if (isEditMode()) {
+            <button
+                appButton
+                block
+                size="large"
+                type="submit"
+                variant="secondary"
+                [disabled]="postForm().invalid()"
+            >
+                Save Changes
+            </button>
+        } @else {
+            <button
+                appButton
+                block
+                size="large"
+                variant="secondary"
+                type="submit"
+                [disabled]="selectedGroupIds().size === 0 || postForm().invalid()"
+            >
+                Send the request
+            </button>
+        }
+    </form>
 </app-modal>

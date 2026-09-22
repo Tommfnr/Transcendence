@@ -1,10 +1,16 @@
 <div class="relative inline-block">
-		<button type="button" (click)="toggle()" [attr.aria-expanded]="open()" [class]="classes">{{ label() }}<img src="/icons/chevron-down.svg" class="size-4 transition transform" [class.-rotate-180]="open()"></button>
+    <button type="button" (click)="toggle()" [attr.aria-expanded]="open()" [class]="classes" [class.ring-1]="open()">
+        {{ label()
+        }}<img
+            src="/icons/chevron-down.svg"
+            class="size-4 transition transform"
+            [class.-rotate-180]="open()"
+        />
+    </button>
 
-		@if (open())
-		{
-			<div class="absolute left-0 top-full z-20 mt-1 w-60 rounded-card bg-card p-1 shadow-raided">
-				<ng-content />
-			</div>
-		}
+    @if (open()) {
+        <div class="absolute left-0 top-full z-20 mt-1 w-60 rounded-card bg-card p-1 shadow-raided">
+            <ng-content />
+        </div>
+    }
 </div>
