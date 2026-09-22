@@ -1,0 +1,12 @@
+<button type="button" (click)="pick.emit()" [class]="classes()">
+	<div class="flex h-14 w-full items-center justify-center bg-muted">
+		@if (imageUrl()) {
+			<img [src]="imageUrl()" [alt]="name()" class="h-full w-full object-cover" />
+		} @else {
+			<img src="/icons/tag.svg" alt="" class="size-5" />
+		}
+	</div>
+	<div class="w-full bg-card p-2">
+		<p class="truncate text-sm font-bold">{{ name() }}</p>
+	</div>
+</button>

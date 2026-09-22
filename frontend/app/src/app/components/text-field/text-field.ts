@@ -1,5 +1,6 @@
 import { Component, input, output, model } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { booleanAttribute, numberAttribute } from '@angular/core';
 
 
 export type TextFieldTone = 'white' | 'field' | 'complementary';
@@ -25,6 +26,10 @@ export class TextFieldComponent implements FormValueControl<string> {
 	readonly placeholder = input.required<string>();
 	readonly typeField = input<TextFieldType>('text');
 	readonly label = input<string>();
+
+	/* Text-area specific */
+	readonly multiline = input(false, { transform: booleanAttribute});
+	readonly rows = input(3, { transform: numberAttribute });
 
 	private static count = 0;
 	id = `text-field-${TextFieldComponent.count++}`;
