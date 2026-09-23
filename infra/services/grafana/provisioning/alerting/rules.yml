@@ -1,0 +1,40 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: pep-server-alerts
+    folder: Alerts
+    interval: 1m
+    rules:
+      - uid: target-down
+        title: Target down
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: lt
+                    params: [1]
+              refId: C
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: A Prometheus scrape target stopped responding
+
+          
