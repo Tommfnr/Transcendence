@@ -92,7 +92,8 @@ export class InternalServiceClient {
 			}
 
 			try {
-				return (await res.json()) as T
+				const text = await res.text()
+				return (text === '' ? null : JSON.parse(text)) as T
 			} catch (err) {
 				if (controller.signal.aborted) {
 					throw new InternalServiceError(0, `${method} ${path} failed: ${(err as Error).message}`, { cause: err })

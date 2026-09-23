@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/common'
+import { Controller, Get, HttpCode, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/common'
 import { InternalAuthGuard, PostView } from '@pep/shared'
 import { PostsService } from '../posts/posts.service'
 
@@ -15,6 +15,7 @@ export class InternalPostsController {
 	}
 
 	@Put(':id/close')
+	@HttpCode(204)
 	async close(@Param('id', ParseIntPipe) id: number): Promise<void> {
 		await this.postsService.closeInternal(id)
 	}
