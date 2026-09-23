@@ -13,6 +13,7 @@ export const conversationMembers = pgTable('conversation_members', {
 	conversationId:	integer('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
 	userId:			integer('user_id').notNull(),
 	createdAt:		timestamptz('created_at').notNull().defaultNow(),
+	updatedAt:		timestamptz('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniqueMembership: unique().on(table.conversationId, table.userId),
 }))
@@ -23,4 +24,5 @@ export const messages = pgTable('messages', {
 	content:			text('content').notNull(),
 	ownerId:			integer('owner_id').notNull(),
 	createdAt:			timestamptz('created_at').notNull().defaultNow(),
+	updatedAt:			timestamptz('updated_at').notNull().defaultNow(),
 })

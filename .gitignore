@@ -30,6 +30,7 @@ docs/
 zhelp
 scripts/
 coverage/
+tests/
 
 # Test files
 *.spec.ts

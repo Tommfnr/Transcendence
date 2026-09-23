@@ -13,7 +13,7 @@ export class GroupOwnerGuard implements CanActivate {
 		const groupId = Number(req.params.groupId)
 
 		if (!Number.isInteger(groupId))
-			throw new BadRequestException('groupId must be a number')
+			throw new BadRequestException('Invalid group id')
 
 		const [group] = await this.db
 			.select()

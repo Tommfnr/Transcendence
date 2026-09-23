@@ -12,6 +12,7 @@ async function bootstrap() {
 	// gateway owns no routes : every request is forwarded to a domain service by path prefix
 	app.use(buildProxyMiddleware(ROUTES, proxies))
 	attachUpgradeProxy(app.getHttpServer(), ROUTES, proxies)
+	app.getHttpServer().keepAliveTimeout = 125_000
 	await app.listen(3000, '0.0.0.0')
 }
 void bootstrap().catch((err) => {

@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, serial, integer, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, pgEnum, serial, integer, timestamp, varchar } from 'drizzle-orm/pg-core'
 
 const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
@@ -14,9 +14,11 @@ export const lending = pgTable('lending', {
 	objectId: 									integer('object_id').notNull(),
 	lenderId: 									integer('lender_id').notNull(),
 	borrowerId:									integer('borrower_id').notNull(),
+	postId:											integer('post_id'),
 	status:											lendingStatusEnum('status').notNull().default('created'),
 	lendedFrom: 								timestamptz('lended_from').notNull(),
 	lendedTo:										timestamptz('lended_to').notNull(),
+	message:										varchar('message', { length: 250 }),
 	pickedUpAt:									timestamptz('picked_up_at'),
 	borrowerReturnedAt: 				timestamptz('borrower_returned_at'),
 	lenderConfirmedReturnedAt:	timestamptz('lender_confirmed_returned_at'),

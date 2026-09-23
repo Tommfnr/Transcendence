@@ -5,6 +5,7 @@ const lendingDateSchema = z.iso.datetime({ offset: true }).or(z.iso.datetime()).
 
 export const createTransactionSchema = z.object({
 	objectId: z.number('Please input a number').int().positive(),
+	postId: z.number('Please input a number').int().positive().optional(),
 	lendedFrom: lendingDateSchema,
 	lendedTo: lendingDateSchema,
 	message: z.string().trim().max(250, 'Max 250 characters').optional(),

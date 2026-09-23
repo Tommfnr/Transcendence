@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { users } from '../database/schema'
@@ -48,7 +48,17 @@ export class UsersService {
 
 	async create(dto: RegisterDto) {
 		const h_password = await argon2.hash(dto.h_password)
-		const [user] = await this.db.insert(users).values({ ...dto, h_password }).returning()
+		let user: typeof users.$inferSelect
+		try {
+			;[user] = await this.db.insert(users).values({ ...dto, h_password }).returning()
+		}
+		catch (err) {
+			const code = (err as { cause?: { code?: string, constraint_name?: string } })?.cause?.code
+			if (code === '23505') {
+				throw new ConflictException('Email or username already exists')
+			}
+			throw err
+		}
 		const { h_password: _, ...safeUser } = user
 		await this.eventPublisher.publish(makeEvent(EVENT.UserRegistered, 'auth', {
 			userId: safeUser.id,
