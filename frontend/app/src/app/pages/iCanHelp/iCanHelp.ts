@@ -81,9 +81,9 @@ export class ICanHelp implements OnInit {
         const post = this.post();
         if (!post) return '';
         const diffH = Math.floor((Date.now() - new Date(post.createdAt).getTime()) / 3_600_000);
-        if (diffH < 1) return "il y a moins d'1h";
-        if (diffH < 24) return `il y a ${diffH}h`;
-        return `il y a ${Math.floor(diffH / 24)}j`;
+        if (diffH < 1) return 'less than 1h ago';
+        if (diffH < 24) return `${diffH}h ago`;
+        return `${Math.floor(diffH / 24)}d ago`;
     });
 
 }
