@@ -7,6 +7,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostEntity, PostGroupData } from '../../models/post.model';
 import { PostsService } from '../../services/posts.service';
 import { UsersService } from '../../services/users.service';
+import { LendingService } from '../../services/lending.service';
 import { User } from '../../models/user.model';
 
 
@@ -38,6 +39,9 @@ export class ICanHelp implements OnInit {
         return groups.map((g) => g.name).join(', ') || 'Aucun groupe';
     });
 
+    private lendingService = inject(LendingService);
+    readonly helperCount = signal<number>(0);
+
     readonly hasChosenHelper = computed(() => this.post()?.status === 'closed');
 
     ngOnInit(): void {
@@ -49,12 +53,15 @@ export class ICanHelp implements OnInit {
                     error: (err) => console.error('Failed to load author', err),
                 });
             },
-
             error: () => this.errorMessage.set('This request no longer exists'),
         });
         this.postsService.findGroups(this.postId).subscribe({
             next: (groups) => this.postGroups.set(groups),
             error: (err) => console.error('Failed to load post groups', err),
+        });
+        this.lendingService.countForPost(this.postId).subscribe({
+            next: ({ count }) => this.helperCount.set(count),
+            error: (err) => console.error('Failed to load helper count', err),
         });
     }
 

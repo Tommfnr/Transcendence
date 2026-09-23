@@ -16,6 +16,10 @@ export class LendingService {
         return this.http.post<LendingEntity>('/api/lending', body);
     }
 
+    countForPost(postId: number) {
+        return this.http.get<{ count: number }>(`/api/lending/post/${postId}/count`);
+    }
+
     findOne(id: number) {
         return this.http.get<LendingEntity>(`/api/lending/${id}`);
     }

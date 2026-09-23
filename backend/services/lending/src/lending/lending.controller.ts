@@ -6,7 +6,7 @@ import { CurrentUser, SharedAuthGuard } from '@pep/shared'
 @UseGuards(SharedAuthGuard)
 @Controller('lending')
 export class LendingController {
-	constructor(private readonly lendingService: LendingService) {}
+	constructor(private readonly lendingService: LendingService) { }
 
 	@Get()
 	listAll(@CurrentUser('sub') userId: number) {
@@ -16,6 +16,11 @@ export class LendingController {
 	@Post()
 	newTransaction(@Body() dto: CreateTransactionDto, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.newTransaction(dto, userId))
+	}
+
+	@Get('post/:postId/count')
+	countForPost(@Param('postId', ParseIntPipe) postId: number) {
+		return (this.lendingService.countForPost(postId))
 	}
 
 	@Get(':id')

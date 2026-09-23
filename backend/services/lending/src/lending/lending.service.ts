@@ -1,7 +1,7 @@
 import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
-import { and, desc, eq, or } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, or } from 'drizzle-orm'
 import { lending } from '../database/schema'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsProxyService } from './objects-proxy.service'
@@ -10,10 +10,10 @@ import { PostsProxyService } from './posts-proxy.service'
 @Injectable()
 export class LendingService {
 	constructor(
-		@Inject(DB) private db : PostgresJsDatabase,
+		@Inject(DB) private db: PostgresJsDatabase,
 		private readonly objectsProxy: ObjectsProxyService,
 		private readonly postsProxy: PostsProxyService,
-	) {}
+	) { }
 
 	async listAll(userId: number) {
 		return (this.db
@@ -75,6 +75,14 @@ export class LendingService {
 			.returning({ id: lending.id })
 
 		return (deleted.length)
+	}
+
+	async countForPost(postId: number) {
+		const [row] = await this.db
+			.select({ count: count() })
+			.from(lending)
+			.where(and(eq(lending.postId, postId), inArray(lending.status, ['pending', 'accepted'])))
+		return { count: row.count }
 	}
 
 	async findOne(id: number, userId: number) {
