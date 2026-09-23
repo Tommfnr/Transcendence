@@ -23,6 +23,7 @@ export class ICanHelp implements OnInit {
     readonly author = signal<User | null>(null);
     readonly authorName = computed(() => this.author()?.username ?? '');
 
+    private router = inject(Router);
     private route = inject(ActivatedRoute);
     readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 
@@ -36,6 +37,8 @@ export class ICanHelp implements OnInit {
         const groups = this.postGroups();
         return groups.map((g) => g.name).join(', ') || 'Aucun groupe';
     });
+
+    readonly hasChosenHelper = computed(() => this.post()?.status === 'closed');
 
     ngOnInit(): void {
         this.postsService.findOne(this.postId).subscribe({
@@ -63,11 +66,6 @@ export class ICanHelp implements OnInit {
         if (!post) return '';
         return `${this.formatDate(post.fromDate)} - ${this.formatDate(post.toDate)}`;
     });
-
-    readonly helperCount = signal<number>(0);
-    readonly hasChosenHelper = signal<boolean>(false);
-
-    private router = inject(Router);
 
     goToOfferHelp(): void {
         this.router.navigate(['/app/offerHelp', this.postId]);
