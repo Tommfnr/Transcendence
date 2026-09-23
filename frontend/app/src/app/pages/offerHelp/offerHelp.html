@@ -1,58 +1,72 @@
-<app-modal
-  title="Proposer mon aide"
-  (closed)="onCancel()"
->
-  <form (submit)="onSubmit($event)" class="flex flex-1 flex-col gap-4 px-3">
+<app-title-bar title="Offer my help" leading="back"></app-title-bar>
+<div class="flex flex-col gap-4 pt-14 flex-1">
     @if (post(); as p) {
-      <div class="flex flex-col gap-1">
-        <h2 class="text-sm font-bold text-strong">{{ p.title }}</h2>
-        <p class="text-xs text-text">{{ p.description }}</p>
-      </div>
+        <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
+            <app-avatar tone="brand"></app-avatar>
+            <div class="flex flex-col gap-1">
+                @if (authorName()) {
+                    <p class="text-text-secondary text-xs">For {{ authorName() }}'s request</p>
+                }
+                <p class="font-bold text-sm">{{ p.title }}</p>
+            </div>
+        </section>
     }
-
+    <section class="gap-2 flex flex-col">
+        <h2 class="text-sm font-bold">Pick an item from my catalog</h2>
+        <div class="flex gap-4">
+            <a
+                routerLink="/app/catalog"
+                class="flex flex-1 justify-center bg-card rounded-card p-3 items-center gap-2 shadow-card cursor-pointer transition-shadow hover:shadow-raised"
+            >
+                <img src="/icons/book.svg" class="size-4" alt="" />
+                <p class="font-bold">My catalog</p>
+            </a>
+            <a
+                routerLink="/app/editAddObject"
+                class="flex flex-1 justify-center rounded-card p-3 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
+            >
+                <img src="/icons/add.svg" class="size-4" alt="" />
+                <p>Add an item</p>
+            </a>
+        </div>
+        <p class="text-xs text-text-secondary">Your available items</p>
+        <div class="flex flex-wrap gap-2">
+            @for (object of availableObjects(); track object.id) {
+                <app-object-mini
+                    [name]="object.name"
+                    [selected]="object.id === selectedObjectId()"
+                    (pick)="selectedObjectId.set(object.id)"
+                />
+            } @empty {
+                <p class="text-xs text-text-secondary">You have no available item yet.</p>
+            }
+        </div>
+    </section>
+    <section>
+        <p>Message (optional)</p>
+        <app-text-field
+            multiline
+            [(value)]="message"
+            placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
+        ></app-text-field>
+    </section>
     @if (bannerErrors().length > 0) {
-      <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
-        @for (msg of bannerErrors(); track msg) {
-          <p>{{ msg }}</p>
-        }
-      </div>
+        <div class="rounded-card border border-error p-3 text-sm text-error">
+            @for (msg of bannerErrors(); track msg) {
+                <p>{{ msg }}</p>
+            }
+        </div>
     }
-
-    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
-      Objet à prêter
-      <select (change)="onObjectChange($event)" class="h-10 rounded-sm bg-card px-3 shadow-raised">
-        <option value="">Choisir un objet</option>
-        @for (object of availableObjects(); track object.id) {
-          <option [value]="object.id">{{ object.name }}</option>
-        } @empty {
-          <option disabled>Aucun objet disponible</option>
-        }
-      </select>
-    </label>
-
-    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
-      Du
-      <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="lendedFrom" />
-    </label>
-
-    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
-      Au
-      <app-date-picker appearance="button" placeholder="Choisir une date" [minDate]="lendedFrom()" [(value)]="lendedTo" />
-    </label>
-
-    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
-      Message (optionnel)
-      <textarea
-        (input)="onMessageChange($event)"
-        maxlength="250"
-        rows="3"
-        class="rounded-sm bg-card px-3 py-2 text-xs shadow-raised"
-      ></textarea>
-    </label>
-
-    <div class="flex justify-end gap-2">
-      <app-button type="button" variant="secondary" (click)="onCancel()">Annuler</app-button>
-      <app-button type="submit" variant="primary">Proposer</app-button>
-    </div>
-  </form>
-</app-modal>
+    <button
+        appButton
+        block
+        variant="secondary"
+        type="button"
+        size="large"
+        class="mt-auto"
+        [disabled]="submitting()"
+        (click)="onSubmit()"
+    >
+        Send my offer
+    </button>
+</div>
