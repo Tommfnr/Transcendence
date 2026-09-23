@@ -209,8 +209,6 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
-    ports:
-      - "9090:9090"
     volumes:
     - prometheus-data:/prometheus
 
@@ -222,8 +220,6 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
-    ports:
-      - "3000:3000"
     depends_on:
       - prometheus
 
