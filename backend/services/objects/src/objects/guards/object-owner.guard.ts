@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../../database/schema'
 import { DB } from '../../database/database.module'
+import { parseId } from '@pep/shared'
 
 @Injectable()
 export class ObjectOwnerGuard implements CanActivate {
@@ -10,7 +11,7 @@ export class ObjectOwnerGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest()
-		const objectId = Number(req.params.objectId)
+		const objectId = parseId(req.params.objectId)
 
 		const [object] = await this.db
 			.select()

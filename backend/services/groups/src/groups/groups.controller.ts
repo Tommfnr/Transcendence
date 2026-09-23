@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto'
-import { CurrentUser, SharedAuthGuard } from '@pep/shared'
+import { CurrentUser, SharedAuthGuard, ParseIdPipe } from '@pep/shared'
 import { GroupAdminGuard } from './guards/group-admin.guard'
 import { GroupMemberGuard } from './guards/group-member.guard'
 import { GroupOwnerGuard } from './guards/group-owner.guard'
@@ -24,13 +24,13 @@ export class GroupsController {
 	}
 
 	@Get(':groupId')
-	findOne(@Param('groupId', ParseIntPipe) groupId: number) {
+	findOne(@Param('groupId', ParseIdPipe) groupId: number) {
 		return (this.groupsService.findByIdOrThrow(groupId))
 	}
 
 	@Get(':groupId/members')
 	@UseGuards(GroupMemberGuard)
-	findMembers(@Param('groupId', ParseIntPipe) groupId: number) {
+	findMembers(@Param('groupId', ParseIdPipe) groupId: number) {
 		return (this.groupsService.findMembers(groupId))
 	}
 
@@ -41,37 +41,37 @@ export class GroupsController {
 
 	@Post(':groupId/members/:targetUserId')
 	@UseGuards(GroupAdminGuard)
-	addMember(@Param('groupId', ParseIntPipe) groupId: number, @Param('targetUserId', ParseIntPipe) targetUserId: number) {
+	addMember(@Param('groupId', ParseIdPipe) groupId: number, @Param('targetUserId', ParseIdPipe) targetUserId: number) {
 		return (this.groupsService.addMember(groupId, targetUserId))
 	}
 
 	@Patch(':groupId')
 	@UseGuards(GroupAdminGuard)
-	updateGroup(@Param('groupId', ParseIntPipe) groupId: number, @Body() dto: UpdateGroupDto) {
+	updateGroup(@Param('groupId', ParseIdPipe) groupId: number, @Body() dto: UpdateGroupDto) {
 		return (this.groupsService.updateGroup(groupId, dto))
 	}
 
 	@Patch(':groupId/members/:targetUserId/role')
 	@UseGuards(GroupAdminGuard)
-	updateMemberRole(@Param('groupId', ParseIntPipe) groupId: number, @Param('targetUserId', ParseIntPipe) targetUserId: number, @Body() dto: UpdateMemberRoleDto) {
+	updateMemberRole(@Param('groupId', ParseIdPipe) groupId: number, @Param('targetUserId', ParseIdPipe) targetUserId: number, @Body() dto: UpdateMemberRoleDto) {
 		return (this.groupsService.updateMemberRole(groupId, targetUserId, dto.role))
 	}
 
 	@Delete(':groupId/members/:targetUserId')
 	@UseGuards(GroupAdminGuard)
 	@HttpCode(HttpStatus.NO_CONTENT)
-	removeMember(@Param('groupId', ParseIntPipe) groupId: number, @Param('targetUserId', ParseIntPipe) targetUserId: number) {
+	removeMember(@Param('groupId', ParseIdPipe) groupId: number, @Param('targetUserId', ParseIdPipe) targetUserId: number) {
 		return (this.groupsService.removeMember(groupId, targetUserId))
 	}
 
 	@Delete(':groupId/leave')
-	leaveGroup(@Param('groupId', ParseIntPipe) groupId: number, @CurrentUser('sub') userId: number) {
+	leaveGroup(@Param('groupId', ParseIdPipe) groupId: number, @CurrentUser('sub') userId: number) {
 		return (this.groupsService.leaveGroup(groupId, userId))
 	}
 
 	@Delete(':groupId')
 	@UseGuards(GroupOwnerGuard)
-	deleteGroup(@Param('groupId', ParseIntPipe) groupId: number) {
+	deleteGroup(@Param('groupId', ParseIdPipe) groupId: number) {
 		return (this.groupsService.deleteGroup(groupId))
 	}
 }
