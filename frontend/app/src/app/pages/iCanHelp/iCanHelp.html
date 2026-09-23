@@ -4,8 +4,8 @@
         <div class="flex gap-3">
             <app-avatar tone="brand"></app-avatar>
             <div class="flex flex-col">
-                <p class="font-bold">TODO: name</p>
-                <p class="text-xs text-text-secondary">{{ groupName() }} | TODO: time</p>
+                <p class="font-bold">{{ authorName() }}</p>
+                <p class="text-xs text-text-secondary">{{ groupName() }} | {{ timeAgo() }}</p>
             </div>
         </div>
         <h2 class="font-bold text-xl">{{ title() }}</h2>
@@ -18,7 +18,7 @@
     </section>
 	<section class="flex flex-col gap-3 p-4 bg-card rounded-card">
 		<p class="text-center text-sm">TODO: nbs | neighbours have already offered to help</p>
-		<p class="text-xs text-text-secondary text-center">TODO: name | has chosen / hasn't chosen yet</p>
+		<p class="text-xs text-text-secondary text-center">{{ authorName() }} | has chosen / hasn't chosen yet</p>
 	</section>
 	<a appButton block size="large" variant="secondary" type="button" class="mt-auto" routerLink="/app/offerHelp">I offer my help</a>
 </div>

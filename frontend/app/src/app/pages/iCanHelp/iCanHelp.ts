@@ -76,4 +76,14 @@ export class ICanHelp implements OnInit {
     private formatDate(dateIso: string): string {
         return new Date(dateIso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
     }
+
+    readonly timeAgo = computed(() => {
+        const post = this.post();
+        if (!post) return '';
+        const diffH = Math.floor((Date.now() - new Date(post.createdAt).getTime()) / 3_600_000);
+        if (diffH < 1) return "il y a moins d'1h";
+        if (diffH < 24) return `il y a ${diffH}h`;
+        return `il y a ${Math.floor(diffH / 24)}j`;
+    });
+
 }
