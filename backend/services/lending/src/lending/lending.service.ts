@@ -96,7 +96,18 @@ export class LendingService {
 		if (approverId !== userId)
 			throw new ForbiddenException('Only the other party can accept this request')
 
+		const postId = t.postId
+
 		const updated = await this.db.transaction(async (t) => {
+			if (postId) {
+				await t
+					.select({ id: lending.id })
+					.from(lending)
+					.where(eq(lending.postId, postId))
+					.orderBy(lending.id)
+					.for('update')
+			}
+
 			const [accepted] = await t
 				.update(lending)
 				.set({ status: 'accepted', updatedAt: new Date() })
