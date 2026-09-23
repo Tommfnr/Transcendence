@@ -1,4 +1,8 @@
-<app-modal [title]="isEditMode() ? 'Edit Post' : 'Add Post'" (closed)="onCancel()">
+<app-modal
+    [title]="isEditMode() ? 'Edit your request' : 'Make a request'"
+    subtitle="Ask the people close to you for an item"
+    (closed)="onCancel()"
+>
     <form (submit)="onSubmit($event)" class="flex flex-col flex-1 px-1 gap-4">
         @if (bannerErrors().length > 0) {
             <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
@@ -10,9 +14,9 @@
         @if (isEditMode()) {
             <h1>Edit Post</h1>
         } @else {
-            <div class="flex items-center gap-2 pt-[1px]">
-                <p class="text-sm font-bold text-text-secondary">Write to</p>
-                <app-select-pill tone="accent" [label]="groupsLabel()">
+            <div class="flex flex-col gap-2">
+                <p class="text-sm font-medium text-text">Share with</p>
+                <app-select-pill tone="neutral" [label]="groupsLabel()">
                     <button
                         type="button"
                         (click)="toggleAllGroups()"
@@ -46,42 +50,36 @@
             </div>
         }
 
-        <div>
-            <p>Hello everyone,</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-            <p class="text-lg font-bold">I'm looking for</p>
-            <div class="max-w-35 min-w-30">
-                <app-text-field
-                    placeholder="an item"
-                    tone="complementary"
-                    [formField]="postForm.title"
-                ></app-text-field>
-            </div>
-        </div>
+        <app-text-field
+            label="Item"
+            placeholder="E.g. Drill, Raclette, Bike…"
+            [formField]="postForm.title"
+        ></app-text-field>
 
-        <section class="flex flex-wrap justify-between gap-2">
-            <div class="flex flex-col gap-1">
-                <p class="text-2xs font-bold text-text-secondary">From</p>
+        <section class="flex gap-4">
+            <div class="flex flex-1 flex-col gap-1">
+                <label for="post-from" class="text-2xs font-bold text-text-secondary">From</label>
                 <input
+                    id="post-from"
                     type="date"
                     [formField]="postForm.fromDate"
-                    class="border border-complementary rounded-card bg-complementary-surface text-secondary text-sm px-4 py-2 max-w-35 focus:outline-none focus:ring-1 focus:ring-complementary"
+                    class="w-full rounded-card border border-text-secondary bg-card px-4 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
             </div>
 
-            <div class="flex flex-col gap-1">
-                <p class="text-2xs font-bold text-text-secondary">To</p>
+            <div class="flex flex-1 flex-col gap-1">
+                <label for="post-to" class="text-2xs font-bold text-text-secondary">To</label>
                 <input
+                    id="post-to"
                     type="date"
                     [formField]="postForm.toDate"
-                    class="border border-complementary rounded-card bg-complementary-surface text-secondary text-sm px-4 py-2 max-w-35 focus:outline-none focus:ring-1 focus:ring-complementary"
+                    class="w-full rounded-card border border-text-secondary bg-card px-4 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
             </div>
         </section>
 
         <div class="flex flex-col gap-2">
-            <p class="text-2xs font-bold text-text-secondary">Category</p>
+            <p class="text-sm font-medium text-text">Category</p>
             <div class="flex flex-wrap gap-2">
                 @for (cat of categories; track cat.label) {
                     <app-chip
@@ -89,22 +87,19 @@
                         [emoji]="cat.emoji"
                         [selected]="cat.label === postForm.objectType().value()"
                         (pick)="setObjectType(cat.label)"
-                        tone="complementary"
+                        tone="white"
                     />
                 }
             </div>
         </div>
 
-        <div>
-            <p class="font-bold text-lg">in order to</p>
-            <app-text-field
-                multiline
-                tone="complementary"
-                placeholder="Describe the use you will do"
-                rows="3"
-                [formField]="postForm.description"
-            ></app-text-field>
-        </div>
+        <app-text-field
+            multiline
+            rows="3"
+            label="Description (optional)"
+            placeholder="What do you need it for?"
+            [formField]="postForm.description"
+        ></app-text-field>
 
         <!-- <form (submit)="onSubmit($event)">
 

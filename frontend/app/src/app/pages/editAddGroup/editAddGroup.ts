@@ -8,10 +8,12 @@ import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ButtonDirective } from '../../components/button/button.directive';
 
 @Component({
   selector: 'app-editAddGroup',
-  imports: [FormField, ButtonComponent, Modal],
+  imports: [FormField, ButtonComponent, ButtonDirective, Modal, TextFieldComponent],
   templateUrl: './editAddGroup.html',
 })
 export class EditAddGroup implements OnInit {

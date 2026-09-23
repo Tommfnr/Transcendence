@@ -1,12 +1,10 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
-import { RouterLink } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
 import { GroupsService } from '../../services/groups.service';
 import { PostInput, PostGroupData } from '../../models/post.model';
 import { GroupEntity } from '../../models/group.model';
 import { OBJECT_TYPES, ObjectType } from '../../models/object.model';
-import { ButtonComponent } from '../../components/button/button';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
@@ -156,7 +154,7 @@ export class EditAddPost implements OnInit {
 	checkboxClasses(checked: boolean): string {
 		const base = 'flex size-[18px] shrink-0 items-center justify-center rounded-[4px]';
 		return checked
-			? `${base} bg-complementary text-white`
+			? `${base} bg-primary text-on-primary`
 			: `${base} border-2 border-text-secondary`;
 	}
 
