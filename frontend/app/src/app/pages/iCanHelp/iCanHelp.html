@@ -20,7 +20,8 @@
 		<p class="text-center text-sm">TODO: nbs | neighbours have already offered to help</p>
 		<p class="text-xs text-text-secondary text-center">{{ authorName() }} | has chosen / hasn't chosen yet</p>
 	</section>
-	<a appButton block size="large" variant="secondary" type="button" class="mt-auto" routerLink="/app/offerHelp">I offer my help</a>
+	<a appButton block size="large" variant="secondary" type="button" class="mt-auto" [routerLink]="['/app/offerHelp', postId]"
+>I offer my help</a>
 </div>
 
 <!-- <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" /> -->

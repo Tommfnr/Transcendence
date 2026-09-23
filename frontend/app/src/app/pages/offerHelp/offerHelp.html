@@ -1,5 +1,58 @@
-<div class="flex flex-1 flex-col gap-4 px-3">
-   <h1>Page: offerHelp</h1>
-  <a routerLink="/app/iCanHelp" class="text-primary underline">iCanHelp</a>
+<app-modal
+  title="Proposer mon aide"
+  (closed)="onCancel()"
+>
+  <form (submit)="onSubmit($event)" class="flex flex-1 flex-col gap-4 px-3">
+    @if (post(); as p) {
+      <div class="flex flex-col gap-1">
+        <h2 class="text-sm font-bold text-strong">{{ p.title }}</h2>
+        <p class="text-xs text-text">{{ p.description }}</p>
+      </div>
+    }
 
-</div>
+    @if (bannerErrors().length > 0) {
+      <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+        @for (msg of bannerErrors(); track msg) {
+          <p>{{ msg }}</p>
+        }
+      </div>
+    }
+
+    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
+      Objet à prêter
+      <select (change)="onObjectChange($event)" class="h-10 rounded-sm bg-card px-3 shadow-raised">
+        <option value="">Choisir un objet</option>
+        @for (object of availableObjects(); track object.id) {
+          <option [value]="object.id">{{ object.name }}</option>
+        } @empty {
+          <option disabled>Aucun objet disponible</option>
+        }
+      </select>
+    </label>
+
+    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
+      Du
+      <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="lendedFrom" />
+    </label>
+
+    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
+      Au
+      <app-date-picker appearance="button" placeholder="Choisir une date" [minDate]="lendedFrom()" [(value)]="lendedTo" />
+    </label>
+
+    <label class="flex flex-col gap-1 text-xs font-bold text-strong">
+      Message (optionnel)
+      <textarea
+        (input)="onMessageChange($event)"
+        maxlength="250"
+        rows="3"
+        class="rounded-sm bg-card px-3 py-2 text-xs shadow-raised"
+      ></textarea>
+    </label>
+
+    <div class="flex justify-end gap-2">
+      <app-button type="button" variant="secondary" (click)="onCancel()">Annuler</app-button>
+      <app-button type="submit" variant="primary">Proposer</app-button>
+    </div>
+  </form>
+</app-modal>

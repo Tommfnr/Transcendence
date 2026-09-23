@@ -24,7 +24,7 @@ export class ICanHelp implements OnInit {
     readonly authorName = computed(() => this.author()?.username ?? '');
 
     private route = inject(ActivatedRoute);
-    private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
+    readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 
     private postsService = inject(PostsService);
     readonly post = signal<PostEntity | null>(null);
