@@ -27,13 +27,10 @@ export class EditAddObject implements OnInit {
 	bannerErrors = signal<string[]>([]);
 
   readonly categories = [
-    { label: 'Tools', emoji: '🛠️' },
+    { label: 'DIY', emoji: '🛠️' },
     { label: 'Electronics', emoji: '💻' },
-    { label: 'Vehicles', emoji: '🚗' },
-    { label: 'Outdoor & Recreation', emoji: '🏕️' },
-    { label: 'Media', emoji: '🎬' },
-    { label: 'Events', emoji: '🎉' },
-    { label: 'Clothing & Gear', emoji: '🧥' },
+    { label: 'Leisure', emoji: '🎾' },
+    { label: 'Other', emoji: '📦' },
   ] as const;
 
   states = [

@@ -47,7 +47,7 @@
             <button
                 type="button"
                 (click)="selectTab('requests')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
                     activeTab() === 'requests'
                         ? 'border-primary text-primary'
@@ -60,7 +60,7 @@
             <button
                 type="button"
                 (click)="selectTab('offers')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
                     activeTab() === 'offers'
                         ? 'border-primary text-primary'
