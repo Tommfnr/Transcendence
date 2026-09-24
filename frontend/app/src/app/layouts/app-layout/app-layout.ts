@@ -5,10 +5,11 @@ import { EditAddPost } from '../../pages/editAddPost/editAddPost';
 import { EditAddGroup } from '../../pages/editAddGroup/editAddGroup';
 import { ModalService } from '../../services/modal.service';
 import { EditProfile } from '../../pages/editProfile/edit-profile';
+import { HeaderAppDesktopComponent } from '../../components/header-app-desktop/header-app-desktop';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent],
   templateUrl: './app-layout.html',
 })
 export class AppLayout {

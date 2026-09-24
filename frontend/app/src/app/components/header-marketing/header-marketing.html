@@ -1,31 +1,32 @@
-<header class=" text-primary wrapper">
-  <div class="container mx-auto flex items-center justify-between px-6 py-4">
-	
-    <a routerLink="/" class="text-2xl font-bold tracking-wide"><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0" /></a>
+<header class="text-primary wrapper">
+    <div class="container mx-auto flex items-center justify-between px-6 py-4">
+        <a routerLink="/" class="text-2xl font-bold tracking-wide"
+            ><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0"
+        /></a>
 
-    <nav class="">
-      <ul class="flex gap-8 items-center">
-        @if (isLoggedIn()) {
-          <li>
-            <a routerLink="/app" class="hover:opacity-80 transition">App</a>
-          </li>
-        }
-        <li>
-          <a routerLink="/" class="hover:opacity-80 transition">Home</a>
-        </li>
-        <li>
-          <a routerLink="/login" class="hover:opacity-80 transition">Login</a>
-        </li>
+        <nav class="">
+            <ul class="flex gap-8 items-center">
+                @if (isLoggedIn()) {
+                    <li>
+                        <a routerLink="/app" class="hover:opacity-80 transition">App</a>
+                    </li>
+                }
+                <li>
+                    <a routerLink="/" class="hover:opacity-80 transition">Home</a>
+                </li>
+                <li>
+                    <a routerLink="/login" class="hover:opacity-80 transition">Login</a>
+                </li>
 
-        <li>
-          <a routerLink="/register" appButton size="small">Register</a>
-        </li>
-		@if(isLoggedIn()) {
-		<li>
-		  <button type="button" (click)="onLogout()">Log out</button>
-		</li>
-		}
-      </ul>
-    </nav>
-  </div>
+                <li>
+                    <a routerLink="/register" appButton size="small">Register</a>
+                </li>
+                @if (isLoggedIn()) {
+                    <li>
+                        <button type="button" (click)="onLogout()">Log out</button>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
 </header>
