@@ -6,9 +6,14 @@ pep.localhost {
 
 	tls internal
 
-	# This will handle correct reverse proxying to the backend
+	@internalRoutes path /internal /internal/*
+	handle @internalRoutes {
+		respond 404
+	}
+
+	# Single entry point: gateway does the per-prefix fan-out to the domain services
 	handle /api/* {
-		reverse_proxy api:3000
+		reverse_proxy gateway:3000
 	}
 
 	# This will handle all the rest of the routes to the frontend
