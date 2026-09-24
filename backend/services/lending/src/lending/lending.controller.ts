@@ -32,4 +32,9 @@ export class LendingController {
 	rejectLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.rejectLend(id, userId))
 	}
+
+	@Patch(':id/cancel')
+	cancelLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.cancelLend(id, userId))
+	}
 }

@@ -176,6 +176,26 @@ export class LendingService {
 		return (updated)
 	}
 
+	async cancelLend(id: number, userId: number) {
+		const [t] = await this.db.select().from(lending).where(eq(lending.id, id))
+
+		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
+			throw new NotFoundException()
+
+		if (this.approverFor(t) === userId)
+			throw new ForbiddenException('Only the requester can cancel this request')
+
+		const [updated] = await this.db
+			.update(lending)
+			.set({ status: 'cancelled', updatedAt: new Date() })
+			.where(and(eq(lending.id, id), eq(lending.status, 'pending')))
+			.returning()
+
+		if (!updated)
+			throw new NotFoundException()
+		return (updated)
+	}
+
 	private approverFor(t: { postId: number | null, lenderId: number, borrowerId: number }): number {
 		return (t.postId ? t.borrowerId : t.lenderId)
 	}
