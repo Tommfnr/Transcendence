@@ -70,7 +70,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.postsService.findMy().subscribe((data) => {
+    this.postsService.findFromMyGroups().subscribe((data) => {
       this.posts.set(data);
 
       const ownerIds = new Set(data.map((post) => post.ownerId));

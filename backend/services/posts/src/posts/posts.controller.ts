@@ -8,7 +8,7 @@ import { PostOwnerGuard } from './guards/post-owner.guard'
 @Controller('posts')
 @UseGuards(SharedAuthGuard)
 export class PostsController {
-	constructor(private readonly postsService: PostsService) {}
+	constructor(private readonly postsService: PostsService) { }
 
 	@Get()
 	findAll() {
@@ -18,6 +18,11 @@ export class PostsController {
 	@Get('my')
 	findMy(@CurrentUser('sub') userId: number) {
 		return (this.postsService.findByUserId(userId))
+	}
+
+	@Get('my-groups')
+	findFromMyGroups(@CurrentUser('sub') userId: number) {
+		return (this.postsService.findFromMyGroups(userId))
 	}
 
 	@Get(':postId')

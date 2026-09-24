@@ -10,7 +10,7 @@ interface MembershipCheckResult {
 export class GroupsProxyService {
 	private readonly logger = new Logger(GroupsProxyService.name)
 
-	constructor(@Inject(GROUPS_INTERNAL_CLIENT) private readonly client: InternalServiceClient) {}
+	constructor(@Inject(GROUPS_INTERNAL_CLIENT) private readonly client: InternalServiceClient) { }
 
 	async isMemberOfAll(userId: number, groupIds: number[]): Promise<boolean> {
 		const result = await this.call(() => this.client.post<MembershipCheckResult>(
@@ -27,6 +27,14 @@ export class GroupsProxyService {
 		))
 
 		return (groups ?? [])
+	}
+
+	async findIdsForUser(userId: number): Promise<number[]> {
+		const ids = await this.call(() => this.client.get<number[]>(
+			`/internal/groups/member/${userId}`,
+		))
+
+		return (ids ?? [])
 	}
 
 	private async call<T>(fn: () => Promise<T>): Promise<T> {

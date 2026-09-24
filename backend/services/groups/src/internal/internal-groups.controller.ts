@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards, Param, ParseIntPipe } from '@nestjs/common'
 import { GroupView, InternalAuthGuard } from '@pep/shared'
 import { GroupsService } from '../groups/groups.service'
 import { MembershipCheckDto } from './dto/membership-check.dto'
@@ -17,7 +17,7 @@ function parseIds(raw: string | undefined): number[] {
 @UseGuards(InternalAuthGuard)
 @Controller('internal/groups')
 export class InternalGroupsController {
-	constructor(private readonly groupsService: GroupsService) {}
+	constructor(private readonly groupsService: GroupsService) { }
 
 	@Get()
 	async findByIds(@Query('ids') ids?: string): Promise<GroupView[]> {
@@ -28,6 +28,12 @@ export class InternalGroupsController {
 		}
 
 		return (this.groupsService.findByIds(groupIds))
+	}
+
+	@Get('member/:userId')
+	async findIdsForUser(@Param('userId', ParseIntPipe) userId: number): Promise<number[]> {
+		const groups = await this.groupsService.findMy(userId)
+		return (groups.map((group) => group.id))
 	}
 
 	@Post('membership-check')
