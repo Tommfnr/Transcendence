@@ -1,12 +1,16 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
-import { and, desc, eq, or } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, lt, or, sql } from 'drizzle-orm'
+import { pgErrorCode } from '@pep/shared'
 import { lending } from '../database/schema'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsProxyService } from './objects-proxy.service'
 import { PostsProxyService } from './posts-proxy.service'
 import { GroupsProxyService } from './groups-proxy.service'
+
+const BOOKED_STATUSES = ['accepted', 'active', 'awaiting_confirmation', 'overdue'] as const
+const OBJECT_LOCK_NAMESPACE = 1
 
 @Injectable()
 export class LendingService {
@@ -60,21 +64,44 @@ export class LendingService {
 			borrowerId = userId
 		}
 
+		const lendedFrom = new Date(dto.lendedFrom)
+		const lendedTo = new Date(dto.lendedTo)
+
 		try {
-			return (await this.db.insert(lending).values({
-				objectId: dto.objectId,
-				postId: dto.postId,
-				lenderId,
-				borrowerId,
-				status: 'pending',
-				lendedFrom: new Date(dto.lendedFrom),
-				lendedTo: new Date(dto.lendedTo),
-				message: dto.message,
-			}).returning())
+			return (await this.db.transaction(async (t) => {
+				await this.lockObject(t, dto.objectId)
+
+				const [booked] = await t
+					.select({ id: lending.id })
+					.from(lending)
+					.where(and(
+						eq(lending.objectId, dto.objectId),
+						inArray(lending.status, [...BOOKED_STATUSES]),
+						lt(lending.lendedFrom, lendedTo),
+						gt(lending.lendedTo, lendedFrom),
+					))
+					.limit(1)
+
+				if (booked)
+					throw new ConflictException('Object already booked for that period')
+
+				return (await t.insert(lending).values({
+					objectId: dto.objectId,
+					postId: dto.postId,
+					lenderId,
+					borrowerId,
+					status: 'pending',
+					lendedFrom,
+					lendedTo,
+					message: dto.message,
+				}).returning())
+			}))
 		} catch (err: unknown) {
 			const wrappedCause = err instanceof Error ? (err as { cause?: unknown }).cause : undefined
 			const cause = wrappedCause instanceof Error ? wrappedCause : err
 
+			if (cause instanceof Error && 'constraint_name' in cause && cause.constraint_name === 'no_duplicate_pending')
+				throw new ConflictException('You already have a pending request for that period')
 			if (cause instanceof Error && 'code' in cause && cause.code === '23P01') // exclusion_violation, no overlap constraint
 				throw new ConflictException('Object already booked for that period')
 			if (cause instanceof Error && 'code' in cause && cause.code === '23503')
@@ -112,25 +139,42 @@ export class LendingService {
 			throw new ForbiddenException('Only the other party can accept this request')
 
 		const postId = t.postId
+		const objectId = t.objectId
 
 		const updated = await this.db.transaction(async (t) => {
-			if (postId) {
-				await t
-					.select({ id: lending.id })
-					.from(lending)
-					.where(eq(lending.postId, postId))
-					.orderBy(lending.id)
-					.for('update')
-			}
+			await this.lockObject(t, objectId)
+			await t
+				.select({ id: lending.id })
+				.from(lending)
+				.where(postId ? or(eq(lending.objectId, objectId), eq(lending.postId, postId)) : eq(lending.objectId, objectId))
+				.orderBy(lending.id)
+				.for('update')
 
-			const [accepted] = await t
-				.update(lending)
-				.set({ status: 'accepted', updatedAt: new Date() })
-				.where(and(eq(lending.id, id), eq(lending.status, 'pending')))
-				.returning()
+			let accepted
+			try {
+				[accepted] = await t
+					.update(lending)
+					.set({ status: 'accepted', updatedAt: new Date() })
+					.where(and(eq(lending.id, id), eq(lending.status, 'pending')))
+					.returning()
+			} catch (err: unknown) {
+				if (pgErrorCode(err) === '23P01')
+					throw new ConflictException('Object already booked for that period')
+				throw err
+			}
 
 			if (!accepted)
 				return (null)
+
+			await t
+				.update(lending)
+				.set({ status: 'rejected', updatedAt: new Date() })
+				.where(and(
+					eq(lending.objectId, accepted.objectId),
+					eq(lending.status, 'pending'),
+					lt(lending.lendedFrom, accepted.lendedTo),
+					gt(lending.lendedTo, accepted.lendedFrom),
+				))
 
 			if (accepted.postId) {
 				await t
@@ -194,6 +238,10 @@ export class LendingService {
 		if (!updated)
 			throw new NotFoundException()
 		return (updated)
+	}
+
+	private async lockObject(t: Pick<PostgresJsDatabase, 'execute'>, objectId: number) {
+		await t.execute(sql`select pg_advisory_xact_lock(${OBJECT_LOCK_NAMESPACE}::int, ${objectId}::int)`)
 	}
 
 	private approverFor(t: { postId: number | null, lenderId: number, borrowerId: number }): number {

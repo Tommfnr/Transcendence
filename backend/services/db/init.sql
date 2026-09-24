@@ -174,5 +174,13 @@ ALTER TABLE lending ADD CONSTRAINT no_overlap
 EXCLUDE USING gist (
 	object_id WITH =, -- for same object
 	tstzrange(lended_from, lended_to) WITH && -- if the two objects time range overlap 
-) WHERE (status IN ('pending', 'accepted', 'active', 'awaiting_confirmation', 'overdue')); -- only apply overlap check to these statuses
--- refuse to let two lending row exists if same object and same time range and statuses conflicts (like both pending, both accepted...)
+) WHERE (status IN ('accepted', 'active', 'awaiting_confirmation', 'overdue')); -- only apply overlap check to these statuses
+-- refuse to let two lending row exists if same object and same time range and statuses conflicts (like both accepted...)
+
+ALTER TABLE lending ADD CONSTRAINT no_duplicate_pending
+EXCLUDE USING gist (
+	object_id WITH =,
+	lender_id WITH =,
+	borrower_id WITH =,
+	tstzrange(lended_from, lended_to) WITH &&
+) WHERE (status = 'pending');
