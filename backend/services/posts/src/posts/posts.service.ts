@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts, postGroups } from '../database/schema'
@@ -80,6 +80,18 @@ export class PostsService {
 			groupIds = [...new Set(rawGroupIds)]
 
 		let post = await this.findOne(postId)
+
+		const fromDate = postFields.fromDate ?? post.fromDate
+		const toDate = postFields.toDate ?? post.toDate
+
+		if (toDate < fromDate) {
+			throw new BadRequestException({
+				statusCode: 400,
+				message: 'Validation failed',
+				errors: { toDate: ['toDate must be on or after fromDate'] },
+				formErrors: [],
+			})
+		}
 
 		if (groupIds) {
 			const isMember = await this.groupsProxy.isMemberOfAll(userId, groupIds)
