@@ -37,4 +37,65 @@ groups:
         annotations:
           summary: A Prometheus scrape target stopped responding
 
-          
+      - uid: gateway-high-p95-latency
+        title: Gateway high P95 latency
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket{job="gateway"}[5m])))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.5]
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: P95 request latency for a service has stayed above 500ms for 2 minutes
+
+      - uid: auth-abuse
+        title: Auth failure spike (possible credential stuffing)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(http_request_duration_seconds_count{job="gateway", service="auth", status_code=~"401|429"}[5m]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [10]
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 10 auth failures (401/429) in 5 minutes - possible brute-force or credential-stuffing attempt
+
