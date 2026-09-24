@@ -1,7 +1,6 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
-import { JwtService } from '@nestjs/jwt'
-import { JwtPayload } from '../auth/types/authenticated-request'
+import { JwtPayload, verifyAccessToken } from '@pep/shared'
 
 export interface AuthenticatedSocket extends Socket {
 	data: {
@@ -20,13 +19,12 @@ export type ChatEvent = typeof CHAT_EVENTS[keyof typeof CHAT_EVENTS]
 // Every socket joins the personal room of its user, so all of a user's tabs/devices can be reached at once
 const userRoom = (userId: number) => `user:${userId}`
 
+// The gateway service forwards /api/socket.io upgrades to this service
 @WebSocketGateway({ cors: true, path: '/api/socket.io' })
 export class ChatsGateway implements OnGatewayConnection {
 	@WebSocketServer() server!: Server
 
-	constructor(private jwtService: JwtService) {}
-
-	async handleConnection(client: AuthenticatedSocket) {
+	handleConnection(client: AuthenticatedSocket) {
 		const token = client.handshake.auth?.token as string | undefined
 
 		if (!token) {
@@ -35,9 +33,7 @@ export class ChatsGateway implements OnGatewayConnection {
 		}
 
 		try {
-			client.data.user = await this.jwtService.verifyAsync<JwtPayload>(token, {
-				secret: process.env.JWT_SECRET,
-			})
+			client.data.user = verifyAccessToken(token)
 		} catch {
 			client.disconnect()
 			return
