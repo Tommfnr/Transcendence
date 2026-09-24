@@ -12,7 +12,14 @@ export class InternalPostsController {
 		const post = await this.postsService.findOne(id)
 		const groupIds = await this.postsService.findGroupIds(id)
 
-		return ({ id: post.id, ownerId: post.ownerId, status: post.status, groupIds })
+		return ({
+			id: post.id,
+			ownerId: post.ownerId,
+			status: post.status,
+			groupIds,
+			fromDate: post.fromDate.toISOString(),
+			toDate: post.toDate.toISOString(),
+		})
 	}
 
 	@Put(':id/close')

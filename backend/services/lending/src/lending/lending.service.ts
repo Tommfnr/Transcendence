@@ -43,6 +43,8 @@ export class LendingService {
 				throw new ForbiddenException('You can only offer your own objects')
 			if (post.ownerId === userId)
 				throw new BadRequestException('You cannot offer help on your own post')
+			if (new Date(dto.lendedFrom) < new Date(post.fromDate) || new Date(dto.lendedTo) > new Date(post.toDate))
+				throw new BadRequestException('Offer window must fit inside the post window')
 			if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
 				throw new ForbiddenException('You can only offer help on posts of your groups')
 
