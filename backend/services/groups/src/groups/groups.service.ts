@@ -122,12 +122,24 @@ export class GroupsService {
 		if (existingUser)
 			throw new ForbiddenException('User already in group')
 
-		const [member] = await this.db
-			.insert(groupMembers)
-			.values({ groupId, userId: targetUserId, role: 'member' })
-			.returning()
+		try {
+			const [member] = await this.db
+				.insert(groupMembers)
+				.values({ groupId, userId: targetUserId, role: 'member' })
+				.returning()
 
-		return member
+			return member
+		} catch (err: unknown) {
+			const wrappedCause = err instanceof Error ? (err as { cause?: unknown }).cause : undefined
+			const cause = wrappedCause instanceof Error ? wrappedCause : err
+			const code = cause instanceof Error && 'code' in cause ? cause.code : undefined
+
+			if (code === '23503')
+				throw new NotFoundException('User not found')
+			if (code === '23505')
+				throw new ForbiddenException('User already in group')
+			throw err
+		}
 	}
 
 	async updateMemberRole(groupId: number, targetUserId: number, role: 'admin' | 'member') {
