@@ -12,6 +12,13 @@ export const createTransactionSchema = z.object({
 }).refine((dto) => new Date(dto.lendedTo) > new Date(dto.lendedFrom), {
 	message: 'Impossible dates',
 	path: ['lendedTo'],
+}).refine((dto) => {
+	const startOfToday = new Date()
+	startOfToday.setUTCHours(0, 0, 0, 0)
+	return (new Date(dto.lendedFrom) >= startOfToday)
+}, {
+	message: 'Start date cannot be in the past',
+	path: ['lendedFrom'],
 })
 
 export class CreateTransactionDto extends createZodDto(createTransactionSchema) {}

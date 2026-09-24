@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts, postGroups } from '../database/schema'
@@ -35,13 +35,17 @@ export class PostsService {
 		return (post)
 	}
 
-	async findGroups(postId: number) {
+	async findGroupIds(postId: number) {
 		const rows = await this.db
 			.select({ groupId: postGroups.groupId })
 			.from(postGroups)
 			.where(eq(postGroups.postId, postId))
 
-		const groupIds = rows.map((row) => row.groupId)
+		return (rows.map((row) => row.groupId))
+	}
+
+	async findGroups(postId: number) {
+		const groupIds = await this.findGroupIds(postId)
 
 		if (groupIds.length === 0)
 			return ([])
@@ -99,6 +103,18 @@ export class PostsService {
 			groupIds = [...new Set(rawGroupIds)]
 
 		let post = await this.findOne(postId)
+
+		const fromDate = postFields.fromDate ?? post.fromDate
+		const toDate = postFields.toDate ?? post.toDate
+
+		if (toDate < fromDate) {
+			throw new BadRequestException({
+				statusCode: 400,
+				message: 'Validation failed',
+				errors: { toDate: ['toDate must be on or after fromDate'] },
+				formErrors: [],
+			})
+		}
 
 		if (groupIds) {
 			const isMember = await this.groupsProxy.isMemberOfAll(userId, groupIds)

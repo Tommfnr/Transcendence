@@ -144,6 +144,7 @@ services:
     environment:
       OBJECTS_INTERNAL_URL: http://objects:3000
       POSTS_INTERNAL_URL: http://posts:3000
+      GROUPS_INTERNAL_URL: http://groups:3000
     depends_on:
       postgres:
         condition: service_healthy

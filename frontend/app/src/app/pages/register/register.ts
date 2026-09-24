@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { AuthService } from '../../services/auth.service';
+import { RefreshService } from '../../services/refresh.service';
 import { RegisterData } from '../../models/register-data.model';
 import { ButtonComponent } from '../../components/button/button';
 import { Router } from '@angular/router';
@@ -20,6 +21,7 @@ import {
 })
 export class Register {
     private authService = inject(AuthService);
+    private refreshService = inject(RefreshService);
     private router = inject(Router);
 
     readonly registrationSuccess = signal(false);
@@ -49,9 +51,6 @@ export class Register {
             try {
                 this.bannerErrors.set([]);
                 await firstValueFrom(this.authService.register(body));
-                this.registrationSuccess.set(true);
-                setTimeout(() => this.router.navigate(['/login']), 2500);
-                return undefined;
             } catch (err) {
                 if (isZodValidationError(err)) {
                     console.log('Backend validation error:', err.error);
@@ -67,6 +66,17 @@ export class Register {
                 console.log('Registration failed (FRONTEND)', err);
                 return undefined;
             }
+
+            try {
+                await firstValueFrom(this.refreshService.login({ identifier: username, password: h_password }));
+                await firstValueFrom(this.refreshService.getMe());
+                this.router.navigate(['/app']);
+            } catch (err) {
+                console.log('Auto-login after registration failed (FRONTEND)', err);
+                this.registrationSuccess.set(true);
+                setTimeout(() => this.router.navigate(['/login']), 2500);
+            }
+            return undefined;
         });
     }
 }

@@ -1,8 +1,9 @@
-import { BadRequestException, CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groups } from '../../database/schema'
 import { DB } from '../../database/database.module'
+import { parseId } from '@pep/shared'
 
 @Injectable()
 export class GroupOwnerGuard implements CanActivate {
@@ -10,10 +11,7 @@ export class GroupOwnerGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest()
-		const groupId = Number(req.params.groupId)
-
-		if (!Number.isInteger(groupId))
-			throw new BadRequestException('Invalid group id')
+		const groupId = parseId(req.params.groupId)
 
 		const [group] = await this.db
 			.select()
