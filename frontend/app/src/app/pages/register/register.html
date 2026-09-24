@@ -1,60 +1,56 @@
 @if (registrationSuccess()) {
-  <div class="flex flex-col items-center gap-4 p-6 text-center">
-    <p class="text-lg font-bold text-black">Votre compte a bien été créé !</p>
-    <p class="text-sm text-black">Redirection vers la page de connexion...</p>
-  </div>
-}
-@else {
-  <form (submit)="onSubmit($event)">
-    <div>
-      <label class="block">
-        Email
-        <input type="text" [formField]="registerForm.email" class="block w-full border border-primary rounded-card p-2"/>
-      </label>
-      @if (registerForm.email().invalid() && registerForm.email().touched()) {
-        <div class="error">
-          @for (error of registerForm.email().errors(); track error.kind) {
-            <span>{{ error.message }}</span>
-          }
-        </div>
-      }
-    </div>
+	<div class="flex flex-1 items-center justify-center">
+		<div class="flex flex-col items-center gap-4 p-6 text-center">
+			<p class="text-lg font-bold text-text">Your account has been created!</p>
+			<p class="text-sm text-text-secondary">Redirecting to the login page…</p>
+		</div>
+	</div>
+} @else {
+	<div class="flex flex-1 items-start justify-center pt-8 lg:items-center lg:py-8 lg:pt-0">
+		<div class="flex w-full max-w-110 flex-col gap-5 rounded-card bg-card px-5 py-6 shadow-card">
+			<section class="flex flex-col gap-1">
+				<h1 class="text-xl font-bold">Create your account</h1>
+				<p class="text-sm text-text-secondary">Free and only takes a second.</p>
+			</section>
 
-    <div>
-      <label class="block">
-        Username
-        <input type="text" [formField]="registerForm.username" class="block w-full border border-primary rounded-card p-2"/>
-      </label>
-      @if (registerForm.username().invalid() && registerForm.username().touched()) {
-        <div class="error">
-          @for (error of registerForm.username().errors(); track error.kind) {
-            <span>{{ error.message }}</span>
-          }
-        </div>
-      }
-    </div>
+			<form (submit)="onSubmit($event)" class="flex flex-col gap-5">
+				<app-text-field
+					placeholder="john@example.com"
+					label="Email"
+					[formField]="registerForm.email"
+				></app-text-field>
+				<div class="flex flex-col gap-1">
+					<app-text-field
+						placeholder="John Smith"
+						label="Username"
+						[formField]="registerForm.username"
+					></app-text-field>
+					<p class="text-xs text-text-secondary">
+						This is how the people in your groups will see you.
+					</p>
+				</div>
+				<div class="flex flex-col gap-1">
+					<app-text-field
+						typeField="password"
+						placeholder="••••••••"
+						label="Password"
+						[formField]="registerForm.h_password"
+					></app-text-field>
+					<p class="text-xs text-text-secondary">
+						At least 8 characters and include an uppercase letter, a digit, and a
+						special character
+					</p>
+				</div>
 
-    <div>
-      <label class="block">
-        Password
-        <input type="password" [formField]="registerForm.h_password" class="block w-full border border-primary rounded-card p-2"/>
-      </label>
-      @if (registerForm.h_password().invalid() && registerForm.h_password().touched()) {
-        <div class="error">
-          @for (error of registerForm.h_password().errors(); track error.kind) {
-            <span>{{ error.message }}</span>
-          }
-        </div>
-    }
-    </div>
+				<button appButton block size="large" type="submit" variant="primary">
+					Register
+				</button>
+			</form>
 
-    <app-button type="submit" variant="primary">Register</app-button>
-  </form>
-
-  <div class="form-debug">
-    <h3>Current Form Values:</h3>
-    <p>Email: {{ registerForm.email().value() }}</p>
-    <p>Username: {{ registerForm.username().value() }}</p>
-    <p>Password: {{ registerForm.h_password().value() ? '••••••••' : '(empty)' }}</p>
-  </div>
+			<p class="text-center text-sm text-text-secondary">
+				Already have an account?
+				<a class="font-bold text-primary" routerLink="/login">Log in</a>
+			</p>
+		</div>
+	</div>
 }
