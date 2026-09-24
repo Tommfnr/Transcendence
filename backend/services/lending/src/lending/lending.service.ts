@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
 import { and, desc, eq, or } from 'drizzle-orm'
@@ -41,12 +41,16 @@ export class LendingService {
 				throw new ConflictException('Post is no longer open')
 			if (object.ownerId !== userId)
 				throw new ForbiddenException('You can only offer your own objects')
+			if (post.ownerId === userId)
+				throw new BadRequestException('You cannot offer help on your own post')
 			if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
 				throw new ForbiddenException('You can only offer help on posts of your groups')
 
 			lenderId = userId
 			borrowerId = post.ownerId
 		} else {
+			if (object.ownerId === userId)
+				throw new BadRequestException('You cannot borrow your own object')
 			if (!(await this.groupsProxy.sharesGroup([userId, object.ownerId])))
 				throw new ForbiddenException('You can only borrow from members of your groups')
 
