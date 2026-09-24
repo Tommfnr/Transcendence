@@ -2,61 +2,64 @@
 
 <div class="text-center text-text py-4">
 
-	<section class="flex flex-col gap-3 pt-10 pb-8 px-4">
+	<section class="flex flex-col gap-3 pt-10 pb-8 px-4 lg:gap-4 lg:pt-20 lg:pb-16">
 
-		<div class="flex flex-col gap-3">
+		<div class="flex flex-col gap-3 lg:gap-4  items-center">
 			<h1 class="text-3xl font-bold">Borrow. Lend. Help your neighbours.</h1>
 
-			<p class="text-text-secondary">
+			<p class="text-text-secondary lg:text-lg max-w-prose">
 				PEP lets neighbours share tools, objects and skills
 				in a simple and trusted community.
 			</p>
 		</div>
-		<div class="flex flex-col gap-3 mt-3">
-			<a appButton block size="large" routerLink="/register">Create my account</a>
-			<a appButton block size="large" variant="secondary" routerLink="/login">Log in</a>
+		<div class="flex flex-col gap-3 mt-3 lg:flex-row lg:justify-center">
+			<a appButton size="large" routerLink="/register">Create my account</a>
+			<a appButton size="large" variant="secondary" routerLink="/login">Log in</a>
 		</div>
 	</section>
 
-	<section class="flex flex-col gap-4 px-4 pb-4">
+	<section class="flex flex-col gap-4 pb-4 lg:gap-5">
 
 		<h2 class="text-2xl font-bold">Why PEP?</h2>
 
-		<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card">
-			<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-surface">
-				<img src="/icons/hand-heart.svg" alt="" class="size-6" />
-			</div>
-			<div class="flex min-w-0 flex-1 flex-col gap-1">
-				<h3 class="text-lg font-bold text-text">Borrow</h3>
-				<p class="text-sm text-text-secondary">
-					Find useful items shared by people living near you.
-				</p>
-			</div>
-		</article>
+		<div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
 
-		<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card">
-			<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-success-surface">
-				<img src="/icons/bag-heart.svg" alt="" class="size-6" />
-			</div>
-			<div class="flex min-w-0 flex-1 flex-col gap-1">
-				<h3 class="text-lg font-bold text-text">Lend</h3>
-				<p class="text-sm text-text-secondary">
-					Give a second life to the things you rarely use.
-				</p>
-			</div>
-		</article>
-
-		<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card">
-			<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-complementary-surface">
-				<img src="/icons/group-ppl.svg" alt="" class="size-6" />
-			</div>
-			<div class="flex min-w-0 flex-1 flex-col gap-1">
-				<h3 class="text-lg font-bold text-text">Build community</h3>
-				<p class="text-sm text-text-secondary">
-					Create stronger neighbourhood connections through sharing.
-				</p>
-			</div>
-		</article>
+			<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card lg:flex-col lg:w-[304px]">
+				<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-surface">
+					<img src="/icons/hand-heart.svg" alt="" class="size-6" />
+				</div>
+				<div class="flex min-w-0 flex-1 flex-col gap-1">
+					<h3 class="text-lg font-bold text-text">Borrow</h3>
+					<p class="text-sm text-text-secondary">
+						Find useful items shared by people living near you.
+					</p>
+				</div>
+			</article>
+			
+			<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card lg:flex-col lg:w-[304px]">
+				<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-success-surface">
+					<img src="/icons/bag-heart.svg" alt="" class="size-6" />
+				</div>
+				<div class="flex min-w-0 flex-1 flex-col gap-1">
+					<h3 class="text-lg font-bold text-text">Lend</h3>
+					<p class="text-sm text-text-secondary">
+						Give a second life to the things you rarely use.
+					</p>
+				</div>
+			</article>
+			
+			<article class="flex items-start gap-4 rounded-card bg-card p-4 text-left shadow-card lg:flex-col lg:w-[304px]">
+				<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-complementary-surface">
+					<img src="/icons/group-ppl.svg" alt="" class="size-6" />
+				</div>
+				<div class="flex min-w-0 flex-1 flex-col gap-1">
+					<h3 class="text-lg font-bold text-text">Build community</h3>
+					<p class="text-sm text-text-secondary">
+						Create stronger neighbourhood connections through sharing.
+					</p>
+				</div>
+			</article>
+		</div>
 
 	</section>
 

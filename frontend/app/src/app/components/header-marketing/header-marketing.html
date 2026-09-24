@@ -1,7 +1,7 @@
 <header class="border-b border-solid border-muted bg-card">
-        <nav class="max-w-app flex mx-auto items-center justify-between px-6 py-4">
+        <nav class="max-w-app flex mx-auto items-center justify-between px-6 py-4 lg:max-w-[960px] lg:text-2xl">
             <a routerLink="/" class="shrink-0"
-                ><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0"
+                ><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0 lg:size-12"
             /></a>
 
             <ul class="flex gap-8 items-center">
@@ -18,7 +18,7 @@
                     </li>
 
                     <li>
-                        <a routerLink="/register" appButton size="small">Register</a>
+                        <a routerLink="/register" appButton size="small" class="lg:px-6 lg:py-3 lg:text-xl">Register</a>
                     </li>
                 }
                 @if (isLoggedIn()) {}

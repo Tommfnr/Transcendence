@@ -1,6 +1,9 @@
-<app-header-marketing></app-header-marketing>
-<div class="flex min-h-dvh flex-col bg-background font-sans text-text">
-	<main class="relative mx-auto flex w-full max-w-app flex-1 flex-col gap-4 px-4 pb-10">
-		<router-outlet />
-	</main>
-<app-footer-marketing></app-footer-marketing>
+<div class="flex flex-col min-h-dvh bg-background font-sans text-text">
+    <app-header-marketing></app-header-marketing>
+    <main
+        class="relative mx-auto flex w-full max-w-app lg:max-w-[960px] flex-1 flex-col gap-4 px-4 pb-10"
+    >
+        <router-outlet />
+    </main>
+    <app-footer-marketing></app-footer-marketing>
+</div>
