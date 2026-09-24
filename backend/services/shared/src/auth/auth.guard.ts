@@ -1,7 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
-import * as jwt from 'jsonwebtoken'
-import { requireEnv } from '../config/env'
-import { jwtPayloadSchema } from './jwt-payload'
+import { InvalidAccessTokenError, verifyAccessToken } from './verify-access-token'
 
 @Injectable()
 export class SharedAuthGuard implements CanActivate {
@@ -14,19 +12,15 @@ export class SharedAuthGuard implements CanActivate {
 			throw new UnauthorizedException('Missing or malformed Authorization header')
 		}
 
-		let decoded: unknown
 		try {
-			decoded = jwt.verify(token, requireEnv('JWT_SECRET'), { algorithms: ['HS256'] })
-		} catch {
-			throw new UnauthorizedException('Invalid or expired access token')
+			req.user = verifyAccessToken(token)
+		} catch (err) {
+			if (err instanceof InvalidAccessTokenError) {
+				throw new UnauthorizedException(err.message)
+			}
+			throw err
 		}
 
-		const parsed = jwtPayloadSchema.safeParse(decoded)
-		if (!parsed.success) {
-			throw new UnauthorizedException('Malformed token payload')
-		}
-
-		req.user = parsed.data
 		return true
 	}
 }
