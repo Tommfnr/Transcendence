@@ -1,8 +1,9 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { eq, ne, and, inArray, notInArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
+import { pgErrorCode } from '@pep/shared'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 
@@ -77,26 +78,32 @@ export class GroupsService {
 	}
 
 	async createGroup(adminId: number, dto: CreateGroupDto) {
-		return this.db.transaction(async (t) => {
-			const [group] = await t
-				.insert(groups)
-				.values({
-					name: dto.name,
-					description: dto.description,
-					ownerId: adminId
-				})
-				.returning()
+		try {
+			return await this.db.transaction(async (t) => {
+				const [group] = await t
+					.insert(groups)
+					.values({
+						name: dto.name,
+						description: dto.description,
+						ownerId: adminId
+					})
+					.returning()
 
-			await t
-				.insert(groupMembers)
-				.values({
-					groupId: group.id,
-					userId: adminId,
-					role: 'admin',
-				})
+				await t
+					.insert(groupMembers)
+					.values({
+						groupId: group.id,
+						userId: adminId,
+						role: 'admin',
+					})
 
-			return group
-		})
+				return group
+			})
+		} catch (err: unknown) {
+			if (pgErrorCode(err) === '23503')
+				throw new UnauthorizedException('User no longer exists')
+			throw err
+		}
 	}
 
 	async updateGroup(groupId: number, dto: UpdateGroupDto) {

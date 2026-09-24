@@ -1,4 +1,5 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { pgErrorCode } from '@pep/shared'
 import { eq, desc, notInArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { conversations, conversationMembers, messages } from '../database/schema'
@@ -59,30 +60,36 @@ export class ChatsService {
 			throw err
 		}
 
-		return this.db.transaction(async (t) => {
-			const [conversation] = await t
-					.insert(conversations)
-					.values({})
-					.returning()
+		try {
+			return await this.db.transaction(async (t) => {
+				const [conversation] = await t
+						.insert(conversations)
+						.values({})
+						.returning()
 
-			await t
-					.insert(conversationMembers)
-					.values([
-						{ conversationId: conversation.id, userId },
-						{ conversationId: conversation.id, userId: dto.recipientId },
-					])
+				await t
+						.insert(conversationMembers)
+						.values([
+							{ conversationId: conversation.id, userId },
+							{ conversationId: conversation.id, userId: dto.recipientId },
+						])
 
-			const [message] = await t
-					.insert(messages)
-					.values({
-						conversationId: conversation.id,
-						ownerId: userId,
-						content: dto.content
-					})
-					.returning()
+				const [message] = await t
+						.insert(messages)
+						.values({
+							conversationId: conversation.id,
+							ownerId: userId,
+							content: dto.content
+						})
+						.returning()
 
-			return ({ conversation, message })
-		})
+				return ({ conversation, message })
+			})
+		} catch (err: unknown) {
+			if (pgErrorCode(err) === '23503')
+				throw new UnauthorizedException('User no longer exists')
+			throw err
+		}
 	}
 
 	async createMessage(conversationId: number, userId: number, dto: CreateMessageDto) {

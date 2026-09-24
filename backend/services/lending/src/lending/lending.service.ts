@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
 import { and, desc, eq, or } from 'drizzle-orm'
@@ -64,6 +64,8 @@ export class LendingService {
 
 			if (cause instanceof Error && 'code' in cause && cause.code === '23P01') // exclusion_violation, no overlap constraint
 				throw new ConflictException('Object already booked for that period')
+			if (cause instanceof Error && 'code' in cause && cause.code === '23503')
+				throw new UnauthorizedException('User no longer exists')
 			throw err
 		}
 	}
