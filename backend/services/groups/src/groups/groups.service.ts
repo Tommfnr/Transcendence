@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { eq, ne, and, inArray, notInArray } from 'drizzle-orm'
+import { eq, ne, and, inArray, notInArray, countDistinct } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -75,6 +75,24 @@ export class GroupsService {
 			.where(and(eq(groupMembers.userId, userId), inArray(groupMembers.groupId, groupIds)))
 
 		return memberships.length === groupIds.length
+	}
+
+	async sharesGroup(userIds: number[], groupIds?: number[]) {
+		const uniqueUserIds = [...new Set(userIds)]
+		const conditions = [inArray(groupMembers.userId, uniqueUserIds)]
+
+		if (groupIds)
+			conditions.push(inArray(groupMembers.groupId, groupIds))
+
+		const [shared] = await this.db
+			.select({ groupId: groupMembers.groupId })
+			.from(groupMembers)
+			.where(and(...conditions))
+			.groupBy(groupMembers.groupId)
+			.having(eq(countDistinct(groupMembers.userId), uniqueUserIds.length))
+			.limit(1)
+
+		return shared !== undefined
 	}
 
 	async createGroup(adminId: number, dto: CreateGroupDto) {

@@ -10,8 +10,9 @@ export class InternalPostsController {
 	@Get(':id')
 	async findOne(@Param('id', ParseIdPipe) id: number): Promise<PostView> {
 		const post = await this.postsService.findOne(id)
+		const groupIds = await this.postsService.findGroupIds(id)
 
-		return ({ id: post.id, ownerId: post.ownerId, status: post.status })
+		return ({ id: post.id, ownerId: post.ownerId, status: post.status, groupIds })
 	}
 
 	@Put(':id/close')

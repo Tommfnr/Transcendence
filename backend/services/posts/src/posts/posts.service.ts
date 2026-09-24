@@ -35,13 +35,17 @@ export class PostsService {
 		return (post)
 	}
 
-	async findGroups(postId: number) {
+	async findGroupIds(postId: number) {
 		const rows = await this.db
 				.select({ groupId: postGroups.groupId })
 				.from(postGroups)
 				.where(eq(postGroups.postId, postId))
 
-		const groupIds = rows.map((row) => row.groupId)
+		return (rows.map((row) => row.groupId))
+	}
+
+	async findGroups(postId: number) {
+		const groupIds = await this.findGroupIds(postId)
 
 		if (groupIds.length === 0)
 			return ([])

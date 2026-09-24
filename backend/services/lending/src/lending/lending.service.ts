@@ -6,6 +6,7 @@ import { lending } from '../database/schema'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsProxyService } from './objects-proxy.service'
 import { PostsProxyService } from './posts-proxy.service'
+import { GroupsProxyService } from './groups-proxy.service'
 
 @Injectable()
 export class LendingService {
@@ -13,6 +14,7 @@ export class LendingService {
 		@Inject(DB) private db : PostgresJsDatabase,
 		private readonly objectsProxy: ObjectsProxyService,
 		private readonly postsProxy: PostsProxyService,
+		private readonly groupsProxy: GroupsProxyService,
 	) {}
 
 	async listAll(userId: number) {
@@ -39,10 +41,15 @@ export class LendingService {
 				throw new ConflictException('Post is no longer open')
 			if (object.ownerId !== userId)
 				throw new ForbiddenException('You can only offer your own objects')
+			if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
+				throw new ForbiddenException('You can only offer help on posts of your groups')
 
 			lenderId = userId
 			borrowerId = post.ownerId
 		} else {
+			if (!(await this.groupsProxy.sharesGroup([userId, object.ownerId])))
+				throw new ForbiddenException('You can only borrow from members of your groups')
+
 			lenderId = object.ownerId
 			borrowerId = userId
 		}
