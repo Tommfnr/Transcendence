@@ -133,13 +133,17 @@ export class Dashboard implements OnInit {
 	}
 
 	private loadLendings(): void {
-		this.lendingService.listAll().subscribe((lendings) => this.lendings.set(lendings));
+		this.lendingService.listAll().subscribe({
+			next: (lendings) => this.lendings.set(lendings),
+			error: (err) => console.error('Failed to load lendings', err),
+		});
 	}
 
 	private loadMyObjects(): void {
-		this.objectService.findMy().subscribe((objects) =>
-			this.objectsById.set(new Map(objects.map((object) => [object.id, object])))
-		);
+		this.objectService.findMy().subscribe({
+			next: (objects) => this.objectsById.set(new Map(objects.map((object) => [object.id, object]))),
+			error: (err) => console.error('Failed to load my objects', err),
+		});
 	}
 
 
