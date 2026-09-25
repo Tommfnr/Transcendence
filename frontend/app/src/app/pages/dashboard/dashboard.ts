@@ -29,9 +29,9 @@ export class Dashboard implements OnInit {
 	private groupsService = inject(GroupsService);
 	readonly modalService = inject(ModalService);
 
-	private authorsById = signal<Map<number, User>>(new Map());
-	readonly posts = signal<PostEntity[]>([]);
 	readonly groups = signal<GroupEntity[]>([]);
+	readonly posts = signal<PostEntity[]>([]);
+	private authorsById = signal<Map<number, User>>(new Map());
 	private groupsByPostId = signal<Map<number, PostGroupData[]>>(new Map());
 	readonly selectedGroupId = signal<number | null>(null);
 	readonly activeTab = signal<DashboardTab>('requests');
@@ -57,24 +57,7 @@ export class Dashboard implements OnInit {
 
 	ngOnInit(): void {
 		this.loadGroups();
-
-		this.postsService.findFromMyGroups().subscribe((data) => {
-			this.posts.set(data);
-
-			const ownerIds = new Set(data.map((post) => post.ownerId));
-			for (const ownerId of ownerIds) {
-				this.usersService.findOne(ownerId).subscribe({
-					next: (user) => this.authorsById.update((map) => new Map(map).set(ownerId, user)),
-					error: (err) => console.error('Failed to load author', err),
-				});
-			}
-
-			for (const post of data) {
-				this.postsService.findGroups(post.id).subscribe((groups) => {
-					this.groupsByPostId.update((map) => new Map(map).set(post.id, groups));
-				});
-			}
-		});
+		this.loadPosts();
 	}
 
 	private loadGroups(): void {
@@ -85,6 +68,36 @@ export class Dashboard implements OnInit {
 				this.errorMessage.set('Could not load your group(s)');
 			},
 		});
+	}
+
+	private loadPosts(): void {
+		this.postsService.findFromMyGroups().subscribe({
+			next: (posts) => {
+				this.posts.set(posts);
+				this.loadAuthorsById(posts);
+				this.loadGroupsByPostId(posts);
+			},
+			error: (err) => console.error('Failed to load posts', err),
+		});
+	}
+
+	private loadAuthorsById(posts: PostEntity[]): void {
+		const ownerIds = new Set(posts.map((post) => post.ownerId));
+		for (const ownerId of ownerIds) {
+			this.usersService.findOne(ownerId).subscribe({
+				next: (user) => this.authorsById.update((map) => new Map(map).set(ownerId, user)),
+				error: (err) => console.error('Failed to load author', err),
+			});
+		}
+	}
+
+	private loadGroupsByPostId(posts: PostEntity[]): void {
+		for (const post of posts) {
+			this.postsService.findGroups(post.id).subscribe({
+				next: (groups) => this.groupsByPostId.update((map) => new Map(map).set(post.id, groups)),
+				error: (err) => console.error('Failed to load post groups', err),
+			});
+		}
 	}
 
 	selectTab(tab: DashboardTab): void {
@@ -137,6 +150,4 @@ export class Dashboard implements OnInit {
 			status: post.status === 'closed' ? 'done' : 'open',
 		};
 	}
-
-	
 }
