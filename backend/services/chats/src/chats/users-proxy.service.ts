@@ -16,6 +16,14 @@ export class UsersProxyService {
 		return (user)
 	}
 
+	async findManyByIds(ids: number[]): Promise<UserView[]> {
+		const unique = [...new Set(ids)]
+		const users = await Promise.all(
+			unique.map((id) => this.call(() => this.client.get<UserView>(`/internal/users/${id}`))),
+		)
+		return (users.filter((user): user is UserView => user !== null))
+	}
+
 	private async call<T>(fn: () => Promise<T>): Promise<T> {
 		try {
 			return (await fn())

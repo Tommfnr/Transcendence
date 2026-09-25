@@ -27,7 +27,8 @@ export class ChatsService {
 		return members.map((member) => member.userId)
 	}
 
-	// Members of several conversations at once, so a list never queries per row
+	// Members of several conversations at once, so a list never queries per row.
+	// Usernames live in the auth service, so they are fetched from there once per distinct user.
 	private async findMembersByConversation(conversationIds: number[]) {
 		const byConversation = new Map<number, ConversationMember[]>()
 
@@ -37,17 +38,22 @@ export class ChatsService {
 		const rows = await this.db
 				.select({
 					conversationId: conversationMembers.conversationId,
-					id: users.id,
-					username: users.username,
+					userId: conversationMembers.userId,
 				})
 				.from(conversationMembers)
-				.innerJoin(users, eq(users.id, conversationMembers.userId))
 				.where(inArray(conversationMembers.conversationId, conversationIds))
 				.orderBy(conversationMembers.id)
 
-		for (const { conversationId, ...member } of rows) {
+		const users = await this.usersProxy.findManyByIds(rows.map((row) => row.userId))
+		const usernameById = new Map(users.map((user) => [user.id, user.username]))
+
+		for (const { conversationId, userId } of rows) {
+			const username = usernameById.get(userId)
+			if (username === undefined)
+				continue
+
 			const members = byConversation.get(conversationId) ?? []
-			members.push(member)
+			members.push({ id: userId, username })
 			byConversation.set(conversationId, members)
 		}
 
@@ -96,9 +102,8 @@ export class ChatsService {
 	}
 
 	async createConversation(userId: number, dto: CreateConversationDto) {
-		const created = await this.db.transaction(async (t) => {
-			if (dto.recipientId === userId)
-				throw new ForbiddenException('You cannot start a conversation with yourself')
+		if (dto.recipientId === userId)
+			throw new ForbiddenException('You cannot start a conversation with yourself')
 
 		try {
 			await this.usersProxy.findById(dto.recipientId)
@@ -108,7 +113,7 @@ export class ChatsService {
 			throw err
 		}
 
-		return this.db.transaction(async (t) => {
+		const created = await this.db.transaction(async (t) => {
 			const [conversation] = await t
 					.insert(conversations)
 					.values({})
