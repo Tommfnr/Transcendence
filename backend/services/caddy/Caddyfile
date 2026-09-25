@@ -16,6 +16,11 @@ pep.localhost {
 		reverse_proxy gateway:3000
 	}
 
+	redir /grafana /grafana/
+	handle /grafana/* {
+		reverse_proxy grafana:3000
+	}
+
 	# This will handle all the rest of the routes to the frontend
 	handle {
 		reverse_proxy frontend:4200

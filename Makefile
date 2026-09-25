@@ -16,6 +16,10 @@ $(ENV_FILE):
 	@echo "JWT_SECRET=$$(openssl rand -hex 32)" >> $@
 	@echo "JWT_REFRESH_SECRET=$$(openssl rand -hex 32)" >> $@
 	@echo "INTERNAL_API_KEY=$$(openssl rand -hex 32)" >> $@
+	@echo "GF_SECURITY_ADMIN_USER=admin" >> $@
+	@echo "GF_SECURITY_ADMIN_PASSWORD=$$(openssl rand -hex 16)" >> $@
+	@echo "GF_SERVER_ROOT_URL=https://pep.localhost:8443/grafana/" >> $@
+	@echo "GF_SERVER_SERVE_FROM_SUB_PATH=true" >> $@
 
 ########## RULES ##########
 
