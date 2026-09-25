@@ -4,15 +4,21 @@ import { RouterLink } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
+import { Exchange, ExchangeTone, OFFER_STATUS, TONE_ORDER } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
 import { PostsService } from '../../services/posts.service';
-import { HeaderAppComponent } from '../../components/header-app/header-app';
-import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { PostEntity, PostGroupData } from '../../models/post.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
+import { LendingService } from '../../services/lending.service';
+import { LendingEntity } from '../../models/lending.model';
+import { ObjectService } from '../../services/object.service';
+import { ObjectEntity } from '../../models/object.model';
+import { RefreshService } from '../../services/refresh.service';
+import { HeaderAppComponent } from '../../components/header-app/header-app';
+import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
 
 type DashboardTab = 'requests' | 'exchanges';
@@ -24,10 +30,14 @@ type DashboardTab = 'requests' | 'exchanges';
 })
 export class Dashboard implements OnInit {
 
-	private usersService = inject(UsersService);
-	private postsService = inject(PostsService);
 	private groupsService = inject(GroupsService);
+	private postsService = inject(PostsService);
+	private usersService = inject(UsersService);
 	readonly modalService = inject(ModalService);
+	private refreshService = inject(RefreshService);
+	private lendingService = inject(LendingService);
+	private objectService = inject(ObjectService);
+
 
 	readonly groups = signal<GroupEntity[]>([]);
 	readonly posts = signal<PostEntity[]>([]);
@@ -37,6 +47,20 @@ export class Dashboard implements OnInit {
 	readonly activeTab = signal<DashboardTab>('requests');
 	readonly fabOpen = signal(false);
 	readonly errorMessage = signal<string | null>(null);
+	readonly lendings = signal<LendingEntity[]>([]);
+	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
+	readonly selectedRequestPostId = signal<number | null>(null);
+
+
+	private readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null)
+
+	readonly myPosts = computed(() =>
+		this.filteredPosts().filter((post) => post.ownerId === this.currentUserId())
+	);
+
+	readonly otherPosts = computed(() =>
+		this.filteredPosts().filter((post) => post.ownerId !== this.currentUserId())
+	);
 
 	readonly filteredPosts = computed(() => {
 		const groupId = this.selectedGroupId();
@@ -48,16 +72,24 @@ export class Dashboard implements OnInit {
 	});
 
 	readonly displayedRequests = computed<HelpRequest[]>(() =>
-		this.filteredPosts().map((post) => this.toHelpRequest(post))
+		this.otherPosts().map((post) => this.toHelpRequest(post))
+	);
+
+	readonly myExchanges = computed<Exchange[]>(() =>
+		[...this.myRequestExchanges(), ...this.myOfferExchanges()]
+			.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone])
 	);
 
 	readonly requestCount = computed(() => this.displayedRequests().length);
 	// TODO: count from my exchanges
 	readonly offerCount = 2;
 
+
 	ngOnInit(): void {
 		this.loadGroups();
 		this.loadPosts();
+		this.loadLendings();
+		this.loadMyObjects();
 	}
 
 	private loadGroups(): void {
@@ -100,6 +132,17 @@ export class Dashboard implements OnInit {
 		}
 	}
 
+	private loadLendings(): void {
+		this.lendingService.listAll().subscribe((lendings) => this.lendings.set(lendings));
+	}
+
+	private loadMyObjects(): void {
+		this.objectService.findMy().subscribe((objects) =>
+			this.objectsById.set(new Map(objects.map((object) => [object.id, object])))
+		);
+	}
+
+
 	selectTab(tab: DashboardTab): void {
 		this.activeTab.set(tab);
 	}
@@ -132,6 +175,7 @@ export class Dashboard implements OnInit {
 		this.modalService.openAddGroup();
 	}
 
+
 	/** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
 	private toHelpRequest(post: PostEntity): HelpRequest {
 		const groups = this.groupsByPostId().get(post.id) ?? [];
@@ -150,4 +194,44 @@ export class Dashboard implements OnInit {
 			status: post.status === 'closed' ? 'done' : 'open',
 		};
 	}
+
+	private myRequestExchanges(): Exchange[] {
+		const me = this.currentUserId();
+
+		return this.myPosts().map((post) => {
+			const offers = this.lendings().filter((l) =>
+				l.postId === post.id && l.borrowerId === me && (l.status === 'pending' || l.status === 'accepted')
+			).length;
+
+			let statusLabel = 'no reply';
+			let tone: ExchangeTone = 'waiting';
+			if (post.status === 'closed') {
+				statusLabel = 'helper chosen';
+				tone = 'done';
+			} else if (offers > 0) {
+				statusLabel = `${offers} offer${offers > 1 ? 's' : ''}`;
+				tone = 'attention';
+			}
+
+			return { id: `post-${post.id}`, kind: 'request', postId: post.id, title: post.title, statusLabel, tone };
+		});
+	}
+
+	private myOfferExchanges(): Exchange[] {
+		const me = this.currentUserId();
+
+		return this.lendings()
+			.filter((l) => l.lenderId === me && l.postId !== null)
+			.map((l) => ({
+				id: `lending-${l.id}`,
+				kind: 'offer',
+				postId: l.postId!,
+				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
+				statusLabel: OFFER_STATUS[l.status].label,
+				tone: OFFER_STATUS[l.status].tone,
+			}));
+	}
+
 }
+
+
