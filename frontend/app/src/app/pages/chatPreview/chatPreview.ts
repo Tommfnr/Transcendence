@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
-import { ChatComponent } from '../../components/chat/chat';
+import { ChatComponent } from '../../components/chats/chats';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';

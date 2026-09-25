@@ -41,7 +41,7 @@ function mergeMessages(current: MessageEntity[], incoming: MessageEntity[]): Mes
 @Component({
     selector: 'app-chat',
     imports: [DatePipe, ButtonDirective],
-    templateUrl: './chat.html',
+    templateUrl: './chats.html',
     host: { class: 'flex min-h-0 flex-col overflow-hidden rounded-card bg-card shadow-card' },
 })
 export class ChatComponent {
