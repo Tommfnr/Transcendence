@@ -13,152 +13,130 @@ import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { PostEntity, PostGroupData } from '../../models/post.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
+import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
 
-
-
-type DashboardTab = 'requests' | 'offers';
+type DashboardTab = 'requests' | 'exchanges';
 
 @Component({
-  selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent],
-  templateUrl: './dashboard.html',
+	selector: 'app-dashboard',
+	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent],
+	templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
 
-  private usersService = inject(UsersService);
-  private authors = signal<Map<number, User>>(new Map());
+	private usersService = inject(UsersService);
+	private postsService = inject(PostsService);
+	private groupsService = inject(GroupsService);
+	readonly modalService = inject(ModalService);
 
-  private groupsService = inject(GroupsService);
-  private postsService = inject(PostsService);
+	private authorsById = signal<Map<number, User>>(new Map());
+	readonly posts = signal<PostEntity[]>([]);
+	readonly groups = signal<GroupEntity[]>([]);
+	private groupsByPostId = signal<Map<number, PostGroupData[]>>(new Map());
+	readonly selectedGroupId = signal<number | null>(null);
+	readonly activeTab = signal<DashboardTab>('requests');
+	readonly fabOpen = signal(false);
+	readonly errorMessage = signal<string | null>(null);
 
-  readonly posts = signal<PostEntity[]>([]);
-  readonly selectedGroupId = signal<number | null>(null);
-  private postGroup = signal<Map<number, PostGroupData[]>>(new Map());
+	readonly filteredPosts = computed(() => {
+		const groupId = this.selectedGroupId();
+		if (groupId === null) {
+			return (this.posts());
+		}
+		return (this.posts()).filter((post) =>
+			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false);
+	});
 
-  readonly filteredPosts = computed(() => {
-    const groupId = this.selectedGroupId();
-    if (groupId === null) {
-      return this.posts();
-    }
+	readonly displayedRequests = computed<HelpRequest[]>(() =>
+		this.filteredPosts().map((post) => this.toHelpRequest(post))
+	);
 
-    const postGroup = this.postGroup();
-    return this.posts().filter((post) => postGroup.get(post.id)?.some((group) => group.id === groupId) ?? false);
-  });
+	readonly requestCount = computed(() => this.displayedRequests().length);
+	// TODO: count from my exchanges
+	readonly offerCount = 2;
 
-  readonly displayedRequests = computed<HelpRequest[]>(() =>
-    this.filteredPosts().map((post) => this.toHelpRequest(post))
-  );
+	ngOnInit(): void {
+		this.loadGroups();
 
-  readonly modalService = inject(ModalService);
+		this.postsService.findFromMyGroups().subscribe((data) => {
+			this.posts.set(data);
 
-  readonly activeTab = signal<DashboardTab>('requests');
+			const ownerIds = new Set(data.map((post) => post.ownerId));
+			for (const ownerId of ownerIds) {
+				this.usersService.findOne(ownerId).subscribe({
+					next: (user) => this.authorsById.update((map) => new Map(map).set(ownerId, user)),
+					error: (err) => console.error('Failed to load author', err),
+				});
+			}
 
-  readonly groups = signal<GroupEntity[]>([]);
-  readonly errorMessage = signal<string | null>(null);
+			for (const post of data) {
+				this.postsService.findGroups(post.id).subscribe((groups) => {
+					this.groupsByPostId.update((map) => new Map(map).set(post.id, groups));
+				});
+			}
+		});
+	}
 
-  readonly requestCount = computed(() => this.displayedRequests().length);
-  readonly offerCount = 2;
+	private loadGroups(): void {
+		this.groupsService.findMy().subscribe({
+			next: (groups) => this.groups.set(groups),
+			error: (err) => {
+				console.error(err);
+				this.errorMessage.set('Could not load your group(s)');
+			},
+		});
+	}
 
+	selectTab(tab: DashboardTab): void {
+		this.activeTab.set(tab);
+	}
 
+	onGroupFilterChange(event: Event): void {
+		const value = (event.target as HTMLSelectElement).value;
+		this.selectedGroupId.set(value === '' ? null : Number(value));
+	}
 
-  ngOnInit(): void {
-    this.groupsService.findMy().subscribe({
-      next: (data) => this.groups.set(data),
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Error while showing group(s)');
-      },
-    });
+	toggleFab(): void {
+		this.fabOpen.update(open => !open);
+	}
 
-    this.postsService.findFromMyGroups().subscribe((data) => {
-      this.posts.set(data);
+	closeFab(): void {
+		this.fabOpen.set(false);
+	}
 
-      const ownerIds = new Set(data.map((post) => post.ownerId));
-      for (const ownerId of ownerIds) {
-        this.usersService.findOne(ownerId).subscribe({
-          next: (user) => this.authors.update((map) => new Map(map).set(ownerId, user)),
-          error: (err) => console.error('Failed to load author', err),
-        });
-      }
+	openAddObjectModal(): void {
+		this.closeFab();
+		this.modalService.openAddObject();
+	}
 
-      for (const post of data) {
-        this.postsService.findGroups(post.id).subscribe((groups) => {
-          this.postGroup.update((map) => new Map(map).set(post.id, groups));
-        });
-      }
-    });
-  }
+	openAddPostModal(): void {
+		this.closeFab();
+		this.modalService.openAddPost();
+	}
 
-  selectTab(tab: DashboardTab): void {
-    this.activeTab.set(tab);
-  }
+	openAddGroupModal(): void {
+		this.closeFab();
+		this.modalService.openAddGroup();
+	}
 
-  onGroupFilterChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedGroupId.set(value === '' ? null : Number(value));
-  }
+	/** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
+	private toHelpRequest(post: PostEntity): HelpRequest {
+		const groups = this.groupsByPostId().get(post.id) ?? [];
 
-  onHelp(request: HelpRequest): void {
-    // TODO: send the offer of help once the API endpoint exists.
-    void request;
-  }
+		return {
+			id: post.id,
+			authorName: this.authorsById().get(post.ownerId)?.username ?? '',
+			groupName: groups.map((g) => g.name).join(', ') || 'No group',
+			timeAgo: formatTimeAgo(post.createdAt),
+			title: post.title,
+			description: post.description ?? '',
+			tags: [
+				{ icon: 'tag', label: post.objectType },
+				{ icon: 'calendar', label: formatDateRange(post.fromDate, post.toDate) },
+			],
+			status: post.status === 'closed' ? 'done' : 'open',
+		};
+	}
 
-  readonly fabOpen = signal(false);
-
-  toggleFab(): void {
-    this.fabOpen.update(open => !open);
-  }
-
-  closeFab(): void {
-    this.fabOpen.set(false);
-  }
-
-  openAddObjectModal(): void {
-    this.closeFab();
-    this.modalService.openAddObject();
-  }
-
-  openAddPostModal(): void {
-    this.closeFab();
-    this.modalService.openAddPost();
-  }
-
-  openAddGroupModal(): void {
-    this.closeFab();
-    this.modalService.openAddGroup();
-  }
-
-  /** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
-  private toHelpRequest(post: PostEntity): HelpRequest {
-    const groups = this.postGroup().get(post.id) ?? [];
-
-    return {
-      id: post.id,
-      authorName: this.authors().get(post.ownerId)?.username ?? '',
-      groupName: groups.map((g) => g.name).join(', ') || 'Aucun groupe',
-      timeAgo: this.formatTimeAgo(post.createdAt),
-      title: post.title,
-      description: post.description ?? '',
-      tags: [
-        { icon: 'tag', label: post.objectType },
-        { icon: 'calendar', label: this.formatDateRange(post.fromDate, post.toDate) },
-      ],
-      status: post.status === 'closed' ? 'done' : 'open',
-    };
-  }
-
-  private formatTimeAgo(dateIso: string): string {
-    const diffMs = Date.now() - new Date(dateIso).getTime();
-    const diffH = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffH < 1) return "il y a moins d'1h";
-    if (diffH < 24) return `il y a ${diffH}h`;
-    const diffJ = Math.floor(diffH / 24);
-    return `il y a ${diffJ}j`;
-  }
-
-  private formatDateRange(fromDate: string, toDate: string): string {
-    const from = new Date(fromDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    const to = new Date(toDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    return `${from}-${to}`;
-  }
+	
 }

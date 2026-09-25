@@ -9,6 +9,7 @@ import { PostsService } from '../../services/posts.service';
 import { UsersService } from '../../services/users.service';
 import { LendingService } from '../../services/lending.service';
 import { User } from '../../models/user.model';
+import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
 
 
 
@@ -70,25 +71,16 @@ export class ICanHelp implements OnInit {
     readonly description = computed(() => this.post()?.description ?? '');
     readonly dateRangeLabel = computed(() => {
         const post = this.post();
-        if (!post) return '';
-        return `${this.formatDate(post.fromDate)} - ${this.formatDate(post.toDate)}`;
+        return post ? formatDateRange(post.fromDate, post.toDate) : '';
     });
 
     goToOfferHelp(): void {
         this.router.navigate(['/app/offerHelp', this.postId]);
     }
 
-    private formatDate(dateIso: string): string {
-        return new Date(dateIso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    }
-
     readonly timeAgo = computed(() => {
         const post = this.post();
-        if (!post) return '';
-        const diffH = Math.floor((Date.now() - new Date(post.createdAt).getTime()) / 3_600_000);
-        if (diffH < 1) return 'less than 1h ago';
-        if (diffH < 24) return `${diffH}h ago`;
-        return `${Math.floor(diffH / 24)}d ago`;
+        return post ? formatTimeAgo(post.createdAt) : '';
     });
 
 }
