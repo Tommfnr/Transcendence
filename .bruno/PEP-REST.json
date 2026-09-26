@@ -1,0 +1,1446 @@
+{
+  "name": "PEP-REST",
+  "version": "1",
+  "items": [
+    {
+      "type": "folder",
+      "name": "Chats",
+      "filename": "Chats",
+      "seq": 5,
+      "examples": [],
+      "root": {
+        "request": {
+          "auth": {
+            "mode": "inherit"
+          }
+        },
+        "meta": {
+          "name": "Chats",
+          "seq": 5
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "create #Cn #P1",
+          "filename": "create #Cn #P1.bru",
+          "seq": 4,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/chats",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "  {\n      \"postId\": [1],\n        \"content\": \"Hey I do have a hammer, but it wont be available until tomorrow is that ok?\"\n    }",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "createMessage #C1",
+          "filename": "createMessage #C1.bru",
+          "seq": 5,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/chats/1/messages",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "  {\n        \"content\": \"Hey, you didnt answer my message are you ok ?\"\n    }",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMessages #C1",
+          "filename": "findMessages #C1.bru",
+          "seq": 3,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/chats/1/messages",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMy",
+          "filename": "findMy.bru",
+          "seq": 1,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/chats/my",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findOne #C1",
+          "filename": "findOne #C1.bru",
+          "seq": 2,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/chats/1",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Posts",
+      "filename": "Posts",
+      "seq": 4,
+      "examples": [],
+      "root": {
+        "request": {
+          "auth": {
+            "mode": "inherit"
+          }
+        },
+        "meta": {
+          "name": "Posts",
+          "seq": 4
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "create #Pn",
+          "filename": "create #Pn.bru",
+          "seq": 5,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "  {\n        \"title\": \"Looking for Screwdriver\",\n      \"type\": \"Tools\",\n      \"description\": \"Help im stuck in the airVent, I need it soon !\",\n      \"fromDate\": \"2026-08-19\",\n      \"toDate\": \"2026-08-20\",\n      \"groupIds\": [1, 2, 3]\n    }",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findAll",
+          "filename": "findAll.bru",
+          "seq": 1,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findGroups #P1",
+          "filename": "findGroups #P1.bru",
+          "seq": 4,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts/1/groups",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMy",
+          "filename": "findMy.bru",
+          "seq": 2,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts/my",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findOne #P1",
+          "filename": "findOne #P1.bru",
+          "seq": 3,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts/1",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "update #Pn",
+          "filename": "update #Pn.bru",
+          "seq": 6,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/posts/1",
+            "method": "PUT",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "  {\n        \"title\": \"Actually a Hammer would be nice\",\n      \"type\": \"Professional Tools\",\n      \"description\": \"Yup still stuck, accept quick !\",\n        \"status\": \"closed\",\n      \"fromDate\": \"2026-08-19\",\n      \"toDate\": \"2026-08-22\",\n      \"groupIds\": [1, 2]\n    }",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Objects",
+      "filename": "Objects",
+      "seq": 2,
+      "examples": [],
+      "root": {
+        "request": {
+          "auth": {
+            "mode": "inherit"
+          }
+        },
+        "meta": {
+          "name": "Objects",
+          "seq": 2
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "create #On",
+          "filename": "create #On.bru",
+          "seq": 4,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects/",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"Bonys\",\n  \"type\": \"cameraa\",\n  \"description\": \"new camera\",\n  \"condition\": \"new\",\n  \"isAvailable\": false\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findAll",
+          "filename": "findAll.bru",
+          "seq": 1,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMy",
+          "filename": "findMy.bru",
+          "seq": 2,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects/my",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findOne #O1",
+          "filename": "findOne #O1.bru",
+          "seq": 3,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects/1",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "remove #O1",
+          "filename": "remove #O1.bru",
+          "seq": 6,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects/1",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "update #O1",
+          "filename": "update #O1.bru",
+          "seq": 5,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/objects/1",
+            "method": "PUT",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"brand\": \"Sony\",\n  \"type\": \"camera\",\n  \"description\": \"New camera\",\n  \"condition\": \"worn\",\n  \"isAvailable\": true\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Users/Auth",
+      "filename": "Users-Auth",
+      "seq": 1,
+      "examples": [],
+      "root": {
+        "request": {
+          "auth": {
+            "mode": "inherit"
+          }
+        },
+        "meta": {
+          "name": "Users/Auth",
+          "seq": 1
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "findAll",
+          "filename": "findAll.bru",
+          "seq": 1,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/users/",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findOne",
+          "filename": "findOne.bru",
+          "seq": 2,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/users/1",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "register #U1",
+          "filename": "register #U1.bru",
+          "seq": 3,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/auth/register/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"username\": \"themangojus\",\n  \"email\": \"themangojus@gmail.com\",\n  \"h_password\": \"Mango@123456\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "register #U2",
+          "filename": "register #U2.bru",
+          "seq": 4,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/auth/register/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"username\": \"louis\",\n  \"email\": \"louis@gmail.com\",\n  \"h_password\": \"1ouisLeBlo@t\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "remove",
+          "filename": "remove.bru",
+          "seq": 8,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/users/3",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "signIn #U1 (email)",
+          "filename": "signIn #U1 (email).bru",
+          "seq": 5,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/auth/login/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"username\": \"themangojus@gmail.com\",\n    \"password\": \"Mango@123456\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {
+              "res": "const responseText = JSON.stringify(res.getBody());\nlet json;\n\ntry {\n    json = JSON.parse(responseText);\n    bru.setEnvVar('access_token', json.access_token);\n    bru.setEnvVar('refresh_token', json.refresh_token);\n    bru.setGlobalEnvVar('access_token', json.access_token);\n    bru.setGlobalEnvVar('refresh_token', json.refresh_token);\n} catch (e) {\n    console.error(\"Failed to parse JSON:\", e);\n}"
+            },
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "signIn #U1 (username)",
+          "filename": "signIn #U1 (username).bru",
+          "seq": 6,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/auth/login/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"username\": \"themangojus\",\n    \"password\": \"Mango@123456\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {
+              "res": "const responseText = JSON.stringify(res.getBody());\nlet json;\n\ntry {\n    json = JSON.parse(responseText);\n    bru.setEnvVar('access_token', json.access_token);\n    bru.setEnvVar('refresh_token', json.refresh_token);\n    bru.setGlobalEnvVar('access_token', json.access_token);\n    bru.setGlobalEnvVar('refresh_token', json.refresh_token);\n} catch (e) {\n    console.error(\"Failed to parse JSON:\", e);\n}"
+            },
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "signIn #U2 (username)",
+          "filename": "signIn #U2 (username).bru",
+          "seq": 7,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/auth/login/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"username\": \"louis\",\n    \"password\": \"1ouisLeBlo@t\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {
+              "res": "const responseText = JSON.stringify(res.getBody());\nlet json;\n\ntry {\n    json = JSON.parse(responseText);\n    bru.setEnvVar('access_token', json.access_token);\n    bru.setEnvVar('refresh_token', json.refresh_token);\n    bru.setGlobalEnvVar('access_token', json.access_token);\n    bru.setGlobalEnvVar('refresh_token', json.refresh_token);\n} catch (e) {\n    console.error(\"Failed to parse JSON:\", e);\n}"
+            },
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Groups",
+      "filename": "Groups",
+      "seq": 3,
+      "examples": [],
+      "root": {
+        "request": {
+          "auth": {
+            "mode": "inherit"
+          }
+        },
+        "meta": {
+          "name": "Groups",
+          "seq": 3
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "addMember #G1 #U2",
+          "filename": "addMember #G1 #U2.bru",
+          "seq": 5,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/members/2",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"name\": \"mongroupe\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "create #Gn",
+          "filename": "create #Gn.bru",
+          "seq": 4,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"name\": \"mangoGroup\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "deleteGroup #G1",
+          "filename": "deleteGroup #G1.bru",
+          "seq": 12,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findAll",
+          "filename": "findAll.bru",
+          "seq": 1,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMembers #G1",
+          "filename": "findMembers #G1.bru",
+          "seq": 3,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/members/",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "findMy",
+          "filename": "findMy.bru",
+          "seq": 2,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/my",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "grantObject #G1 #O1",
+          "filename": "grantObject #G1 #O1.bru",
+          "seq": 6,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/objects/1/grant",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"name\": \"mongroupe\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "leaveGroup #G1",
+          "filename": "leaveGroup #G1.bru",
+          "seq": 10,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/leave",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "removeMember #G1 #U2",
+          "filename": "removeMember #G1 #U2.bru",
+          "seq": 11,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/members/2",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "transferOwnership #G1 #U2",
+          "filename": "transferOwnership #G1 #U2.bru",
+          "seq": 9,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/owner/2",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "updateMemberRole #G1 #U2 (admin)",
+          "filename": "updateMemberRole #G1 #U2 (admin).bru",
+          "seq": 7,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/members/2/role",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"role\": \"admin\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "updateMemberRole #G1 #U2 (member)",
+          "filename": "updateMemberRole #G1 #U2 (member).bru",
+          "seq": 8,
+          "settings": {
+            "encodeUrl": true,
+            "timeout": 0
+          },
+          "tags": [],
+          "examples": [],
+          "request": {
+            "url": "https://pep.localhost:8443/api/groups/1/members/2/role",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n    \"role\": \"member\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Flow",
+      "filename": "Flow",
+      "examples": []
+    }
+  ],
+  "environments": [],
+  "root": {
+    "request": {
+      "auth": {
+        "mode": "none"
+      },
+      "vars": {
+        "req": [
+          {
+            "name": "object",
+            "value": "1",
+            "enabled": true,
+            "local": false,
+            "uid": "sSOaRsGI21aVRpktTBnjX"
+          }
+        ]
+      }
+    },
+    "meta": {
+      "name": "PEP/mango"
+    }
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "PEP/mango",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  },
+  "exportedAt": "2026-09-15T12:05:59.128Z",
+  "exportedUsing": "Bruno/3.0.2"
+}

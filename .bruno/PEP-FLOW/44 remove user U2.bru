@@ -1,0 +1,25 @@
+meta {
+  name: 44 remove user U2
+  type: http
+  seq: 44
+}
+
+delete {
+  url: https://pep.localhost:8443/api/users/{{u2_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u2_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 204)
+    throw new Error(`remove user U2 failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,35 @@
+meta {
+  name: create object Board Game Collection
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/objects
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u3_token}}
+}
+
+body:json {
+  {
+    "name": "Board Game Collection",
+    "type": "Media",
+    "description": "A box of 10 popular family board games.",
+    "condition": "good",
+    "isAvailable": true
+  }
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`create object Board Game Collection failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

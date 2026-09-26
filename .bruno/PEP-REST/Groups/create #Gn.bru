@@ -1,0 +1,26 @@
+meta {
+  name: create #Gn
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "name": "mangoGroup"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

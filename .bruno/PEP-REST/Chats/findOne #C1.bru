@@ -1,0 +1,20 @@
+meta {
+  name: findOne #C1
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://pep.localhost:8443/api/chats/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

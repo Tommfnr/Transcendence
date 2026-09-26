@@ -1,0 +1,36 @@
+meta {
+  name: create post Projector Needed
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/posts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u5_token}}
+}
+
+body:json {
+  {
+    "title": "Projector Needed",
+    "objectType": "Media",
+    "description": "Need a projector and screen for a movie night this Friday.",
+    "fromDate": "{{date_from}}",
+    "toDate": "{{date_to}}",
+    "groupIds": [{{friends_id}}]
+  }
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`create post Projector Needed failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

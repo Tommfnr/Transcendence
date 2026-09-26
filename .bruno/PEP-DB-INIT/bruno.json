@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "PEP-DB-INIT",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

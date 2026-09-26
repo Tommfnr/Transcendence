@@ -1,0 +1,20 @@
+meta {
+  name: addMember #G1 #U2
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/1/members/2
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

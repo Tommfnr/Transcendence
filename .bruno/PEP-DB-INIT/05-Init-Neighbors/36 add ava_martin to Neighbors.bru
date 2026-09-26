@@ -1,0 +1,25 @@
+meta {
+  name: add ava_martin to Neighbors
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/{{neighbors_id}}/members/{{u5_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u3_token}}
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`add ava_martin to Neighbors failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

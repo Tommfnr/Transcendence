@@ -1,0 +1,25 @@
+meta {
+  name: 34 find my chats
+  type: http
+  seq: 34
+}
+
+get {
+  url: https://pep.localhost:8443/api/chats/my
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find my chats failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

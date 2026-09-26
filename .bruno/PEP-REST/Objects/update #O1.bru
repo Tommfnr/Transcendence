@@ -1,0 +1,29 @@
+meta {
+  name: update #O1
+  type: http
+  seq: 5
+}
+
+put {
+  url: https://pep.localhost:8443/api/objects/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "type": "Electronics",
+    "description": "New camera",
+    "condition": "worn",
+    "isAvailable": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

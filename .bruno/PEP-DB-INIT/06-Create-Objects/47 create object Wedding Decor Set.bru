@@ -1,0 +1,35 @@
+meta {
+  name: create object Wedding Decor Set
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/objects
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u5_token}}
+}
+
+body:json {
+  {
+    "name": "Wedding Decor Set",
+    "type": "Events",
+    "description": "Fairy lights, table runners, and centerpiece vases.",
+    "condition": "good",
+    "isAvailable": true
+  }
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`create object Wedding Decor Set failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

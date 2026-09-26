@@ -1,0 +1,30 @@
+meta {
+  name: 04 refresh U1
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/refresh
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+const json = res.getBody();
+
+if (res.getStatus() !== 200)
+    throw new Error(`refresh U1 failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+
+// Note: the refreshed access token is missing the "username" claim (backend bug in
+// AuthService.refresh(), which trusts payload.username off the refresh token even
+// though the refresh token is never signed with one) and gets rejected downstream
+// with "Malformed token payload". Kept under a separate var so it doesn't clobber
+// the working login token the rest of the flow depends on.
+bru.setEnvVar('u1_access_token_refreshed', json.access_token);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

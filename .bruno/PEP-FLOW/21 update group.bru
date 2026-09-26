@@ -1,0 +1,32 @@
+meta {
+  name: 21 update group
+  type: http
+  seq: 21
+}
+
+patch {
+  url: https://pep.localhost:8443/api/groups/{{group_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+body:json {
+  {
+  "name": "FlowGroupUpdated",
+  "description": "Updated by the flow"
+  }
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`update group failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

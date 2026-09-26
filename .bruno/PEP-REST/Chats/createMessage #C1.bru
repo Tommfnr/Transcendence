@@ -1,0 +1,26 @@
+meta {
+  name: createMessage #C1
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://pep.localhost:8443/api/chats/1/messages
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+    {
+          "content": "Hey, you didnt answer my message are you ok ?"
+      }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

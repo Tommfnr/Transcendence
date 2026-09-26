@@ -1,0 +1,20 @@
+meta {
+  name: findGroups #P1
+  type: http
+  seq: 4
+}
+
+get {
+  url: https://pep.localhost:8443/api/posts/1/groups
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

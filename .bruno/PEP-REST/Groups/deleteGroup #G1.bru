@@ -1,0 +1,20 @@
+meta {
+  name: deleteGroup #G1
+  type: http
+  seq: 10
+}
+
+delete {
+  url: https://pep.localhost:8443/api/groups/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

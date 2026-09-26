@@ -1,0 +1,31 @@
+meta {
+  name: 36 create message
+  type: http
+  seq: 36
+}
+
+post {
+  url: https://pep.localhost:8443/api/chats/{{conversation_id}}/messages
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u2_access_token}}
+}
+
+body:json {
+  {
+  "content": "Sure, sounds good!"
+  }
+}
+
+script:post-response {
+if (res.getStatus() !== 201)
+    throw new Error(`create message failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

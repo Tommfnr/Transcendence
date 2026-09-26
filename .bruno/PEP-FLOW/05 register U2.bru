@@ -1,0 +1,24 @@
+meta {
+  name: 05 register U2
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+  "username": "flowuser2",
+  "email": "flowuser2@test.local",
+  "h_password": "Flow@123456"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

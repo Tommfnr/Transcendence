@@ -1,0 +1,21 @@
+meta {
+  name: 43 logout U2
+  type: http
+  seq: 43
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/logout
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`logout U2 failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

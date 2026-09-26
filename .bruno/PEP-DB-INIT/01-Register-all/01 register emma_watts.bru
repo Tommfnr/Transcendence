@@ -1,0 +1,33 @@
+meta {
+  name: register emma_watts
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "emma_watts",
+    "email": "emma.watts@example.com",
+    "h_password": "Emma2024!"
+  }
+}
+
+script:post-response {
+const json = res.getBody();
+
+if (res.getStatus() !== 201)
+    throw new Error(`register emma_watts failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+
+bru.setEnvVar('u1_id', json.id);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

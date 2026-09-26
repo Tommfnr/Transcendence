@@ -1,0 +1,36 @@
+meta {
+  name: 17 create group2 (for delete test)
+  type: http
+  seq: 17
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+body:json {
+  {
+  "name": "FlowGroup2",
+  "description": "Throwaway group, only used to test deleteGroup"
+  }
+}
+
+script:post-response {
+const json = res.getBody();
+
+if (res.getStatus() !== 201)
+    throw new Error(`create group2 failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+
+bru.setEnvVar('group2_id', json.id);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

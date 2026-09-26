@@ -1,0 +1,25 @@
+meta {
+  name: 27 find all posts
+  type: http
+  seq: 27
+}
+
+get {
+  url: https://pep.localhost:8443/api/posts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find all posts failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

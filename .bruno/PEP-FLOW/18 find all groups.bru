@@ -1,0 +1,25 @@
+meta {
+  name: 18 find all groups
+  type: http
+  seq: 18
+}
+
+get {
+  url: https://pep.localhost:8443/api/groups
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find all groups failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

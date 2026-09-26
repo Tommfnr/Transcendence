@@ -1,0 +1,25 @@
+meta {
+  name: 40 delete group2
+  type: http
+  seq: 40
+}
+
+delete {
+  url: https://pep.localhost:8443/api/groups/{{group2_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`delete group2 failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

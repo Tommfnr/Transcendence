@@ -1,0 +1,37 @@
+meta {
+  name: login emma_watts
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "identifier": "emma_watts",
+    "password": "Emma2024!"
+  }
+}
+
+script:post-response {
+  const json = res.getBody();
+  
+  if (res.getStatus() !== 200)
+    throw new Error(`login emma_watts failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+  
+  bru.setEnvVar('u1_token', json.access_token);
+  
+  const from = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const to = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  bru.setEnvVar('date_from', from.toISOString());
+  bru.setEnvVar('date_to', to.toISOString());
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

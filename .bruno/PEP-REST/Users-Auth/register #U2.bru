@@ -1,0 +1,24 @@
+meta {
+  name: register #U2
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/register/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "louis",
+    "email": "louis@gmail.com",
+    "h_password": "1ouisLeBlo@t"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

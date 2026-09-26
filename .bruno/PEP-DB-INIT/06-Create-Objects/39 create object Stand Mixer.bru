@@ -1,0 +1,35 @@
+meta {
+  name: create object Stand Mixer
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/objects
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_token}}
+}
+
+body:json {
+  {
+    "name": "Stand Mixer",
+    "type": "Electronics",
+    "description": "Countertop stand mixer, great for baking large batches.",
+    "condition": "new",
+    "isAvailable": true
+  }
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`create object Stand Mixer failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

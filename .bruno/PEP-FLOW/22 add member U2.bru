@@ -1,0 +1,25 @@
+meta {
+  name: 22 add member U2
+  type: http
+  seq: 22
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/{{group_id}}/members/{{u2_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 201)
+    throw new Error(`add member U2 failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

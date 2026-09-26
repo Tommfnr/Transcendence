@@ -1,0 +1,36 @@
+meta {
+  name: create post Chainsaw Needed
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/posts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u4_token}}
+}
+
+body:json {
+  {
+    "title": "Chainsaw Needed",
+    "objectType": "Tools",
+    "description": "Looking for a chainsaw to clear a fallen branch in the yard.",
+    "fromDate": "{{date_from}}",
+    "toDate": "{{date_to}}",
+    "groupIds": [{{neighbors_id}}]
+  }
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`create post Chainsaw Needed failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

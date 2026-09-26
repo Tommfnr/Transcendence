@@ -1,0 +1,25 @@
+meta {
+  name: 10 find user by id
+  type: http
+  seq: 10
+}
+
+get {
+  url: https://pep.localhost:8443/api/users/{{u2_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find user by id failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

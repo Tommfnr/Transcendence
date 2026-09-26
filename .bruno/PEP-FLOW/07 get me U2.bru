@@ -1,0 +1,29 @@
+meta {
+  name: 07 get me U2
+  type: http
+  seq: 7
+}
+
+get {
+  url: https://pep.localhost:8443/api/users/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u2_access_token}}
+}
+
+script:post-response {
+const json = res.getBody();
+
+if (res.getStatus() !== 200)
+    throw new Error(`get me U2 failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+
+bru.setEnvVar('u2_id', json.id);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

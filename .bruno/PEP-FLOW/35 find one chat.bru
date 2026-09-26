@@ -1,0 +1,25 @@
+meta {
+  name: 35 find one chat
+  type: http
+  seq: 35
+}
+
+get {
+  url: https://pep.localhost:8443/api/chats/{{conversation_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find one chat failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

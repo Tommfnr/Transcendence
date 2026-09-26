@@ -37,11 +37,79 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
+  gateway:
     build:
-      context: ../backend/services/api
-      dockerfile: ../../../infra/services/api/Dockerfile
-    container_name: api
+      context: ../backend/services/gateway
+      dockerfile: ../../../infra/services/gateway/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: gateway
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      AUTH_SERVICE_URL: http://auth:3000
+      USERS_SERVICE_URL: http://users:3000
+      OBJECTS_SERVICE_URL: http://objects:3000
+      GROUPS_SERVICE_URL: http://groups:3000
+      LENDING_SERVICE_URL: http://lending:3000
+      POSTS_SERVICE_URL: http://posts:3000
+      CHATS_SERVICE_URL: http://chats:3000
+    depends_on:
+      auth:
+        condition: service_started
+      users:
+        condition: service_started
+      objects:
+        condition: service_started
+      groups:
+        condition: service_started
+      lending:
+        condition: service_started
+      posts:
+        condition: service_started
+      chats:
+        condition: service_started
+
+  auth:
+    build:
+      context: ../backend/services/auth
+      dockerfile: ../../../infra/services/auth/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: auth
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      EVENT_SUBSCRIBER_URLS: http://objects:3000,http://groups:3000,http://lending:3000,http://posts:3000,http://chats:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  users:
+    build:
+      context: ../backend/services/users
+      dockerfile: ../../../infra/services/users/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: users
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      AUTH_INTERNAL_URL: http://auth:3000
+    depends_on:
+      auth:
+        condition: service_started
+
+  objects:
+    build:
+      context: ../backend/services/objects
+      dockerfile: ../../../infra/services/objects/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: objects
     restart: unless-stopped
     env_file:
       - ../.env
@@ -49,18 +117,88 @@ services:
       postgres:
         condition: service_healthy
 
-  orm:
+  groups:
     build:
-      context: ../backend/services/orm
-      dockerfile: ../../../infra/services/orm/Dockerfile
+      context: ../backend/services/groups
+      dockerfile: ../../../infra/services/groups/Dockerfile
       additional_contexts:
         shared: ../backend
-    container_name: orm
+    container_name: groups
     restart: unless-stopped
-    ports:
-      - "4983:4983" # If you need to access Drizzle Studio just go to local.drizzle.studio
     env_file:
       - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  lending:
+    build:
+      context: ../backend/services/lending
+      dockerfile: ../../../infra/services/lending/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: lending
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      OBJECTS_INTERNAL_URL: http://objects:3000
+      POSTS_INTERNAL_URL: http://posts:3000
+      GROUPS_INTERNAL_URL: http://groups:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      objects:
+        condition: service_started
+      posts:
+        condition: service_started
+
+  posts:
+    build:
+      context: ../backend/services/posts
+      dockerfile: ../../../infra/services/posts/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: posts
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      GROUPS_INTERNAL_URL: http://groups:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      groups:
+        condition: service_started
+
+  chats:
+    build:
+      context: ../backend/services/chats
+      dockerfile: ../../../infra/services/chats/Dockerfile
+      additional_contexts:
+        shared: ../backend
+    container_name: chats
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      AUTH_INTERNAL_URL: http://auth:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+
+  drizzle-gateway:
+    build: ./services/orm
+    container_name: drizzle-gateway
+    restart: unless-stopped
+    ports:
+      - "4983:4983"
+    env_file:
+      - ../.env
+    volumes:
+      - drizzle_gateway_data:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,3 +207,4 @@ services:
 volumes:
     frontend_node_modules:
     postgres_data:
+    drizzle_gateway_data:

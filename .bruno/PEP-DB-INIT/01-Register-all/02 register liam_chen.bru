@@ -1,0 +1,33 @@
+meta {
+  name: register liam_chen
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "liam_chen",
+    "email": "liam.chen@example.com",
+    "h_password": "Liam2024!"
+  }
+}
+
+script:post-response {
+  const json = res.getBody();
+  
+  if (res.getStatus() !== 201)
+    throw new Error(`register liam_chen failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+  
+  bru.setEnvVar('u2_id', json.id);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 20 find one group
+  type: http
+  seq: 20
+}
+
+get {
+  url: https://pep.localhost:8443/api/groups/{{group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_access_token}}
+}
+
+script:post-response {
+if (res.getStatus() !== 200)
+    throw new Error(`find one group failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

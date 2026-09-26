@@ -37,7 +37,7 @@
             tone="success"
             icon="bag-heart"
             [count]="offerCount"
-            label="help offers"
+            label="My exchanges"
             sublabel="recent"
         />
     </section>
@@ -59,21 +59,21 @@
 
             <button
                 type="button"
-                (click)="selectTab('offers')"
+                (click)="selectTab('exchanges')"
                 class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
-                    activeTab() === 'offers'
+                    activeTab() === 'exchanges'
                         ? 'border-primary text-primary'
                         : 'border-transparent text-strong'
                 "
             >
-                Help offers
+                My exchanges
             </button>
         </div>
 
         <div class="flex flex-col gap-5">
             @for (request of displayedRequests(); track request.id) {
-                <app-request-card [request]="request" (help)="onHelp($event)" />
+                <app-request-card [request]="request" />
             }
         </div>
 

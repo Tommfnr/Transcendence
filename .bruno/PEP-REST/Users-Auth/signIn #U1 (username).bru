@@ -1,0 +1,38 @@
+meta {
+  name: signIn #U1 (username)
+  type: http
+  seq: 6
+}
+
+post {
+  url: https://pep.localhost:8443/api/auth/login/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "identifier": "themangojus",
+      "password": "Mango@123456"
+  }
+}
+
+script:post-response {
+  const responseText = JSON.stringify(res.getBody());
+  let json;
+  
+  try {
+      json = JSON.parse(responseText);
+      bru.setEnvVar('access_token', json.access_token);
+      bru.setEnvVar('refresh_token', json.refresh_token);
+      bru.setGlobalEnvVar('access_token', json.access_token);
+      bru.setGlobalEnvVar('refresh_token', json.refresh_token);
+  } catch (e) {
+      console.error("Failed to parse JSON:", e);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

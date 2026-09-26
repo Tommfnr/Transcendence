@@ -1,0 +1,25 @@
+meta {
+  name: add olivia_kim to Family
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/{{family_id}}/members/{{u3_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_token}}
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`add olivia_kim to Family failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,25 @@
+meta {
+  name: add emma_watts to Friends
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups/{{friends_id}}/members/{{u1_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u5_token}}
+}
+
+script:post-response {
+  if (res.getStatus() !== 201)
+    throw new Error(`add emma_watts to Friends failed: ${res.getStatus()} ${JSON.stringify(res.getBody())}`);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

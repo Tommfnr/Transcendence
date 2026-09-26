@@ -1,0 +1,36 @@
+meta {
+  name: create group Family
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://pep.localhost:8443/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{u1_token}}
+}
+
+body:json {
+  {
+    "name": "Family",
+    "description": "A group for sharing tools and household items with family members."
+  }
+}
+
+script:post-response {
+  const json = res.getBody();
+  
+  if (res.getStatus() !== 201)
+    throw new Error(`create group Family failed: ${res.getStatus()} ${JSON.stringify(json)}`);
+  
+  bru.setEnvVar('family_id', json.id);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
