@@ -15,20 +15,14 @@
         <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
         <app-list-row
             editable
-            label="Last name"
-            [value]="'var name'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="First name"
-            [value]="'var frist name'"
+            label="Username"
+            [value]="user()?.username ?? ''"
             (edit)="openEditProfileModal()"
         ></app-list-row>
         <app-list-row
             editable
             label="Email address"
-            [value]="'pierre.examplereallylongaddress@example.com'"
+            [value]="user()?.email ?? ''"
             (edit)="openEditProfileModal()"
         ></app-list-row>
         <app-list-row
