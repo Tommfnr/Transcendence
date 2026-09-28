@@ -55,12 +55,21 @@ export class Dashboard implements OnInit {
   // TODO(wiring): replace with real exchange data (posts + offers + lendings).
   // Shapes and labels mirror the Dashboard-myExchanges mock.
   readonly demoExchanges = [
-    { id: 1, title: 'Looking for a drill', subtitle: 'my request · 1h ago', statusLabel: '2 offers', status: 'attention', unread: true },
-    { id: 2, title: 'Lawn mower → Julien', subtitle: 'my offer · new message', statusLabel: 'accepted', status: 'attention', unread: true },
-    { id: 3, title: 'Bosch drill → Sarah', subtitle: 'my offer · sent yesterday', statusLabel: 'pending', status: 'waiting', unread: false },
-    { id: 4, title: 'Looking for a mouse', subtitle: 'my request · posted 5h ago', statusLabel: 'no reply', status: 'waiting', unread: false },
-    { id: 5, title: 'Ladder → Jean', subtitle: 'my offer · returned Monday', statusLabel: 'completed', status: 'done', unread: false },
+    { id: 1, kind: 'request', title: 'Looking for a drill', subtitle: 'my request · 1h ago', statusLabel: '2 offers', status: 'attention', unread: true },
+    { id: 2, kind: 'offer', title: 'Lawn mower → Julien', subtitle: 'my offer · new message', statusLabel: 'accepted', status: 'attention', unread: true },
+    { id: 3, kind: 'offer', title: 'Bosch drill → Sarah', subtitle: 'my offer · sent yesterday', statusLabel: 'pending', status: 'waiting', unread: false },
+    { id: 4, kind: 'request', title: 'Looking for a mouse', subtitle: 'my request · posted 5h ago', statusLabel: 'no reply', status: 'waiting', unread: false },
+    { id: 5, kind: 'offer', title: 'Ladder → Jean', subtitle: 'my offer · returned Monday', statusLabel: 'completed', status: 'done', unread: false },
   ] as const;
+
+  onExchangePress(exchange: { id: number; kind: 'request' | 'offer' }): void {
+    if (exchange.kind === 'request') {
+      this.modalService.openOffers(exchange.id);
+    }
+    // TODO(chat): an "offer" row is the MAIN entry to its conversation
+    // (decided 28 Sept — see the ExchangeRow doc in Figma). The chat view
+    // belongs to the chat chantier; wire the navigation here once it lands.
+  }
 
 
 

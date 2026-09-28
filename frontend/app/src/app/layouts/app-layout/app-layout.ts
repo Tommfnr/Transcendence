@@ -6,10 +6,11 @@ import { EditAddGroup } from '../../pages/editAddGroup/editAddGroup';
 import { ModalService } from '../../services/modal.service';
 import { EditProfile } from '../../pages/editProfile/edit-profile';
 import { HeaderAppDesktopComponent } from '../../components/header-app-desktop/header-app-desktop';
+import { Offers } from '../../pages/offers/offers';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, Offers],
   templateUrl: './app-layout.html',
 })
 export class AppLayout {
