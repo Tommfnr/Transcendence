@@ -3,34 +3,33 @@
     leading="back"
     meta="{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}"
 ></app-title-bar>
-<div class="flex flex-col gap-4 pt-14">
-    <div class="fixed bottom-6 inset-x-0 z-10 mx-auto max-w-app px-4 flex items-center justify-end">
-        <app-fab-action
-            (pick)="openAddObjectModal()"
-			label="Add item"
-			tone="object"
-            >
-		</app-fab-action>
-    </div>
 
-    <app-text-field
-        placeholder="Search..."
-        typeField="search"
-        [(value)]="searchTerm"
-    ></app-text-field>
-    <div class="flex flex-wrap gap-2">
-        @for (cat of categories; track cat.label) {
-            <app-chip
-                [label]="cat.label"
-                [emoji]="cat.emoji"
-                [selected]="cat.label === activeCategory()"
-                (pick)="activeCategory.set(cat.label)"
-                tone="white"
-            />
-        }
-    </div>
+<div class="flex flex-col gap-4 pt-14 lg:pt-6">
+	<div class="hidden lg:flex items-baseline justify-between">
+		<h1 class="text-xl font-bold">Catalog</h1>
+		<span class="text-text-secondary">{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}</span>
+	</div>
+    <div class="flex flex-col gap-4 lg:flex-row">
+		<app-text-field
+			placeholder="Search..."
+			typeField="search"
+			[(value)]="searchTerm"
+			class="w-80"
+		></app-text-field>
+		<div class="flex flex-wrap gap-2">
+			@for (cat of categories; track cat.label) {
+				<app-chip
+					[label]="cat.label"
+					[emoji]="cat.emoji"
+					[selected]="cat.label === activeCategory()"
+					(pick)="activeCategory.set(cat.label)"
+					tone="white"
+				/>
+			}
+		</div>
+	</div>
 
-    <div class="grid grid-cols-2 gap-3">
+    <div class="relative grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
         @for (object of searchObjects(); track object.id) {
             <app-object-card
                 [name]="object.name"
@@ -41,5 +40,16 @@
         } @empty {
             <p class="col-span-2">No objects match your search/filter.</p>
         }
+        <div
+            class="fixed bottom-6 inset-x-0 z-10 mx-auto max-w-app px-4 flex items-center justify-end"
+        >
+            <app-fab-action
+                (pick)="openAddObjectModal()"
+                label="Add item"
+                tone="object"
+                class="lg:hidden"
+            >
+            </app-fab-action>
+        </div>
     </div>
 </div>
