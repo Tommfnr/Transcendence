@@ -1,27 +1,29 @@
-<header class="border-b border-solid border-muted bg-card">
-        <nav class="max-w-app flex mx-auto items-center justify-between px-6 py-4 lg:max-w-[960px] lg:text-2xl">
-            <a routerLink="/" class="shrink-0"
-                ><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0 lg:size-12"
-            /></a>
+<header class="border-b border-muted bg-card">
+	<nav class="mx-auto flex w-full items-center justify-between px-6 py-3.5 lg:max-w-desktop lg:text-2xl">
+		<a routerLink="/" aria-label="Home" class="shrink-0">
+			<img src="/icons/logo-invisible-background.svg" alt="" class="size-10 lg:size-12" />
+		</a>
 
-            <ul class="flex gap-8 items-center">
-                @if (isLoggedIn()) {
-                    <li>
-                        <a routerLink="/app" class="hover:text-primary transition">App</a>
-                    </li>
-                    <li>
-                        <button appButton type="button" (click)="onLogout()">Log out</button>
-                    </li>
-                } @else {
-                    <li>
-                        <a routerLink="/login" class="hover:text-primary transition">Login</a>
-                    </li>
-
-                    <li>
-                        <a routerLink="/register" appButton size="small" class="lg:px-6 lg:py-3 lg:text-xl">Register</a>
-                    </li>
-                }
-                @if (isLoggedIn()) {}
-            </ul>
-        </nav>
+		<ul class="flex items-center gap-8">
+			@if (isLoggedIn()) {
+				<li>
+					<a routerLink="/app" class="transition hover:text-primary">App</a>
+				</li>
+				<li>
+					<button appButton type="button" (click)="onLogout()" class="lg:px-6 lg:py-3 lg:text-xl">
+						Log out
+					</button>
+				</li>
+			} @else {
+				<li>
+					<a routerLink="/login" class="transition hover:text-primary">Login</a>
+				</li>
+				<li>
+					<a routerLink="/register" appButton size="small" class="lg:px-6 lg:py-3 lg:text-xl">
+						Register
+					</a>
+				</li>
+			}
+		</ul>
+	</nav>
 </header>

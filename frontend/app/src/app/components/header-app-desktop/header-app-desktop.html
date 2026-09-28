@@ -1,22 +1,68 @@
-<header class="text-primary bg-card">
-    <div class="container-desktop  flex items-center justify-between px-6 py-4">
-        <a routerLink="/" class="text-2xl font-bold tracking-wide"
-            ><img src="/icons/logo-invisible-background.svg" alt="" class="size-8 shrink-0"
-        /></a>
+<header class="border-b border-muted bg-card">
+	<nav class="mx-auto flex w-full max-w-desktop items-center gap-4 px-6 py-3.5">
+		<a routerLink="/app" aria-label="Home" class="shrink-0">
+			<img src="/icons/logo-invisible-background.svg" alt="" class="size-12" />
+		</a>
 
-        <nav class="">
-            <ul class="flex gap-8 items-center">
-                <li>
-                    <a routerLink="/" class="hover:opacity-80 transition">Home</a>
-                </li>
-                <li>
-                    <a routerLink="/login" class="hover:opacity-80 transition">Login</a>
-                </li>
+		<p class="min-w-0 flex-1 truncate text-base text-text-secondary">
+			Borrow rather than buy · lend rather than store
+		</p>
 
-                <li>
-                    <a routerLink="/register" appButton size="small">Register</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+		<div class="flex shrink-0 items-center gap-3">
+			<div class="relative">
+				<button
+					type="button"
+					(click)="toggle()"
+					[attr.aria-expanded]="open()"
+					class="flex cursor-pointer items-center gap-2 rounded-card bg-primary px-6 py-3 text-xl font-bold text-on-primary hover:bg-alert"
+				>
+					New
+					<img
+						src="/icons/chevron-down.svg"
+						alt=""
+						class="size-5 transition-transform"
+						[class.-rotate-180]="open()"
+					/>
+				</button>
+				@if (open()) {
+					<div class="absolute right-0 top-full z-20 mt-1 w-56 rounded-card bg-card p-1 shadow-raised">
+						<button
+							type="button"
+							(click)="modalService.openAddObject(); close()"
+							class="flex w-full cursor-pointer items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background"
+						>
+							<img src="/icons/box-orange.svg" alt="" class="size-4" />
+							Add an item
+						</button>
+						<button
+							type="button"
+							(click)="modalService.openAddPost(); close()"
+							class="flex w-full cursor-pointer items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background"
+						>
+							<img src="/icons/hand-give-helps.svg" alt="" class="size-4" />
+							Make a request
+						</button>
+						<button
+							type="button"
+							(click)="modalService.openAddGroup(); close()"
+							class="flex w-full cursor-pointer items-center gap-3 rounded-card px-3 py-2 text-left text-sm hover:bg-background"
+						>
+							<img src="/icons/group-green.svg" alt="" class="size-4" />
+							Create a group
+						</button>
+					</div>
+				}
+			</div>
+
+			<button type="button" aria-label="Notifications" class="shrink-0 cursor-pointer">
+				<img src="/icons/notification.svg" alt="" class="size-7" />
+			</button>
+
+			<a
+				routerLink="/app/profile"
+				aria-label="Profile"
+				class="size-11 shrink-0 rounded-full bg-primary/50"
+			></a>
+		</div>
+	</nav>
 </header>
