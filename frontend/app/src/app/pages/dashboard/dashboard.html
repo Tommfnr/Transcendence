@@ -3,7 +3,7 @@
     <section class="flex items-center justify-between gap-2">
         <select
             (change)="onGroupFilterChange($event)"
-            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-raised"
+            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-card cursor-pointer"
         >
             @if (errorMessage()) {
                 <option disabled selected>{{ errorMessage() }}</option>
@@ -20,7 +20,7 @@
         <a
             routerLink="/app/groupParameter"
             aria-label="Settings"
-            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-raised"
+            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-card"
         >
             <img src="/icons/settings.svg" alt="" class="size-6" />
         </a>
@@ -47,36 +47,51 @@
             <button
                 type="button"
                 (click)="selectTab('requests')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
                     activeTab() === 'requests'
                         ? 'border-primary text-primary'
                         : 'border-transparent text-strong'
                 "
             >
-                Requests
+                Group requests
             </button>
 
             <button
                 type="button"
-                (click)="selectTab('offers')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
+                (click)="selectTab('exchanges')"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
-                    activeTab() === 'offers'
+                    activeTab() === 'exchanges'
                         ? 'border-primary text-primary'
                         : 'border-transparent text-strong'
                 "
             >
-                Help offers
+                My exchanges
             </button>
         </div>
 
-        <div class="flex flex-col gap-5">
-            @for (request of displayedRequests(); track request.id) {
-                <app-request-card [request]="request" (help)="onHelp($event)" />
-            }
-        </div>
-
+        @if (activeTab() === 'requests') {
+            <div class="flex flex-col gap-5">
+                @for (request of displayedRequests(); track request.id) {
+                    <app-request-card [request]="request" (help)="onHelp($event)" />
+                } @empty {
+                    <p class="text-center text-sm text-text-secondary">No requests right now.</p>
+                }
+            </div>
+        } @else {
+            <div class="flex flex-col gap-3">
+                @for (exchange of demoExchanges; track exchange.id) {
+                    <app-exchange-row
+                        [title]="exchange.title"
+                        [subtitle]="exchange.subtitle"
+                        [statusLabel]="exchange.statusLabel"
+                        [status]="exchange.status"
+                        [unread]="exchange.unread"
+                    />
+                }
+            </div>
+        }
     </section>
 </div>
 
