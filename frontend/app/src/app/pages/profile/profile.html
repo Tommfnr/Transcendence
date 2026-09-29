@@ -5,32 +5,18 @@
         class="flex items-center gap-4 rounded-card border border-primary-border bg-primary-surface p-4"
     >
         <app-avatar tone="brand" size="lg"></app-avatar>
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
             <p class="truncate text-lg font-bold text-text">{{ user()?.username }}</p>
             <p class="truncate text-xs text-text-secondary">{{ user()?.email }}</p>
         </div>
-    </section>
-
-    <section class="flex flex-col gap-2">
-        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
-        <app-list-row
-            editable
-            label="Username"
-            [value]="user()?.username ?? ''"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="Email address"
-            [value]="user()?.email ?? ''"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="Profile picture"
-            [value]="'Edit'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
+        <button
+            type="button"
+            (click)="openEditProfileModal()"
+            aria-label="Edit my profile"
+            class="shrink-0 cursor-pointer rounded-card p-1 transition-opacity hover:opacity-70"
+        >
+            <img src="/icons/pen.svg" alt="" class="size-4 shrink-0" />
+        </button>
     </section>
 
     <section class="flex flex-col gap-2">

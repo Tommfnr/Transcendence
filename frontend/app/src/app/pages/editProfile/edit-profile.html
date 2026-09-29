@@ -4,13 +4,17 @@
     (closed)="modalService.close()"
 >
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
-        <app-text-field label="Name" [placeholder]="'TODO'" [required]="true"></app-text-field>
         <app-text-field
-            label="First name"
-            [placeholder]="'TODO'"
+            label="Username"
+            [placeholder]="user()?.username ?? ''"
             [required]="true"
         ></app-text-field>
-        <app-text-field label="Email" [placeholder]="'TODO'" [required]="true"></app-text-field>
+        <app-text-field
+            label="Email"
+            typeField="email"
+            [placeholder]="user()?.email ?? ''"
+            [required]="true"
+        ></app-text-field>
         <div class="flex flex-col gap-2">
             <h2 class="text-sm font-medium text-text">Profile picture</h2>
 			<p class="font-bold text-complementary">Coming soon</p>
