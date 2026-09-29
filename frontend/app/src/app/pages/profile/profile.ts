@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -19,6 +20,7 @@ export class Profile implements OnInit {
   private refreshService = inject(RefreshService);
   private objectService = inject(ObjectService);
   private groupsService = inject(GroupsService);
+  private router = inject(Router);
   user = this.refreshService.user;
   readonly modalService = inject(ModalService);
 
@@ -27,6 +29,16 @@ export class Profile implements OnInit {
 
   openEditProfileModal(): void {
 	this.modalService.openEditProfile();
+  }
+
+  onLogout(): void {
+    this.refreshService.logout().subscribe({
+      next: () => this.router.navigate(['/']),
+      error: () => {
+        this.refreshService.clearAccessToken();
+        this.router.navigate(['/']);
+      },
+    });
   }
 
   objectsCount = computed(() => {

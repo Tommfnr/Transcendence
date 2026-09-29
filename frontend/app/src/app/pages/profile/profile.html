@@ -52,5 +52,5 @@
         <app-list-row label="Settings and privacy" link="/app"></app-list-row>
         <app-list-row label="Help and support" link="/app"></app-list-row>
     </section>
-    <button appButton [block]="true" size="large" variant="secondary" type="button">Log out</button>
+    <button appButton [block]="true" size="large" variant="secondary" type="button" (click)="onLogout()">Log out</button>
 </div>

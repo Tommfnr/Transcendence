@@ -64,6 +64,7 @@ export class RefreshService {
         return this.http.post('/api/auth/logout', {}).pipe(
             tap(() => {
                 this.accessToken.set(null);
+                this.currentUser.set(null);
             }),
         );
     }
@@ -74,5 +75,6 @@ export class RefreshService {
 
     clearAccessToken(): void {
         this.accessToken.set(null);
+        this.currentUser.set(null);
     }
 }
