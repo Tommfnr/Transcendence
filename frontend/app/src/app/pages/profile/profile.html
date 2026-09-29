@@ -1,62 +1,66 @@
 <app-title-bar title="My profile" leading="back"></app-title-bar>
 
-<div class="flex flex-col gap-6 pt-12">
-    <section
-        class="flex items-center gap-4 rounded-card border border-primary-border bg-primary-surface p-4"
-    >
-        <app-avatar tone="brand" size="lg"></app-avatar>
-        <div class="min-w-0">
-            <p class="truncate text-lg font-bold text-text">{{ user()?.username }}</p>
-            <p class="truncate text-xs text-text-secondary">{{ user()?.email }}</p>
-        </div>
-    </section>
+<h1 class="hidden text-lg font-bold lg:block">My profile</h1>
+<div class="flex flex-col gap-6 pt-12 lg:pt-8 lg:grid lg:grid-cols-2 lg:gap-8">
+    <div class="flex flex-col gap-6">
+        <section
+            class="flex items-center gap-4 rounded-card border border-primary-border bg-primary-surface p-4"
+        >
+            <app-avatar tone="brand" size="lg"></app-avatar>
+            <div class="min-w-0">
+                <p class="truncate text-lg font-bold text-text">{{ user()?.username }}</p>
+                <p class="truncate text-xs text-text-secondary">{{ user()?.email }}</p>
+            </div>
+        </section>
 
-    <section class="flex flex-col gap-2">
-        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
-        <app-list-row
-            editable
-            label="Last name"
-            [value]="'var name'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="First name"
-            [value]="'var frist name'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="Email address"
-            [value]="'pierre.examplereallylongaddress@example.com'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-        <app-list-row
-            editable
-            label="Profile picture"
-            [value]="'Edit'"
-            (edit)="openEditProfileModal()"
-        ></app-list-row>
-    </section>
+        <section class="flex flex-col gap-2">
+            <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">IDENTITY</h2>
+            <app-list-row
+                editable
+                label="Last name"
+                [value]="'var name'"
+                (edit)="openEditProfileModal()"
+            ></app-list-row>
+            <app-list-row
+                editable
+                label="First name"
+                [value]="'var frist name'"
+                (edit)="openEditProfileModal()"
+            ></app-list-row>
+            <app-list-row
+                editable
+                label="Email address"
+                [value]="'pierre.examplereallylongaddress@example.com'"
+                (edit)="openEditProfileModal()"
+            ></app-list-row>
+            <app-list-row
+                editable
+                label="Profile picture"
+                [value]="'Edit'"
+                (edit)="openEditProfileModal()"
+            ></app-list-row>
+        </section>
+    </div>
+    <div class="flex flex-col gap-6">
+        <section class="flex flex-col gap-2">
+            <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">MY CONTENT</h2>
+            <app-list-row
+                link="/app/catalog"
+                label="Item catalog"
+                [value]="'nb of items items'"
+            ></app-list-row>
+            <app-list-row
+                link="/app/groupParameter"
+                label="My groups"
+                [value]="'nb of groups'"
+            ></app-list-row>
+        </section>
 
-    <section class="flex flex-col gap-2">
-        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">MY CONTENT</h2>
-        <app-list-row
-            link="/app/catalog"
-            label="Item catalog"
-            [value]="'nb of items items'"
-        ></app-list-row>
-        <app-list-row
-            link="/app/groupParameter"
-            label="My groups"
-            [value]="'nb of groups'"
-        ></app-list-row>
-    </section>
-
-    <section class="flex flex-col gap-2">
-        <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">ACCOUNT</h2>
-        <app-list-row label="Settings and privacy" link="/app"></app-list-row>
-        <app-list-row label="Help and support" link="/app"></app-list-row>
-    </section>
-    <button appButton [block]="true" size="large" variant="secondary" type="button">Log out</button>
+        <section class="flex flex-col gap-2">
+            <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">ACCOUNT</h2>
+            <app-list-row label="Settings and privacy" link="/app"></app-list-row>
+            <app-list-row label="Help and support" link="/app"></app-list-row>
+        </section>
+    </div>
 </div>
+<button appButton [block]="true" size="large" variant="secondary" type="button" class="mt-6 lg:w-auto lg:self-center">Log out</button>
