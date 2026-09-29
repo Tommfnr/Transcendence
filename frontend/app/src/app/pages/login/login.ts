@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { form, FormField, required, email, submit } from '@angular/forms/signals';
 import { LoginData } from '../../models/login-data.model';
-import { Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { RefreshService } from '../../services/refresh.service';
-import { ButtonComponent } from "../../components/button/button";
+import { ButtonDirective } from '../../components/button/button.directive';
 import { firstValueFrom } from 'rxjs';
 import { isAuthError, isZodValidationError, mapAuthErrorToBanner, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { TextFieldComponent } from '../../components/text-field/text-field';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, ButtonComponent],
+  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

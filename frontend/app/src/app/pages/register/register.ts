@@ -3,7 +3,7 @@ import { form, FormField, required, email, submit } from '@angular/forms/signals
 import { AuthService } from '../../services/auth.service';
 import { RefreshService } from '../../services/refresh.service';
 import { RegisterData } from '../../models/register-data.model';
-import { ButtonComponent } from '../../components/button/button';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -12,10 +12,12 @@ import {
     isConflictError,
     mapAuthErrorToBanner,
 } from '../../shared/zod-signal-errors';
+import { TextFieldComponent } from '../../components/text-field/text-field';
+import { FooterApp } from '../../components/footer-app/footer-app';
 
 @Component({
     selector: 'app-register',
-    imports: [FormField, ButtonComponent],
+    imports: [FormField, ButtonDirective, TextFieldComponent, FooterApp],
     templateUrl: './register.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

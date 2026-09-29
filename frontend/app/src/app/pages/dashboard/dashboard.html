@@ -1,9 +1,9 @@
 <div class="flex flex-col gap-4">
-<app-header-app></app-header-app>
+    <app-header-app class="lg:hidden"></app-header-app>
     <section class="flex items-center justify-between gap-2">
         <select
             (change)="onGroupFilterChange($event)"
-            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-raised"
+            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-card cursor-pointer"
         >
             @if (errorMessage()) {
                 <option disabled selected>{{ errorMessage() }}</option>
@@ -20,7 +20,7 @@
         <a
             routerLink="/app/groupParameter"
             aria-label="Settings"
-            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-raised"
+            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-card"
         >
             <img src="/icons/settings.svg" alt="" class="size-6" />
         </a>
@@ -43,7 +43,7 @@
     </section>
 
     <section class="flex flex-1 flex-col gap-5">
-        <div class="flex items-start justify-between px-8">
+        <div class="flex items-start justify-between px-8 lg:hidden">
             <button
                 type="button"
                 (click)="selectTab('requests')"
@@ -54,7 +54,7 @@
                         : 'border-transparent text-strong'
                 "
             >
-                Requests
+                Group requests
             </button>
 
             <button
@@ -70,20 +70,56 @@
                 My exchanges
             </button>
         </div>
+        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+            <div [class.hidden]="activeTab() !== 'requests'" class="lg:block">
+                <div class="mb-4 hidden items-baseline justify-between lg:flex">
+                    <h2 class="text-lg font-bold">Group requests</h2>
+                    <span class="text-sm text-text-secondary"
+                        >{{ requestCount() }} in progress</span
+                    >
+                </div>
+                <div class="flex flex-col gap-5">
+                    @for (request of displayedRequests(); track request.id) {
+                        <app-request-card [request]="request" (help)="onHelp($event)" />
+                    } @empty {
+                        <p class="text-center text-sm text-text-secondary">
+                            No requests right now.
+                        </p>
+                    }
+                </div>
+            </div>
 
-        <div class="flex flex-col gap-5">
-            @for (request of displayedRequests(); track request.id) {
-                <app-request-card [request]="request" />
-            }
+            <div
+                [class.hidden]="activeTab() !== 'exchanges'"
+                class="lg:block lg:border-l lg:border-muted lg:pl-8"
+            >
+                <div class="mb-4 hidden items-baseline justify-between lg:flex">
+                    <h2 class="text-lg font-bold">My exchanges</h2>
+                    <span class="text-sm text-text-secondary">{{ demoExchanges.length }}</span>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-3">
+                        @for (exchange of demoExchanges; track exchange.id) {
+                            <app-exchange-row
+                                [title]="exchange.title"
+                                [subtitle]="exchange.subtitle"
+                                [statusLabel]="exchange.statusLabel"
+                                [status]="exchange.status"
+                                [unread]="exchange.unread"
+                                (press)="onExchangePress(exchange)"
+                            />
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-
     </section>
 </div>
 
 @if (fabOpen()) {
-    <div (click)="closeFab()" class="fixed inset-0 z-40 bg-black/50"></div>
+    <div (click)="closeFab()" class="fixed inset-0 z-40 bg-black/50 lg:hidden"></div>
 
-    <div class="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 flex-col items-end gap-3">
+    <div class="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 flex-col items-end gap-3 lg:hidden">
         <app-fab-action label="Add an item" tone="object" (pick)="openAddObjectModal()" />
         <app-fab-action label="Add request" tone="request" (pick)="openAddPostModal()" />
         <app-fab-action label="Create group" tone="group" (pick)="openAddGroupModal()" />
@@ -94,7 +130,7 @@
         type="button"
         (click)="toggleFab()"
         [attr.aria-label]="fabOpen() ? 'Close menu' : 'Open actions menu'"
-        class="fixed bottom-6 left-1/2 z-50 size-15 -translate-x-1/2 cursor-pointer"
+        class="fixed bottom-6 left-1/2 z-50 size-15 -translate-x-1/2 cursor-pointer lg:hidden"
     >
         @if (fabOpen()) {
             <img src="/icons/fab-cross.png" alt="" class="size-full" />

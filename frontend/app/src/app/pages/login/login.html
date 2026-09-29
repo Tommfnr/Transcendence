@@ -1,52 +1,40 @@
-@if (bannerErrors().length > 0) {
-  <div class="banner-error">
-    @for (msg of bannerErrors(); track msg) {
-      <p>{{ msg }}</p>
-    }
-  </div>
-}
-<form (submit)="onSubmit($event)">
-  <div>
-    <label class="block">
-      Username or Email
-      <input type="text" [formField]="loginForm.identifier" class="block w-full border border-primary rounded-card p-2"/>
-    </label>
-    @if (loginForm.identifier().invalid() && loginForm.identifier().touched()) {
-      <div class="error">
-        @for (error of loginForm.identifier().errors(); track error.kind) {
-          <span>{{ error.message }}</span>
-        }
-      </div>
-    }
-  </div>
+<div class="flex flex-1 items-start justify-center pt-8 lg:items-center lg:py-8 lg:pt-0">
+	<div class="flex w-full max-w-110 flex-col gap-5 rounded-card bg-card px-5 py-6 shadow-card">
+		<section class="flex flex-col gap-1">
+			<h1 class="text-xl font-bold">Welcome back</h1>
+			<p class="text-sm text-text-secondary">Log in to see what people close to you need</p>
+		</section>
 
-  <div>
-    <label class="block">
-      Password
-      <input type="password" [formField]="loginForm.password" class="block w-full border border-primary rounded-card p-2"/>
-    </label>
-    @if (loginForm.password().invalid() && loginForm.password().touched()) {
-      <div class="error">
-        @for (error of loginForm.password().errors(); track error.kind) {
-          <span>{{ error.message }}</span>
-        }
-      </div>
-  }
-  </div>
+		@if (bannerErrors().length > 0) {
+			<div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+				@for (msg of bannerErrors(); track msg) {
+					<p>{{ msg }}</p>
+				}
+			</div>
+		}
 
-  <div>
-    <label>
-      <input type="checkbox" [formField]="loginForm.rememberMe"/>
-      Remember me
-    </label>
-  </div>
+		<form (submit)="onSubmit($event)" class="flex flex-col gap-5">
+			<app-text-field
+				placeholder="john@example.com"
+				label="Username or Email"
+				[formField]="loginForm.identifier"
+			></app-text-field>
+			<app-text-field
+				typeField="password"
+				placeholder="••••••••"
+				label="Password"
+				[formField]="loginForm.password"
+			></app-text-field>
+			<label class="flex items-center gap-2 text-sm">
+				<input type="checkbox" [formField]="loginForm.rememberMe" class="accent-primary" />
+				Remember me
+			</label>
 
-  <app-button type="submit" variant="primary">Log in</app-button>
-</form>
+			<button appButton block size="large" type="submit" variant="primary">Log in</button>
+		</form>
 
-<div class="form-debug">
-  <h3>Current Form Values:</h3>
-  <p>Username or Email: {{ loginForm.identifier().value() }}</p>
-  <p>Password: {{ loginForm.password().value() ? '••••••••' : '(empty)' }}</p>
-  <p>Remember me: {{ loginForm.rememberMe().value() ? 'Yes' : 'No' }}</p>
+		<p class="text-center text-sm text-text-secondary">
+			No account yet? <a class="font-bold text-primary" routerLink="/register">Register</a>
+		</p>
+	</div>
 </div>

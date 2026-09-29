@@ -1,11 +1,18 @@
 <app-title-bar title="My groups" leading="back" [meta]="groupData().length + (groupData().length > 1 ? ' groups' : ' group')"></app-title-bar>
 
-<div class="flex flex-col gap-4 pt-12">
-    @for (group of groupData(); track group.id) {
-        <app-group-card [name]="group.name" [memberCount]="memberCounts()[group.id] ?? 0" (settings)="modalService.openEditGroup(group.id)"></app-group-card>
-    } @empty {
-        <p>No groups yet.</p>
-    }
+<div class="flex flex-col gap-4 pt-12 lg:pt-6">
+	<div class="hidden lg:flex items-baseline justify-between">
+		<h1 class="text-lg font-bold">My groups</h1>
+		<span>{{groupData().length }} {{groupData().length > 1 ? ' groups' : ' group'}}</span>
+	</div>
+	<div class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
+
+		@for (group of groupData(); track group.id) {
+			<app-group-card [name]="group.name" [memberCount]="memberCounts()[group.id] ?? 0" (settings)="modalService.openEditGroup(group.id)"></app-group-card>
+		} @empty {
+			<p>No groups yet.</p>
+		}
+	</div>
     <!-- <ul>
         @for (group of groupData(); track group.id) {
             <li>
@@ -32,6 +39,7 @@
         variant="secondary"
         type="button"
         (click)="modalService.openAddGroup()"
+		class="lg:w-fit"
     >
         Create a group
     </button>
