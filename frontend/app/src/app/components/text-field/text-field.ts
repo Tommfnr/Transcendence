@@ -42,14 +42,14 @@ export class TextFieldComponent implements FormValueControl<string> {
 
 	get classes(): string {
 		const base =
-			'rounded-card border border-text-secondary px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
+			'rounded-card px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
 			+
 			'focus:outline-none focus:ring-1 focus:ring-offset-background ';
 
 		const surface: Record<TextFieldTone, string> = {
-			white: 'bg-card focus:border-primary focus:ring-primary text-strong ',
-			field: 'bg-field-surface focus:border-primary focus:ring-primary text-strong',
-			complementary: 'bg-complementary-surface focus:border-complementary focus:ring-complementary text-strong',
+			white: 'bg-card  border border-text-secondary focus:border-primary focus:ring-primary text-strong ',
+			field: 'bg-field-surface  border border-text-secondary focus:border-primary focus:ring-primary text-strong',
+			complementary: 'bg-complementary-surface border border-complementary focus:border-complementary focus:ring-complementary text-strong',
 		};
 
 		return `${base} ${surface[this.tone()]}`;
