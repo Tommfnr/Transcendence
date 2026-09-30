@@ -3,7 +3,7 @@
         <img src="/icons/logo-invisible-background.svg" alt="" class="size-10 shrink-0" />
     </a>
     <div class="min-w-0 flex-1">
-        <p class="truncate text-lg font-bold text-strong">Hello {{ userName() }}</p>
+        <p class="truncate text-lg font-bold text-strong">Hello {{ userName() }} </p>
         <p class="truncate text-2xs text-strong">Together, let's help the people close to us</p>
     </div>
 
@@ -11,9 +11,5 @@
         <img src="/icons/notification.svg" alt="" class="size-6" />
     </button>
 
-    <a
-        routerLink="/app/profile"
-        aria-label="Profile"
-        class="size-10 shrink-0 rounded-full bg-primary/50"
-    ></a>
+	<app-avatar kind="mySelf"></app-avatar>
 </header>
