@@ -61,8 +61,8 @@
             ></app-text-field>
         </div>
 
-        <app-button block type="submit" variant="primary" >
+        <button appButton block size="large" variant="secondary" type="submit" [disabled]="objectForm().invalid()">
             @if (isEditMode()) { Save Changes } @else { Add Object }
-        </app-button>
+        </button>
     </form>
 </app-modal>

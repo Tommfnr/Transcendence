@@ -12,69 +12,123 @@
             </div>
         }
 
-        <div class="flex flex-wrap gap-4 ">
-            <div class="size-18 bg-primary rounded-full shrink-0"></div>
-            <div class="flex flex-col gap-2 min-w-40 flex-1">
-                <app-text-field
-                    label="Group name"
-                    type="text"
-                    placeholder="E.g Neighbours Bellevue, Family"
-                    [formField]="groupForm.name"
-                ></app-text-field>
-                <!-- RAPH check here -->
-                <!-- @if (groupForm.name().invalid() && groupForm.name().touched()) {
-                    @for (error of groupForm.name().errors(); track error.kind) {
-                        {{ error.message }}
-                    }
-                } -->
+        @if (!isEditMode() || isOwner) {
+            <div class="flex flex-wrap gap-4">
+                <div class="size-18 bg-primary rounded-full shrink-0"></div>
+                <div class="flex flex-col gap-2 min-w-40 flex-1">
+                    <app-text-field
+                        label="Group name"
+                        type="text"
+                        placeholder="E.g Neighbours Bellevue, Family"
+                        [formField]="groupForm.name"
+                    ></app-text-field>
+                </div>
             </div>
-            <!-- RAPH check here -->
-            <!-- Name <input type="text" [formField]="groupForm.name" class="border" />
-                @if (groupForm.name().invalid() && groupForm.name().touched()) {
-                    @for (error of groupForm.name().errors(); track error.kind) {
-                        {{ error.message }}
-                    }
-                } -->
-        </div>
 
-        <div>
-            <app-text-field
-                multiline
-                label="Description (optional)"
-                placeholder="What is this group for? Who can join?"
-                [formField]="groupForm.description"
-            ></app-text-field>
-        </div>
+            <div>
+                <app-text-field
+                    multiline
+                    label="Description (optional)"
+                    placeholder="What is this group for? Who can join?"
+                    [formField]="groupForm.description"
+                ></app-text-field>
+            </div>
+        } @else {
+            <div class="flex items-center gap-4">
+                <div class="size-18 bg-primary rounded-full shrink-0"></div>
+                <div class="flex flex-col gap-1">
+                    <p class="text-sm font-medium text-text">Group name</p>
+                    <p class="text-lg font-bold">{{ group().name }}</p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <p class="text-sm font-medium text-text">Description</p>
+                <p class="text-sm text-text-secondary">{{ group().description }}</p>
+            </div>
+        }
 
         @if (isEditMode()) {
-            <div>
-                <input #targetUsernameInput placeholder="Username" class="border" />
-                <app-button
-                    type="button"
-                    variant="secondary"
-                    (click)="onAddMember(targetUsernameInput.value); targetUsernameInput.value = ''"
-                    >Add Member</app-button
-                >
-            </div>
+            @if (isOwner) {
+                <section class="flex flex-col gap-3">
+                    <h2 class="text-sm font-bold">Members ({{ demoMembers().length }})</h2>
+                    @for (member of demoMembers(); track member.id) {
+                        <div class="flex items-center gap-3">
+                            <app-avatar></app-avatar>
+                            <p class="font-bold">
+                                {{ member.name }}
+                                @if (member.isYou) {
+                                    <span class="font-normal text-text-secondary">(you)</span>
+                                }
+                            </p>
+                            <p class="text-xs text-text-secondary">{{ member.role }}</p>
+                            @if (member.role !== 'Owner') {
+                                <button
+                                    type="button"
+                                    class="ml-auto cursor-pointer rounded-full border border-text-secondary/40 px-2 py-0.5 text-xs text-text-secondary transition-colors hover:border-primary hover:text-primary"
+                                >
+                                    {{ member.role === 'Admin' ? 'Demote' : 'Promote' }}
+                                </button>
+                                <button
+                                    type="button"
+                                    aria-label="Remove member"
+                                    class="cursor-pointer text-text-secondary hover:text-error"
+                                >
+                                    ✕
+                                </button>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+
+            @if (isAdmin) {
+                <div class="flex gap-3">
+                    <app-text-field
+                        placeholder="Add a member by username…"
+                        [(value)]="newMemberUsername"
+                        class="flex-1"
+                    ></app-text-field>
+                    <button
+                        appButton
+                        type="button"
+                        variant="secondary"
+                        (click)="onAddMember(newMemberUsername()); newMemberUsername.set('')"
+                    >
+                        Add
+                    </button>
+                </div>
+            }
         }
 
         @if (errorMessage()) {
             <p class="text-error">{{ errorMessage() }}</p>
         }
 
-        <button
-            appButton
-            block
-            type="submit"
-            variant="secondary"
-            size="large"
-            [disabled]="groupForm().invalid()"
-        >
-            @if (isEditMode()) {
-                Save Changes
-            } @else {
-                Create the group
-            }
-        </button>
+        @if (!isEditMode() || isOwner) {
+            <button
+                appButton
+                block
+                type="submit"
+                variant="secondary"
+                size="large"
+                [disabled]="groupForm().invalid()"
+            >
+                @if (isEditMode()) {
+                    Save Changes
+                } @else {
+                    Create the group
+                }
+            </button>
+        }
     </form>
+    <!-- TO DO -->
+    @if (isEditMode() && isOwner) {
+        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert">Delete this group</button>
+    }
+
+    @if (isEditMode() && !isOwner) {
+        <button appButton type="button" variant="muted" class="mt-4  hover:bg-alert">
+            Leave this group
+        </button>
+    }
 </app-modal>
