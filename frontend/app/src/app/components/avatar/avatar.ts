@@ -12,7 +12,7 @@ export type AvatarSize = 'md' | 'lg';
 @Component({
 	selector: 'app-avatar',
 	standalone: true,
-	template: `<span [class]="classes"></span>`,
+	template: `<img src="/icons/app-avatar.svg" [class]="classes">`,
 })
 
 export class AvatarComponent {
@@ -23,7 +23,7 @@ export class AvatarComponent {
 		const base = 'block shrink-0 rounded-full';
 		const sizes: Record<AvatarSize, string> = {
 			md: 'size-10',
-			lg: 'size-16',
+			lg: 'size-12',
 		};
 		const tones: Record<AvatarTone, string> = {
 			neutral: 'bg-muted/50',
