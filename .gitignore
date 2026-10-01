@@ -27,3 +27,4 @@ dist-ssr
 secrets/
 docs/
 zhelp
+.bruno*
