@@ -17,8 +17,8 @@ import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanc
 import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { authGuard } from './guards/auth.guard';
 
-import { Test } from './pages/test/test';
 import { PrivacyPolicy } from './pages/privacyPolicy/privacyPolicy';
+import { TermsOfService } from './pages/termsOfService/termsOfService';
 
 export const routes: Routes = [
   {
@@ -38,13 +38,13 @@ export const routes: Routes = [
         component: Register
       },
 	  {
-		path: 'test',
-		component: Test
-	  },
-	  {
 		path: 'privacyPolicy',
 		component: PrivacyPolicy
 	  },
+	  {
+		path: 'termsOfService',
+		component: TermsOfService,
+	  }
     ],
   },
   {
