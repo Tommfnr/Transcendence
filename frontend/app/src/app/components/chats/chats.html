@@ -1,0 +1,56 @@
+<ng-content />
+
+<div #scroller role="log" class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
+    @if (loading()) {
+        <p class="m-auto text-xs text-text-secondary">Chargement…</p>
+    } @else {
+        @for (message of messages(); track message.id) {
+            @let mine = message.ownerId === me()?.id;
+            <div
+                class="flex max-w-[80%] flex-col gap-0.5 rounded-card px-3 py-2"
+                [class.self-end]="mine"
+                [class.bg-primary-surface-solid]="mine"
+                [class.self-start]="!mine"
+                [class.bg-background]="!mine"
+            >
+                <p class="text-sm break-words whitespace-pre-line text-text">
+                    {{ message.content }}
+                </p>
+                <span class="text-2xs text-text-secondary" [class.self-end]="mine">
+                    {{ message.createdAt | date: 'HH:mm' }}
+                </span>
+            </div>
+        } @empty {
+            <p class="m-auto text-xs text-text-secondary">Aucun message pour l'instant.</p>
+        }
+    }
+</div>
+
+@if (error(); as message) {
+    <p class="px-3 pb-1 text-xs text-error">{{ message }}</p>
+}
+
+<form
+    class="flex items-end gap-2 border-t border-muted p-2"
+    (submit)="$event.preventDefault(); send()"
+>
+    <textarea
+        rows="1"
+        aria-label="Message"
+        [value]="draft()"
+        [placeholder]="placeholder()"
+        [maxLength]="maxLength"
+        (input)="onDraftInput($event)"
+        (keydown.enter)="$event.preventDefault(); send()"
+        class="field-sizing-content max-h-32 min-w-0 flex-1 resize-none rounded-card border border-text-secondary bg-field-surface px-3 py-2 text-sm text-strong placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+    ></textarea>
+    <button
+        type="submit"
+        appButton
+        size="small"
+        [disabled]="!canSend()"
+        class="shrink-0 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+        Envoyer
+    </button>
+</form>

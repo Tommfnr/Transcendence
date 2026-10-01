@@ -1,0 +1,12 @@
+import { Logger } from '@nestjs/common'
+import type { UserDeletedData } from '@pep/shared'
+import { PostsService } from './posts.service'
+
+export function userDeletedHandler(posts: PostsService) {
+	const logger = new Logger('UserDeletedHandler')
+
+	return async (data: UserDeletedData): Promise<void> => {
+		const removed = await posts.removeAllByOwner(data.userId)
+		logger.log(`user.deleted(${data.userId}) -> removed ${removed} posts`)
+	}
+}
