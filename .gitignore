@@ -27,7 +27,7 @@ dist-ssr
 .env*
 secrets/
 docs/
-zhelp
+zhelp*
 scripts/
 coverage/
 
