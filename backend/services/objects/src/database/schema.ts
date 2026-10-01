@@ -4,7 +4,7 @@ const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
 export const objectConditionEnum = pgEnum('object_condition', ['new', 'good', 'worn'])
 
-export const objectTypeEnum = pgEnum('object_type', ['Tools', 'Electronics', 'Vehicles', 'Outdoor & Recreation', 'Media', 'Events', 'Clothing & Gear'])
+export const objectTypeEnum = pgEnum('object_type', ['DIY', 'Electronics', 'Leisure', 'Other'])
 
 export const objects = pgTable('objects', {
 	id:						serial('id').primaryKey(),
