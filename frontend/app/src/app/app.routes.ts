@@ -18,6 +18,7 @@ import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { authGuard } from './guards/auth.guard';
 
 import { Test } from './pages/test/test';
+import { PrivacyPolicy } from './pages/privacyPolicy/privacyPolicy';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
 	  {
 		path: 'test',
 		component: Test
+	  },
+	  {
+		path: 'privacyPolicy',
+		component: PrivacyPolicy
 	  },
     ],
   },
