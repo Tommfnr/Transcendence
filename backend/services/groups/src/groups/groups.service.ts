@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, ne, and, inArray, notInArray } from 'drizzle-orm'
+import { eq, ne, and, inArray, notInArray, count } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -10,10 +10,27 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	findAll() {
+	// Groups the user belongs to, with their role and how many members each group has
+	findAll(userId: number) {
+		const memberCounts = this.db
+			.select({ groupId: groupMembers.groupId, memberCount: count().as('member_count') })
+			.from(groupMembers)
+			.groupBy(groupMembers.groupId)
+			.as('member_counts')
+
 		return this.db
-			.select()
-			.from(groups)
+			.select({
+				id: groups.id,
+				name: groups.name,
+				description: groups.description,
+				ownerId: groups.ownerId,
+				role: groupMembers.role,
+				memberCount: memberCounts.memberCount,
+			})
+			.from(groupMembers)
+			.innerJoin(groups, eq(groupMembers.groupId, groups.id))
+			.innerJoin(memberCounts, eq(memberCounts.groupId, groups.id))
+			.where(eq(groupMembers.userId, userId))
 			.orderBy(groups.id)
 	}
 

@@ -13,13 +13,6 @@ import { UpdateObjectDto } from './dto/update-object.dto'
 export class ObjectsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	findAll() {
-		return (this.db
-				.select()
-				.from(objects)
-				.orderBy(objects.id))
-	}
-
 	findByUserId(userId: number) {
 		return (this.db
 				.select()
