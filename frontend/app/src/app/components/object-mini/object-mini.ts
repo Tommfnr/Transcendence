@@ -13,7 +13,7 @@ export class ObjectMiniComponent {
 
 	readonly classes = computed(() => {
 		const base =
-			'flex flex-col shrink-0 w-28 overflow-hidden rounded-card text-left shadow-card bg-card cursor-pointer transition-shadow hover:shadow-raised';
+			'flex flex-col shrink-0 w-28 lg:w-36 overflow-hidden rounded-card text-left shadow-card bg-card cursor-pointer transition-shadow hover:shadow-raised';
 		if (this.selected())
 			return `${base} ring-2 ring-primary`
 		return `${base}`;

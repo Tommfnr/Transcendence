@@ -1,35 +1,27 @@
-import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Component, computed, signal, inject } from '@angular/core';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ObjectMiniComponent } from '../../components/object-mini/object-mini';
+import { ChipComponent } from '../../components/chip/chip';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { PostsService } from '../../services/posts.service';
 import { ObjectService } from '../../services/object.service';
 import { LendingService } from '../../services/lending.service';
 import { UsersService } from '../../services/users.service';
 import { ModalService } from '../../services/modal.service';
-import { PostEntity } from '../../models/post.model';
-import { ObjectEntity } from '../../models/object.model';
-import { User } from '../../models/user.model';
+import { normalizeForSearch } from '../../shared/normalize-text';
 
-const MESSAGE_MAX_LENGTH = 250;
+interface Category {
+	label: string;
+	emoji: string;
+}
 
 @Component({
-    selector: 'app-offerHelp',
-    imports: [
-        RouterLink,
-        TitleBarComponent,
-        AvatarComponent,
-        TextFieldComponent,
-        ObjectMiniComponent,
-        ButtonDirective,
-    ],
-    host: { class: 'flex flex-col flex-1' },
-    templateUrl: './offerHelp.html',
+	selector: 'app-offerHelp',
+	imports: [ TitleBarComponent, AvatarComponent, TextFieldComponent, ObjectMiniComponent, ChipComponent, ButtonDirective],
+	host: { class: 'flex flex-col flex-1' },
+	templateUrl: './offerHelp.html',
 })
 export class OfferHelp implements OnInit {
     private route = inject(ActivatedRoute);
@@ -42,18 +34,42 @@ export class OfferHelp implements OnInit {
 
     private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 
-    readonly post = signal<PostEntity | null>(null);
-    readonly author = signal<User | null>(null);
-    readonly authorName = computed(() => this.author()?.username ?? '');
-    readonly objects = signal<ObjectEntity[]>([]);
-    readonly availableObjects = computed(() =>
-        this.objects().filter((object) => object.isAvailable),
-    );
+	readonly demoItems = [
+		{ id: 1, name: 'Drill', type: 'DIY' },
+		{ id: 2, name: 'Ladder', type: 'DIY' },
+		{ id: 3, name: 'Wrench set', type: 'DIY' },
+		{ id: 4, name: 'Hammer', type: 'DIY' },
+	];
+	readonly selectedObjectId = signal<number | null>(null);
 
-    readonly selectedObjectId = signal<number | null>(null);
-    readonly lendedFrom = signal('');
-    readonly lendedTo = signal('');
-    readonly message = signal('');
+	categories: Category[] = [
+		{ label: 'All', emoji: '👀' },
+		{ label: 'DIY', emoji: '🛠️' },
+		{ label: 'Electronics', emoji: '💻' },
+		{ label: 'Leisure', emoji: '🎾' },
+		{ label: 'Other', emoji: '📦' },
+	]
+	// TODO(wiring): initialize with the category of the request being answered
+	activeCategory = signal('DIY');
+	readonly searchTerm = signal('');
+
+	readonly filteredItems = computed(() => {
+		const category = this.activeCategory();
+		if (category === 'All') {
+			return this.demoItems;
+		}
+		return this.demoItems.filter((item) => item.type === category);
+	});
+
+	readonly searchItems = computed(() => {
+		const term = normalizeForSearch(this.searchTerm());
+		if (term === '') {
+			return this.filteredItems();
+		}
+		return this.filteredItems().filter((item) =>
+			normalizeForSearch(item.name).includes(term)
+		);
+	});
 
     readonly submitting = signal(false);
     readonly bannerErrors = signal<string[]>([]);

@@ -1,45 +1,54 @@
 <app-title-bar title="Offer my help" leading="back"></app-title-bar>
 <div class="flex flex-col gap-4 pt-14 flex-1">
-    @if (post(); as p) {
-        <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
-            <app-avatar tone="brand"></app-avatar>
-            <div class="flex flex-col gap-1">
-                @if (authorName()) {
-                    <p class="text-text-secondary text-xs">For {{ authorName() }}'s request</p>
-                }
-                <p class="font-bold text-sm">{{ p.title }}</p>
-            </div>
-        </section>
-    }
-    <section class="gap-2 flex flex-col">
-        <h2 class="text-sm font-bold">Pick an item from my catalog</h2>
+    <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
+        <app-avatar tone="brand"></app-avatar>
+        <div class="flex flex-col gap-1">
+            <p class="text-text-secondary text-xs">
+                For NAME 's request has really really long name
+            </p>
+            <p class="font-bold text-sm">Looking for OBJECT</p>
+        </div>
+    </section>
+    <section class="gap-3 flex flex-col">
+        <h2 class="text-sm font-bold">
+            Pick an item from my catalog
+        </h2>
         <div class="flex gap-4">
-            <a
-                routerLink="/app/catalog"
-                class="flex flex-1 justify-center bg-card rounded-card p-3 items-center gap-2 shadow-card cursor-pointer transition-shadow hover:shadow-raised"
-            >
-                <img src="/icons/book.svg" class="size-4" alt="" />
-                <p class="font-bold">My catalog</p>
-            </a>
+            <app-text-field
+                placeholder="Search my items…"
+                typeField="search"
+                [(value)]="searchTerm"
+                class="flex-1"
+            ></app-text-field>
             <button
                 type="button"
                 (click)="openAddObjectModal()"
-                class="flex flex-1 justify-center rounded-card p-3 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
+                class="flex justify-center rounded-card px-4 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
             >
-                <img src="/icons/add.svg" class="size-4" alt="" />
-                <p>Add an item</p>
+                <img src="/icons/add.svg" class="size-4" />
+                <p>Add item</p>
             </button>
         </div>
-        <p class="text-xs text-text-secondary">Your available items</p>
         <div class="flex flex-wrap gap-2">
-            @for (object of availableObjects(); track object.id) {
+            @for (cat of categories; track cat.label) {
+                <app-chip
+                    [label]="cat.label"
+                    [emoji]="cat.emoji"
+                    [selected]="cat.label === activeCategory()"
+                    (pick)="activeCategory.set(cat.label)"
+                    tone="white"
+                />
+            }
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (item of searchItems(); track item.id) {
                 <app-object-mini
                     [name]="object.name"
                     [selected]="object.id === selectedObjectId()"
                     (pick)="selectedObjectId.set(object.id)"
                 />
             } @empty {
-                <p class="text-xs text-text-secondary">You have no available item yet.</p>
+                <p class="text-xs text-text-secondary">No items match your search/filter.</p>
             }
         </div>
     </section>
@@ -51,23 +60,7 @@
             placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
         ></app-text-field>
     </section>
-    @if (bannerErrors().length > 0) {
-        <div class="rounded-card border border-error p-3 text-sm text-error">
-            @for (msg of bannerErrors(); track msg) {
-                <p>{{ msg }}</p>
-            }
-        </div>
-    }
-    <button
-        appButton
-        block
-        variant="secondary"
-        type="button"
-        size="large"
-        class="mt-auto"
-        [disabled]="submitting()"
-        (click)="onSubmit()"
-    >
+    <button appButton block variant="secondary" type="button" size="large" class="mt-auto lg:mt-0 lg:w-auto lg:self-center">
         Send my offer
     </button>
 </div>

@@ -1,6 +1,6 @@
 import { Directive, HostBinding, Input, booleanAttribute } from '@angular/core';
 
-export type ButtonVariant = 'primary' | 'secondary';
+export type ButtonVariant = 'primary' | 'secondary' | 'muted';
 export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 
 /**
@@ -36,6 +36,9 @@ export class ButtonDirective {
 		const variants: Record<ButtonVariant, string> = {
 			primary: 'bg-primary text-on-primary hover:bg-alert active:bg-alert',
 			secondary: 'bg-secondary text-on-secondary hover:bg-primary hover:text-on-primary active:bg-primary active:text-on-primary',
+			// muted: action gardée discrète au repos (ex. Leave) — surface muted
+			// comme un bouton désactivé, mais vivante au survol.
+			muted: 'bg-muted text-text-secondary hover:bg-primary hover:text-on-primary active:bg-primary active:text-on-primary',
 		};
 
 		const sizes: Record<ButtonSize, string> = {
