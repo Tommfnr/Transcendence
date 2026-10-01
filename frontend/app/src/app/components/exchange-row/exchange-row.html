@@ -1,0 +1,17 @@
+<button
+	type="button"
+	(click)="press.emit()"
+	class="flex h-16 w-full cursor-pointer items-center gap-2 rounded-card bg-card p-3 text-left shadow-card transition-shadow hover:shadow-raised active:bg-background"
+>
+	@if (unread()) {
+		<span class="size-2 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+	}
+	<div class="flex min-w-0 flex-1 flex-col gap-1">
+		<p class="truncate text-sm font-bold text-strong">{{ title() }}</p>
+		<p class="truncate text-2xs text-text-secondary">{{ subtitle() }}</p>
+	</div>
+	<div class="flex shrink-0 items-center gap-1">
+		<span [class]="statusClasses()">{{ statusLabel() }}</span>
+		<img src="/icons/chevron-down.svg" alt="" class="size-4 -rotate-90" />
+	</div>
+</button>

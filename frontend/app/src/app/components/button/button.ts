@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, booleanAttribute } from '@angular/core';
 import { ButtonDirective, ButtonSize, ButtonVariant } from './button.directive';
 
 /**
@@ -12,8 +12,9 @@ import { ButtonDirective, ButtonSize, ButtonVariant } from './button.directive';
 	selector: 'app-button',
 	standalone: true,
 	imports: [ButtonDirective],
+	host: { '[class.block]': 'block', '[class.w-full]': 'block' },
 	template: `
-		<button [type]="type" appButton [variant]="variant" [size]="size">
+		<button [type]="type" appButton [variant]="variant" [size]="size" [block]="block">
 			<ng-content></ng-content>
 		</button>
 	`,
@@ -22,4 +23,5 @@ export class ButtonComponent {
 	@Input() variant: ButtonVariant = 'primary';
 	@Input() size: ButtonSize = 'medium';
 	@Input() type: 'button' | 'submit' | 'reset' = 'button';
+	@Input({ transform: booleanAttribute }) block = false;
 }

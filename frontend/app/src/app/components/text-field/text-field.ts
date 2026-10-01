@@ -1,5 +1,6 @@
 import { Component, input, output, model } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { booleanAttribute, numberAttribute } from '@angular/core';
 
 
 export type TextFieldTone = 'white' | 'field' | 'complementary';
@@ -26,6 +27,10 @@ export class TextFieldComponent implements FormValueControl<string> {
 	readonly typeField = input<TextFieldType>('text');
 	readonly label = input<string>();
 
+	/* Text-area specific */
+	readonly multiline = input(false, { transform: booleanAttribute});
+	readonly rows = input(3, { transform: numberAttribute });
+
 	private static count = 0;
 	id = `text-field-${TextFieldComponent.count++}`;
 
@@ -37,14 +42,14 @@ export class TextFieldComponent implements FormValueControl<string> {
 
 	get classes(): string {
 		const base =
-			'rounded-card border border-text-secondary px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
+			'rounded-card px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
 			+
 			'focus:outline-none focus:ring-1 focus:ring-offset-background ';
 
 		const surface: Record<TextFieldTone, string> = {
-			white: 'bg-card focus:border-primary focus:ring-primary text-strong ',
-			field: 'bg-field-surface focus:border-primary focus:ring-primary text-strong',
-			complementary: 'bg-complementary-surface focus:border-complementary focus:ring-complementary text-strong',
+			white: 'bg-card  border border-text-secondary focus:border-primary focus:ring-primary text-strong ',
+			field: 'bg-field-surface  border border-text-secondary focus:border-primary focus:ring-primary text-strong',
+			complementary: 'bg-complementary-surface border border-complementary focus:border-complementary focus:ring-complementary text-strong',
 		};
 
 		return `${base} ${surface[this.tone()]}`;

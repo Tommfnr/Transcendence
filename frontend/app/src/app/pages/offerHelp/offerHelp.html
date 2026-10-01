@@ -1,5 +1,65 @@
-<div class="flex flex-1 flex-col gap-4 px-3">
-   <h1>Page: offerHelp</h1>
-  <a routerLink="/app/iCanHelp" class="text-primary underline">iCanHelp</a>
-
+<app-title-bar title="Offer my help" leading="back"></app-title-bar>
+<div class="flex flex-col gap-4 pt-14 flex-1">
+    <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
+        <app-avatar tone="brand"></app-avatar>
+        <div class="flex flex-col gap-1">
+            <p class="text-text-secondary text-xs">
+                For NAME 's request has really really long name
+            </p>
+            <p class="font-bold text-sm">Looking for OBJECT</p>
+        </div>
+    </section>
+    <section class="gap-3 flex flex-col">
+        <h2 class="text-sm font-bold">
+            Pick an item from my catalog
+        </h2>
+        <div class="flex gap-4">
+            <app-text-field
+                placeholder="Search my items…"
+                typeField="search"
+                [(value)]="searchTerm"
+                class="flex-1"
+            ></app-text-field>
+            <button
+                type="button"
+                (click)="openAddObjectModal()"
+                class="flex justify-center rounded-card px-4 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
+            >
+                <img src="/icons/add.svg" class="size-4" />
+                <p>Add item</p>
+            </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (cat of categories; track cat.label) {
+                <app-chip
+                    [label]="cat.label"
+                    [emoji]="cat.emoji"
+                    [selected]="cat.label === activeCategory()"
+                    (pick)="activeCategory.set(cat.label)"
+                    tone="white"
+                />
+            }
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (item of searchItems(); track item.id) {
+                <app-object-mini
+                    [name]="item.name"
+                    [selected]="item.id === selectedObjectId()"
+                    (pick)="selectedObjectId.set(item.id)"
+                />
+            } @empty {
+                <p class="text-xs text-text-secondary">No items match your search/filter.</p>
+            }
+        </div>
+    </section>
+    <section>
+        <app-text-field
+            multiline
+            label="Message (optional)"
+            placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
+        ></app-text-field>
+    </section>
+    <button appButton block variant="secondary" type="button" size="large" class="mt-auto lg:mt-0 lg:w-auto lg:self-center">
+        Send my offer
+    </button>
 </div>

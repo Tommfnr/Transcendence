@@ -1,13 +1,13 @@
 export type ObjectCondition = 'new' | 'good' | 'worn';
 
+// Canonical category vocabulary — mirrors the Figma mocks (chips in
+// editAddObject / catalog). The backend zod enum and the object_type
+// pgEnum MUST be migrated to the same list before this ships.
 export const OBJECT_TYPES = [
-	'Tools',
+	'DIY',
 	'Electronics',
-	'Vehicles',
-	'Outdoor & Recreation',
-	'Media',
-	'Events',
-	'Clothing & Gear',
+	'Leisure',
+	'Other',
 ] as const;
 
 export type ObjectType = typeof OBJECT_TYPES[number];

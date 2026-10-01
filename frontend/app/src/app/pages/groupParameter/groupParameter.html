@@ -1,22 +1,46 @@
-<main class="mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 px-3 pb-10">
-  <h1>Page: My Groups</h1>
+<app-title-bar title="My groups" leading="back" [meta]="groupData().length + (groupData().length > 1 ? ' groups' : ' group')"></app-title-bar>
 
-  <ul>
-    @for (group of groupData(); track group.id) {
-      <li>
-        <h2 class="text-2xl font-bold">{{ group.name }}</h2>
-        @if (group.description) {
-          <p>{{ group.description }}</p>
-        }
-        <p>role: {{ group.role }}</p>
-        <p>Members: {{ memberCounts()[group.id] ?? 0 }}</p>
-        <a appButton [routerLink]="['/app/editAddGroup', group.id]" variant="primary">Update group</a>
-        <app-button type="button" variant="secondary" (click)="deleteGroup(group.id)">Delete group</app-button>
-      </li>
-    } @empty {
-      <li>No groups yet.</li>
-    }
-  </ul>
+<div class="flex flex-col gap-4 pt-12 lg:pt-6">
+	<div class="hidden lg:flex items-baseline justify-between">
+		<h1 class="text-lg font-bold">My groups</h1>
+		<span>{{groupData().length }} {{groupData().length > 1 ? ' groups' : ' group'}}</span>
+	</div>
+	<div class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
 
-  <app-button type ="button" routerLink="/app/editAddGroup" variant="primary">Add group</app-button>
-</main>
+		@for (group of groupData(); track group.id) {
+			<app-group-card [name]="group.name" [memberCount]="memberCounts()[group.id] ?? 0" (settings)="modalService.openEditGroup(group.id)"></app-group-card>
+		} @empty {
+			<p>No groups yet.</p>
+		}
+	</div>
+    <!-- <ul>
+        @for (group of groupData(); track group.id) {
+            <li>
+                <h2 class="text-2xl font-bold">{{ group.name }}</h2>
+                @if (group.description) {
+                    <p>{{ group.description }}</p>
+                }
+                <p>role: {{ group.role }}</p>
+                <p>Members: {{ memberCounts()[group.id] ?? 0 }}</p>
+                <a appButton [routerLink]="['/app/editAddGroup', group.id]" variant="primary"
+                    >Update group</a
+                >
+                <app-button type="button" variant="secondary" (click)="deleteGroup(group.id)"
+                    >Delete group</app-button
+                >
+            </li>-->
+
+    <!-- </ul> -->
+
+    <button
+        appButton
+        block
+        size="large"
+        variant="secondary"
+        type="button"
+        (click)="modalService.openAddGroup()"
+        class="lg:w-auto lg:self-start"
+    >
+        Create a group
+    </button>
+</div>

@@ -1,17 +1,22 @@
 <div class="flex min-h-dvh flex-col bg-background font-sans text-text">
-  <app-header-app></app-header-app>
-	<main class="relative mx-auto flex w-full max-w-[390px] flex-1 flex-col gap-4 pb-10">
-	  <router-outlet />
+	<app-header-app-desktop class="hidden lg:block"></app-header-app-desktop>
+	<main class="relative mx-auto flex w-full max-w-app lg:max-w-desktop flex-1 flex-col gap-4 px-4 pb-10">
+		<router-outlet />
 	</main>
-  <app-footer-app></app-footer-app>
-  
-  @if (modalService.activeModal() === 'addObject') {
-    <app-editAddObject />
-  }
-  @if (modalService.activeModal() === 'addPost') {
-    <app-editAddPost />
-  }
-  @if (modalService.activeModal() === 'addGroup') {
-    <app-editAddGroup />
-  }
+
+    @if (modalService.activeModal() === 'addObject') {
+        <app-editAddObject />
+    }
+    @if (modalService.activeModal() === 'addPost') {
+        <app-editAddPost />
+    }
+    @if (modalService.activeModal() === 'addGroup') {
+        <app-editAddGroup />
+    }
+	@if (modalService.activeModal() === 'editProfile') {
+		<app-editProfile />
+	}
+	@if (modalService.activeModal() === 'offers') {
+		<app-offers />
+	}
 </div>

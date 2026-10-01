@@ -1,0 +1,30 @@
+<app-modal
+	title="Offers"
+	subtitle="{{ demoOffers.length }} received"
+	(closed)="modalService.close()"
+>
+	<div class="flex flex-col gap-4 p-2 lg:p-6">
+		<section class="flex flex-col gap-2 rounded-card bg-primary-surface p-3">
+			<p class="text-2xs font-bold uppercase tracking-wide text-text-secondary">Your request</p>
+			<h3 class="text-base font-bold text-text">{{ demoRequest.title }}</h3>
+			<div class="flex flex-wrap gap-2">
+				@for (tag of demoRequest.tags; track tag.label) {
+					<app-tag [label]="tag.label" [icon]="tag.icon" />
+				}
+			</div>
+		</section>
+
+		@for (offer of demoOffers; track offer.id) {
+			<app-offer-card
+				[name]="offer.name"
+				[group]="offer.group"
+				[time]="offer.time"
+				[objectName]="offer.objectName"
+				[message]="offer.message"
+				[state]="offer.state"
+				(press)="openConversation(offer.id)"
+			/>
+			<!-- TODO(wiring): (accept)/(decline) once the offers endpoint exists -->
+		}
+	</div>
+</app-modal>

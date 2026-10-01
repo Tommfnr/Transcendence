@@ -1,16 +1,17 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderApp } from '../../components/header-app/header-app';
-import { FooterApp } from '../../components/footer-app/footer-app';
 import { EditAddObject } from '../../pages/editAddObject/editAddObject';
 import { EditAddPost } from '../../pages/editAddPost/editAddPost';
 import { EditAddGroup } from '../../pages/editAddGroup/editAddGroup';
 import { ModalService } from '../../services/modal.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
+import { EditProfile } from '../../pages/editProfile/edit-profile';
+import { HeaderAppDesktopComponent } from '../../components/header-app-desktop/header-app-desktop';
+import { Offers } from '../../pages/offers/offers';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, HeaderApp, FooterApp, EditAddObject, EditAddPost, EditAddGroup],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, Offers],
   templateUrl: './app-layout.html',
 })
 export class AppLayout implements OnInit, OnDestroy {

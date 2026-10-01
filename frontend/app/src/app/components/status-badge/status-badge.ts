@@ -12,20 +12,24 @@ export type RequestStatus = 'open' | 'pending' | 'done' | 'available' | 'lent';
 @Component({
 	selector: 'app-status-badge',
 	standalone: true,
-	template: `<span [class]="classes">{{ label }}</span>`,
+	template: `<span [class]="classes">{{ displayLabel }}</span>`,
 })
 export class StatusBadgeComponent {
 	@Input({ required: true }) status!: Exclude<RequestStatus, 'open'>;
 
+	/** Optional wording override — the colour still comes from `status`
+	 *  (e.g. status="done" with label "Offer accepted" on OfferCard). */
+	@Input() label?: string;
+
 	private static readonly LABELS: Record<string, string> = {
 		pending: 'Pending',
 		done: 'Done',
-		available: 'Avaible',
+		available: 'Available',
 		lent: 'Lent'
 	};
 
-	get label(): string {
-		return StatusBadgeComponent.LABELS[this.status] ?? this.status;
+	get displayLabel(): string {
+		return this.label ?? StatusBadgeComponent.LABELS[this.status] ?? this.status;
 	}
 
 	get classes(): string {

@@ -1,0 +1,23 @@
+<ng-template #content>
+	<p class="shrink-0 text-sm font-medium">{{ label }}</p>
+	<div class="flex min-w-0 items-center gap-1">
+		<p class="truncate text-sm text-text-secondary pl-2">{{ value }}</p>
+		@if (trailing) {
+			<img [src]="icon" alt="" [class]="iconClasses">
+		}
+	</div>
+</ng-template>
+
+@if (link) {
+	<a [routerLink]="link" [class]="rowClasses">
+		<ng-container [ngTemplateOutlet]="content" />
+	</a>
+} @else if (editable) {
+	<button type="button" (click)="edit.emit()" [class]="rowClasses">
+		<ng-container [ngTemplateOutlet]="content" />
+	</button>
+} @else {
+	<div [class]="rowClasses">
+		<ng-container [ngTemplateOutlet]="content" />
+	</div>
+}

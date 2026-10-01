@@ -1,0 +1,36 @@
+<header [class]="classes">
+    <div class="flex h-12 w-full items-center justify-between px-4">
+        <div [class]="headingClasses">
+            @switch (leading) {
+                @case ('avatar') {
+                    <app-avatar tone="brand"> </app-avatar>
+                }
+                @case ('back') {
+                    <button
+                        type="button"
+                        (click)="goBack()"
+                        aria-label="Back"
+                        class="cursor-pointer px-1 py-1 text-text-secondary transition-colors hover:text-primary active:text-primary"
+                    >
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-6 shrink-0">
+                            <path d="M7.825 13L12.725 17.9C12.925 18.1 13.021 18.3333 13.013 18.6C13.005 18.8667 12.9007 19.1 12.7 19.3C12.5 19.4833 12.2667 19.5793 12 19.588C11.7333 19.5967 11.5 19.5007 11.3 19.3L4.7 12.7C4.6 12.6 4.529 12.4917 4.487 12.375C4.445 12.2583 4.42466 12.1333 4.426 12C4.42733 11.8667 4.44833 11.7417 4.489 11.625C4.52966 11.5083 4.60033 11.4 4.701 11.3L11.301 4.7C11.4843 4.51667 11.7137 4.425 11.989 4.425C12.2643 4.425 12.5017 4.51667 12.701 4.7C12.901 4.9 13.001 5.13767 13.001 5.413C13.001 5.68834 12.901 5.92567 12.701 6.125L7.825 11H19C19.2833 11 19.521 11.096 19.713 11.288C19.905 11.48 20.0007 11.7173 20 12C19.9993 12.2827 19.9033 12.5203 19.712 12.713C19.5207 12.9057 19.2833 13.0013 19 13H7.825Z" />
+                        </svg>
+                    </button>
+                }
+            }
+            <h1 class="text-2xl font-bold text-text truncate">{{ title }}</h1>
+            @if (meta) {
+                <span class="text-sm text-text-secondary shrink-0 align-bottom">{{ meta }}</span>
+            }
+        </div>
+        <a
+            routerLink="/app"
+            aria-label="Home"
+            class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-background text-text transition-colors hover:text-primary active:text-primary"
+        >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="size-6 shrink-0">
+                <path d="M6 19H9V14C9 13.7167 9.096 13.4793 9.288 13.288C9.48 13.0967 9.71733 13.0007 10 13H14C14.2833 13 14.521 13.096 14.713 13.288C14.905 13.48 15.0007 13.7173 15 14V19H18V10L12 5.5L6 10V19ZM4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H14C13.7167 21 13.4793 20.904 13.288 20.712C13.0967 20.52 13.0007 20.2827 13 20V15H11V20C11 20.2833 10.904 20.521 10.712 20.713C10.52 20.905 10.2827 21.0007 10 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z" />
+            </svg>
+        </a>
+    </div>
+</header>
