@@ -2,10 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { GroupsService } from '../../services/groups.service';
 import { UsersService } from '../../services/users.service';
-import { GroupInput } from '../../models/group.model';
+import { GroupInput, GroupMemberView } from '../../models/group.model';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ButtonDirective } from '../../components/button/button.directive';
@@ -28,6 +28,8 @@ export class EditAddGroup implements OnInit {
 
 	readonly newMemberUsername = signal('');
 
+	readonly members = signal<GroupMemberView[]>([]);
+
 
 	bannerErrors = signal<string[]>([]);
 
@@ -47,7 +49,21 @@ export class EditAddGroup implements OnInit {
 			this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
 				this.group.set({ name: data.name, description: data.description ?? '' });
 			});
+			this.loadMembers();
 		}
+	}
+
+	private loadMembers(): void {
+		this.groupsService.findMembers(Number(this.groupId)).pipe(
+			switchMap((members) => members.length === 0
+				? of([])
+				: forkJoin(members.map((member) =>
+					this.usersService.findOne(member.userId).pipe(
+						map((user) => ({ ...member, username: user.username })),
+					),
+				)),
+			),
+		).subscribe((members) => this.members.set(members));
 	}
 
 	onAddMember(username: string): void {
