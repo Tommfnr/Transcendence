@@ -123,6 +123,19 @@ export class EditAddGroup implements OnInit {
 		});
 	}
 
+	onDeleteGroup(): void {
+		if (!confirm(`Delete "${this.group().name}"? This cannot be undone.`))
+			return;
+
+		this.errorMessage.set(null);
+		this.groupsService.deleteGroup(Number(this.groupId)).subscribe({
+			next: () => this.modalService.close(),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not delete this group');
+			},
+		});
+	}
+
 	onSubmit(event: Event) {
 		event.preventDefault();
 

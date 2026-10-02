@@ -127,7 +127,9 @@
     </form>
     <!-- TO DO -->
     @if (isEditMode() && isOwner()) {
-        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert">Delete this group</button>
+        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onDeleteGroup()">
+            Delete this group
+        </button>
     }
 
     @if (isEditMode() && !isOwner()) {
