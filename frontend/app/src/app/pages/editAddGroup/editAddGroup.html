@@ -12,7 +12,7 @@
             </div>
         }
 
-        @if (!isEditMode() || isOwner) {
+        @if (!isEditMode() || isOwner()) {
             <div class="flex flex-wrap gap-4">
                 <div class="size-18 bg-primary rounded-full shrink-0"></div>
                 <div class="flex flex-col gap-2 min-w-40 flex-1">
@@ -48,7 +48,7 @@
         }
 
         @if (isEditMode()) {
-            @if (isOwner) {
+            @if (isOwner()) {
                 <section class="flex flex-col gap-3">
                     <h2 class="text-sm font-bold">Members ({{ members().length }})</h2>
                     @for (member of members(); track member.id) {
@@ -81,7 +81,7 @@
                 </section>
             }
 
-            @if (isAdmin) {
+            @if (isAdmin()) {
                 <div class="flex gap-3">
                     <app-text-field
                         placeholder="Add a member by username…"
@@ -104,7 +104,7 @@
             <p class="text-error">{{ errorMessage() }}</p>
         }
 
-        @if (!isEditMode() || isOwner) {
+        @if (!isEditMode() || isOwner()) {
             <button
                 appButton
                 block
@@ -122,11 +122,11 @@
         }
     </form>
     <!-- TO DO -->
-    @if (isEditMode() && isOwner) {
+    @if (isEditMode() && isOwner()) {
         <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert">Delete this group</button>
     }
 
-    @if (isEditMode() && !isOwner) {
+    @if (isEditMode() && !isOwner()) {
         <button appButton type="button" variant="muted" class="mt-4  hover:bg-alert">
             Leave this group
         </button>

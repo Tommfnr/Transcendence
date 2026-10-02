@@ -33,6 +33,9 @@ export class EditAddGroup implements OnInit {
 	readonly members = signal<GroupMemberView[]>([]);
 	readonly ownerId = signal<number | null>(null);
 	readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null);
+	readonly isOwner = computed(() => this.ownerId() !== null && this.ownerId() === this.currentUserId());
+	readonly isAdmin = computed(() =>
+		this.members().some((member) => member.userId === this.currentUserId() && member.role === 'admin'));
 
 
 	bannerErrors = signal<string[]>([]);
@@ -117,10 +120,4 @@ export class EditAddGroup implements OnInit {
 	onCancel(): void {
 		this.modalService.close();
 	}
-
-	/* DEMO — TODO(wiring): remplacer par la vraie logique (voir note de passation)
-	   isAdmin = mon role === 'admin' ; isOwner = group.ownerId === utilisateur courant */
-
-	readonly isAdmin: boolean = true;
-	readonly isOwner: boolean = true;
 }
