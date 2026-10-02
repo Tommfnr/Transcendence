@@ -96,6 +96,21 @@ export class EditAddGroup implements OnInit {
 		});
 	}
 
+	onToggleRole(member: GroupMemberView): void {
+		const role = member.role === 'admin' ? 'member' : 'admin';
+
+		this.errorMessage.set(null);
+		this.groupsService.updateMemberRole(Number(this.groupId), member.userId, { role }).subscribe({
+			next: (updated) => {
+				this.members.update((members) => members.map((m) =>
+					m.userId === updated.userId ? { ...m, role: updated.role } : m));
+			},
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not change this member role');
+			},
+		});
+	}
+
 	onSubmit(event: Event) {
 		event.preventDefault();
 

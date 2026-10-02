@@ -64,6 +64,7 @@
                             @if (member.userId !== ownerId()) {
                                 <button
                                     type="button"
+                                    (click)="onToggleRole(member)"
                                     class="ml-auto cursor-pointer rounded-full border border-text-secondary/40 px-2 py-0.5 text-xs text-text-secondary transition-colors hover:border-primary hover:text-primary"
                                 >
                                     {{ member.role === 'admin' ? 'Demote' : 'Promote' }}
