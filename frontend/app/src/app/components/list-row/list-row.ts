@@ -45,7 +45,7 @@ export class ListRowComponent {
 			'flex h-12 w-full items-center justify-between rounded-card bg-card py-3 pr-3 pl-4';
 
 		if (this.link || this.editable) {
-			return `${base} cursor-pointer text-left hover:bg-background transition-colors`;
+			return `${base} cursor-pointer text-left shadow-card transition-shadow hover:shadow-raised active:bg-background`;
 		}
 		return base;
 	}

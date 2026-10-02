@@ -19,13 +19,14 @@ import { ObjectEntity } from '../../models/object.model';
 import { RefreshService } from '../../services/refresh.service';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
+import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
 import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
 
 type DashboardTab = 'requests' | 'exchanges';
 
 @Component({
 	selector: 'app-dashboard',
-	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent],
+	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent, ExchangeRowComponent],
 	templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -83,6 +84,26 @@ export class Dashboard implements OnInit {
 	readonly requestCount = computed(() => this.displayedRequests().length);
 	// TODO: count from my exchanges
 	readonly offerCount = 2;
+
+  // TODO(wiring): replace with real exchange data (posts + offers + lendings).
+  // Shapes and labels mirror the Dashboard-myExchanges mock.
+  readonly demoExchanges = [
+    { id: 1, kind: 'request', title: 'Looking for a drill', subtitle: 'my request · 1h ago', statusLabel: '2 offers', status: 'attention', unread: true },
+    { id: 2, kind: 'offer', title: 'Lawn mower → Julien', subtitle: 'my offer · new message', statusLabel: 'accepted', status: 'attention', unread: true },
+    { id: 3, kind: 'offer', title: 'Bosch drill → Sarah', subtitle: 'my offer · sent yesterday', statusLabel: 'pending', status: 'waiting', unread: false },
+    { id: 4, kind: 'request', title: 'Looking for a mouse', subtitle: 'my request · posted 5h ago', statusLabel: 'no reply', status: 'waiting', unread: false },
+    { id: 5, kind: 'offer', title: 'Ladder → Jean', subtitle: 'my offer · returned Monday', statusLabel: 'completed', status: 'done', unread: false },
+  ] as const;
+
+  onExchangePress(exchange: { id: number; kind: 'request' | 'offer' }): void {
+    if (exchange.kind === 'request') {
+      this.modalService.openOffers(exchange.id);
+    }
+    // TODO(chat): an "offer" row is the MAIN entry to its conversation
+    // (decided 28 Sept — see the ExchangeRow doc in Figma). The chat view
+    // belongs to the chat chantier; wire the navigation here once it lands.
+  }
+
 
 
 	ngOnInit(): void {

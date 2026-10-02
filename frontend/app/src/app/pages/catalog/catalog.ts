@@ -42,13 +42,10 @@ export class Catalog implements OnInit {
 
 	categories: Category[] = [
 		{ label: 'All', emoji: '👀' },
-		{ label: 'Tools', emoji: '🛠️' },
+		{ label: 'DIY', emoji: '🛠️' },
 		{ label: 'Electronics', emoji: '💻' },
-		{ label: 'Vehicles', emoji: '🚗' },
-		{ label: 'Outdoor & Recreation', emoji: '🏕️' },
-		{ label: 'Media', emoji: '🎬' },
-		{ label: 'Events', emoji: '🎉' },
-		{ label: 'Clothing & Gear', emoji: '🧥' },
+		{ label: 'Leisure', emoji: '🎾' },
+		{ label: 'Other', emoji: '📦' },
 	]
 	activeCategory = signal('All');
 	readonly searchTerm = signal('');

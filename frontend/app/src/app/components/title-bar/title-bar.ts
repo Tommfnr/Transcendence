@@ -23,7 +23,7 @@ export class TitleBarComponent {
 
 
 	get classes(): string {
-		const base = 'fixed top-0 inset-x-0 z-10 bg-background mx-auto max-w-app pt-2';
+		const base = 'fixed top-0 inset-x-0 z-10 bg-background mx-auto max-w-app pt-2 lg:hidden';
 		return `${base}`;
 	}
 

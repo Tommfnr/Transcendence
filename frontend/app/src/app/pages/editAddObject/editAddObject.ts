@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
 import { ObjectInput, OBJECT_TYPES, ObjectCondition, ObjectType } from '../../models/object.model';
-import { ButtonComponent } from '../../components/button/button';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from '../../components/text-field/text-field';
@@ -12,7 +12,7 @@ import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-
 
 @Component({
   selector: 'app-editAddObject',
-  imports: [FormField, ButtonComponent, Modal, TextFieldComponent, ChipComponent],
+  imports: [FormField, ButtonDirective, Modal, TextFieldComponent, ChipComponent],
   templateUrl: './editAddObject.html',
 })
 export class EditAddObject implements OnInit {
@@ -27,13 +27,10 @@ export class EditAddObject implements OnInit {
 	bannerErrors = signal<string[]>([]);
 
   readonly categories = [
-    { label: 'Tools', emoji: '🛠️' },
+    { label: 'DIY', emoji: '🛠️' },
     { label: 'Electronics', emoji: '💻' },
-    { label: 'Vehicles', emoji: '🚗' },
-    { label: 'Outdoor & Recreation', emoji: '🏕️' },
-    { label: 'Media', emoji: '🎬' },
-    { label: 'Events', emoji: '🎉' },
-    { label: 'Clothing & Gear', emoji: '🧥' },
+    { label: 'Leisure', emoji: '🎾' },
+    { label: 'Other', emoji: '📦' },
   ] as const;
 
   states = [

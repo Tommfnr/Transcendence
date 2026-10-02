@@ -11,41 +11,51 @@
             </div>
         </section>
     }
-    <section class="gap-2 flex flex-col">
+    <section class="gap-3 flex flex-col">
         <h2 class="text-sm font-bold">Pick an item from my catalog</h2>
         <div class="flex gap-4">
-            <a
-                routerLink="/app/catalog"
-                class="flex flex-1 justify-center bg-card rounded-card p-3 items-center gap-2 shadow-card cursor-pointer transition-shadow hover:shadow-raised"
-            >
-                <img src="/icons/book.svg" class="size-4" alt="" />
-                <p class="font-bold">My catalog</p>
-            </a>
-            <a
-                routerLink="/app/editAddObject"
-                class="flex flex-1 justify-center rounded-card p-3 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
+            <app-text-field
+                placeholder="Search my items…"
+                typeField="search"
+                [(value)]="searchTerm"
+                class="flex-1"
+            ></app-text-field>
+            <button
+                type="button"
+                (click)="openAddObjectModal()"
+                class="flex justify-center rounded-card px-4 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
             >
                 <img src="/icons/add.svg" class="size-4" alt="" />
-                <p>Add an item</p>
-            </a>
+                <p>Add item</p>
+            </button>
         </div>
-        <p class="text-xs text-text-secondary">Your available items</p>
         <div class="flex flex-wrap gap-2">
-            @for (object of availableObjects(); track object.id) {
+            @for (cat of categories; track cat.label) {
+                <app-chip
+                    [label]="cat.label"
+                    [emoji]="cat.emoji"
+                    [selected]="cat.label === activeCategory()"
+                    (pick)="activeCategory.set(cat.label)"
+                    tone="white"
+                />
+            }
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (object of searchedObjects(); track object.id) {
                 <app-object-mini
                     [name]="object.name"
                     [selected]="object.id === selectedObjectId()"
                     (pick)="selectedObjectId.set(object.id)"
                 />
             } @empty {
-                <p class="text-xs text-text-secondary">You have no available item yet.</p>
+                <p class="text-xs text-text-secondary">No items match your search/filter.</p>
             }
         </div>
     </section>
     <section>
-        <p>Message (optional)</p>
         <app-text-field
             multiline
+            label="Message (optional)"
             [(value)]="message"
             placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
         ></app-text-field>
@@ -63,7 +73,7 @@
         variant="secondary"
         type="button"
         size="large"
-        class="mt-auto"
+        class="mt-auto lg:mt-0 lg:w-auto lg:self-center"
         [disabled]="submitting()"
         (click)="onSubmit()"
     >

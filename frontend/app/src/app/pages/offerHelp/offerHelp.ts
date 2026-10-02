@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
@@ -14,23 +14,25 @@ import { UsersService } from '../../services/users.service';
 import { PostEntity } from '../../models/post.model';
 import { ObjectEntity } from '../../models/object.model';
 import { User } from '../../models/user.model';
+import { ChipComponent } from '../../components/chip/chip';
+import { ModalService } from '../../services/modal.service';
+import { normalizeForSearch } from '../../shared/normalize-text';
 
 const MESSAGE_MAX_LENGTH = 250;
 
+interface Category {
+    label: string;
+    emoji: string;
+}
+
 @Component({
-    selector: 'app-offerHelp',
-    imports: [
-        RouterLink,
-        TitleBarComponent,
-        AvatarComponent,
-        TextFieldComponent,
-        ObjectMiniComponent,
-        ButtonDirective,
-    ],
-    host: { class: 'flex flex-col flex-1' },
-    templateUrl: './offerHelp.html',
+	selector: 'app-offerHelp',
+	imports: [ TitleBarComponent, AvatarComponent, TextFieldComponent, ObjectMiniComponent, ChipComponent, ButtonDirective],
+	host: { class: 'flex flex-col flex-1' },
+	templateUrl: './offerHelp.html',
 })
 export class OfferHelp implements OnInit {
+    readonly modalService = inject(ModalService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private postsService = inject(PostsService);
@@ -47,6 +49,30 @@ export class OfferHelp implements OnInit {
     readonly availableObjects = computed(() =>
         this.objects().filter((object) => object.isAvailable),
     );
+
+    readonly categories: Category[] = [
+    { label: 'All', emoji: '👀' },
+    { label: 'DIY', emoji: '🛠️' },
+    { label: 'Electronics', emoji: '💻' },
+    { label: 'Leisure', emoji: '🎾' },
+    { label: 'Other', emoji: '📦' },
+];
+    readonly activeCategory = signal('All');
+    readonly searchTerm = signal('');
+
+    readonly filteredObjects = computed(() => {
+        const category = this.activeCategory();
+        if (category === 'All')
+            return this.availableObjects();
+        return this.availableObjects().filter((object) => object.type === category);
+    });
+
+    readonly searchedObjects = computed(() => {
+        const term = normalizeForSearch(this.searchTerm());
+        if (term === '')
+            return this.filteredObjects();
+        return this.filteredObjects().filter((object) => normalizeForSearch(object.name).includes(term));
+    });
 
     readonly selectedObjectId = signal<number | null>(null);
     readonly lendedFrom = signal('');
@@ -66,6 +92,7 @@ export class OfferHelp implements OnInit {
                     next: (user) => this.author.set(user),
                     error: (err) => console.error('Failed to load author', err),
                 });
+                this.activeCategory.set(post.objectType);
             },
             error: () => this.bannerErrors.set(['This request no longer exists']),
         });
@@ -113,4 +140,10 @@ export class OfferHelp implements OnInit {
             this.submitting.set(false);
         }
     }
+    
+    openAddObjectModal(): void {
+        this.modalService.openAddObject();
+    }
 }
+
+

@@ -3,21 +3,17 @@ import { form, FormField, required, email, submit } from '@angular/forms/signals
 import { AuthService } from '../../services/auth.service';
 import { RefreshService } from '../../services/refresh.service';
 import { RegisterData } from '../../models/register-data.model';
-import { ButtonComponent } from '../../components/button/button';
-import { Router } from '@angular/router';
+import { ButtonDirective } from "../../components/button/button.directive";
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import {
-    isZodValidationError,
-    mapZodErrorsToFieldTree,
-    isConflictError,
-    mapAuthErrorToBanner,
-} from '../../shared/zod-signal-errors';
+import { isZodValidationError, mapZodErrorsToFieldTree, isConflictError, mapAuthErrorToBanner } from '../../shared/zod-signal-errors';
+import { TextFieldComponent } from '../../components/text-field/text-field';
 
 @Component({
-    selector: 'app-register',
-    imports: [FormField, ButtonComponent],
-    templateUrl: './register.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-register',
+  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink],
+  templateUrl: './register.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
     private authService = inject(AuthService);

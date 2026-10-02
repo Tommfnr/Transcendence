@@ -15,6 +15,7 @@ import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
 import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
 import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
+import { ChatPreview } from './pages/chatPreview/chatPreview';
 import { authGuard } from './guards/auth.guard';
 
 import { Test } from './pages/test/test';
@@ -107,6 +108,10 @@ export const routes: Routes = [
       {
         path: 'exampleGroupList',
         component: ExampleGroupList
+      },
+      {
+        path: 'chatPreview',
+        component: ChatPreview
       }
     ]
   },

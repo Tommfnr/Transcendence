@@ -20,8 +20,10 @@
 		<p class="text-center text-sm">{{ helperCount() === 1 ? '1 person has' : `${helperCount()} people have` }} already offered to help</p>
 		<p class="text-xs text-text-secondary text-center">{{ authorName() }} {{ hasChosenHelper() ? 'has chosen' : " hasn't chosen yet" }}</p>
 	</section>
-	<a appButton block size="large" variant="secondary" type="button" class="mt-auto" [routerLink]="['/app/offerHelp', postId]"
+	<a appButton block size="large" variant="secondary" type="button" class="mt-auto lg:mt-0 lg:w-auto lg:self-center" [routerLink]="['/app/offerHelp', postId]"
 >I offer my help</a>
+  <a routerLink="/app/chatPreview" class="text-primary underline">Voir le chat</a>
+  <!-- chatpreview placeholder-->
 </div>
 
 <!-- <app-date-picker appearance="button" placeholder="Choisir une date" [(value)]="date" /> -->

@@ -1,9 +1,9 @@
 <div (click)="onClose()" class="fixed inset-0 z-50 bg-black/50"></div>
 
 <div
-    class="fixed inset-x-0 top-12 z-70 mx-auto w-full max-w-app max-h-[85vh] flex flex-col rounded-card bg-background px-4 pt-4 pb-8 gap-5 md:max-w-2xl md:p-6"
+    class="fixed inset-x-0 top-12 z-70 mx-auto w-full max-w-app max-h-[85vh] flex flex-col rounded-card bg-background px-4 pt-4 pb-8 gap-5 lg:max-w-2xl lg:p-6"
 >
-    <div class="flex items-start justify-between">
+    <div class="flex items-start justify-between px-4">
         <div>
             <h2 class="text-lg font-bold text-text">{{ title() }}</h2>
             @if (subtitle()) {
@@ -20,7 +20,7 @@
             <img src="/icons/fab-cross.png" alt="" class="size-4 cursor-pointer" />
         </button>
     </div>
-    <div class="min-h-0 flex-1 overflow-y-auto">
+    <div class="min-h-0 flex-1 overflow-y-auto px-4">
         <ng-content />
     </div>
 </div>

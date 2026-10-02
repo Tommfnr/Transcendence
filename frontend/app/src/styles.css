@@ -6,6 +6,7 @@
 @theme {
 	/* Widths */
 	--container-app: 390px;
+	--container-desktop: 960px;
 	
 	/* Colors*/
 	--color-primary: #FF9D2E;
