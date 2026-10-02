@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
@@ -24,7 +24,25 @@ export class GroupParameter implements OnInit {
 	private location = inject(Location);
 	private router = inject(Router);
 
+	private previousModal = this.modalService.activeModal();
+
+	constructor() {
+		// Reload once the add/edit group modal closes: a group may have been
+		// created, renamed, deleted or left, or its members changed.
+		effect(() => {
+			const modal = this.modalService.activeModal();
+
+			if (this.previousModal === 'addGroup' && modal === null)
+				this.loadGroups();
+			this.previousModal = modal;
+		});
+	}
+
 	ngOnInit(): void {
+		this.loadGroups();
+	}
+
+	private loadGroups(): void {
 		this.groupsService.findMy().subscribe((data) => {
 			this.groupData.set(data);
 
