@@ -81,12 +81,17 @@ export class EditAddGroup implements OnInit {
 	}
 
 	onAddMember(username: string): void {
-		this.usersService.findByUsername(username).subscribe({
-			next: (user) => {
-				this.groupsService.addMember(Number(this.groupId), user.id).subscribe();
-			},
+		const trimmed = username.trim();
+		if (!trimmed)
+			return;
+
+		this.errorMessage.set(null);
+		this.usersService.findByUsername(trimmed).pipe(
+			switchMap((user) => this.groupsService.addMember(Number(this.groupId), user.id)),
+		).subscribe({
+			next: () => this.loadMembers(),
 			error: (err) => {
-				this.errorMessage.set(err.error?.message);
+				this.errorMessage.set(err.error?.message ?? 'Could not add this member');
 			},
 		});
 	}
