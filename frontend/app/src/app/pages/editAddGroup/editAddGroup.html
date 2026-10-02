@@ -50,23 +50,23 @@
         @if (isEditMode()) {
             @if (isOwner) {
                 <section class="flex flex-col gap-3">
-                    <h2 class="text-sm font-bold">Members ({{ demoMembers().length }})</h2>
-                    @for (member of demoMembers(); track member.id) {
+                    <h2 class="text-sm font-bold">Members ({{ members().length }})</h2>
+                    @for (member of members(); track member.id) {
                         <div class="flex items-center gap-3">
                             <app-avatar></app-avatar>
                             <p class="font-bold">
-                                {{ member.name }}
-                                @if (member.isYou) {
+                                {{ member.username }}
+                                @if (member.userId === currentUserId()) {
                                     <span class="font-normal text-text-secondary">(you)</span>
                                 }
                             </p>
-                            <p class="text-xs text-text-secondary">{{ member.role }}</p>
-                            @if (member.role !== 'Owner') {
+                            <p class="text-xs text-text-secondary">{{ roleLabel(member) }}</p>
+                            @if (member.userId !== ownerId()) {
                                 <button
                                     type="button"
                                     class="ml-auto cursor-pointer rounded-full border border-text-secondary/40 px-2 py-0.5 text-xs text-text-secondary transition-colors hover:border-primary hover:text-primary"
                                 >
-                                    {{ member.role === 'Admin' ? 'Demote' : 'Promote' }}
+                                    {{ member.role === 'admin' ? 'Demote' : 'Promote' }}
                                 </button>
                                 <button
                                     type="button"

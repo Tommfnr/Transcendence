@@ -5,6 +5,7 @@ import { UsersService } from '../../services/users.service';
 import { GroupInput, GroupMemberView } from '../../models/group.model';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
+import { RefreshService } from '../../services/refresh.service';
 import { firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
@@ -21,6 +22,7 @@ export class EditAddGroup implements OnInit {
 	private groupsService = inject(GroupsService);
 	private usersService = inject(UsersService);
 	private modalService = inject(ModalService);
+	private refreshService = inject(RefreshService);
 
 	private groupId = this.modalService.editGroupId();
 	readonly isEditMode = computed(() => this.modalService.editGroupId() !== null);
@@ -29,6 +31,8 @@ export class EditAddGroup implements OnInit {
 	readonly newMemberUsername = signal('');
 
 	readonly members = signal<GroupMemberView[]>([]);
+	readonly ownerId = signal<number | null>(null);
+	readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null);
 
 
 	bannerErrors = signal<string[]>([]);
@@ -48,6 +52,7 @@ export class EditAddGroup implements OnInit {
 		if (this.isEditMode()) {
 			this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
 				this.group.set({ name: data.name, description: data.description ?? '' });
+				this.ownerId.set(data.ownerId);
 			});
 			this.loadMembers();
 		}
@@ -64,6 +69,12 @@ export class EditAddGroup implements OnInit {
 				)),
 			),
 		).subscribe((members) => this.members.set(members));
+	}
+
+	roleLabel(member: GroupMemberView): string {
+		if (member.userId === this.ownerId())
+			return ('Owner');
+		return (member.role === 'admin' ? 'Admin' : 'Member');
 	}
 
 	onAddMember(username: string): void {
@@ -112,21 +123,4 @@ export class EditAddGroup implements OnInit {
 
 	readonly isAdmin: boolean = true;
 	readonly isOwner: boolean = true;
-
-	readonly demoMembers = signal([
-		{ id: 1, name: 'Pierre', role: 'Owner', isYou: true },
-		{ id: 2, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 3, name: 'Marine', role: 'Admin', isYou: false },
-		{ id: 4, name: 'John', role: 'Member', isYou: false },
-		{ id: 5, name: 'Sebastian', role: 'Member', isYou: false },
-		{ id: 6, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 7, name: 'Marine', role: 'Member', isYou: false },
-		{ id: 8, name: 'John', role: 'Member', isYou: false },
-		{ id: 9, name: 'Sebastian', role: 'Member', isYou: false },
-		{ id: 10, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 11, name: 'Marine', role: 'Member', isYou: false },
-		{ id: 12, name: 'John', role: 'Member', isYou: false },
-		{ id: 13, name: 'Sebastian', role: 'Member', isYou: false },
-	]);
-
 }
