@@ -11,6 +11,7 @@ import { ButtonComponent } from '../button/button';
 export class GroupCardComponent {
 	readonly name = input.required<string>();
 	readonly memberCount = input.required<number>();
+	readonly role = input.required<string>();
 	readonly settings = output<void>();
 
 }

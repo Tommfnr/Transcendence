@@ -6,6 +6,7 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { GroupCardComponent } from '../../components/group-card/group-card';
 import { ModalService } from '../../services/modal.service';
+import { RefreshService } from '../../services/refresh.service';
 import { Location } from '@angular/common';
 
 
@@ -23,6 +24,7 @@ export class GroupParameter implements OnInit {
 	readonly modalService = inject(ModalService);
 	private location = inject(Location);
 	private router = inject(Router);
+	private refreshService = inject(RefreshService);
 
 	private previousModal = this.modalService.activeModal();
 
@@ -52,6 +54,12 @@ export class GroupParameter implements OnInit {
 				});
 			}
 		});
+	}
+
+	roleLabel(group: GroupEntity): string {
+		if (group.ownerId === this.refreshService.user()?.id)
+			return ('Owner');
+		return (group.role === 'admin' ? 'Admin' : 'Member');
 	}
 
 	deleteGroup(groupId: number): void {
