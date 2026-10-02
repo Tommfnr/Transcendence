@@ -111,6 +111,18 @@ export class EditAddGroup implements OnInit {
 		});
 	}
 
+	onRemoveMember(member: GroupMemberView): void {
+		this.errorMessage.set(null);
+		this.groupsService.removeMember(Number(this.groupId), member.userId).subscribe({
+			next: () => {
+				this.members.update((members) => members.filter((m) => m.userId !== member.userId));
+			},
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not remove this member');
+			},
+		});
+	}
+
 	onSubmit(event: Event) {
 		event.preventDefault();
 
