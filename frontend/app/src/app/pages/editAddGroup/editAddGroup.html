@@ -125,7 +125,6 @@
             </button>
         }
     </form>
-    <!-- TO DO -->
     @if (isEditMode() && isOwner()) {
         <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onDeleteGroup()">
             Delete this group
@@ -133,7 +132,7 @@
     }
 
     @if (isEditMode() && !isOwner()) {
-        <button appButton type="button" variant="muted" class="mt-4  hover:bg-alert">
+        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
             Leave this group
         </button>
     }

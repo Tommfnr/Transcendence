@@ -136,6 +136,19 @@ export class EditAddGroup implements OnInit {
 		});
 	}
 
+	onLeaveGroup(): void {
+		if (!confirm(`Leave "${this.group().name}"?`))
+			return;
+
+		this.errorMessage.set(null);
+		this.groupsService.leaveGroup(Number(this.groupId)).subscribe({
+			next: () => this.modalService.close(),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not leave this group');
+			},
+		});
+	}
+
 	onSubmit(event: Event) {
 		event.preventDefault();
 
