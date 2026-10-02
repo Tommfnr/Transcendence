@@ -34,7 +34,7 @@ export class AuthService {
 	}
 
 	async refresh(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
-		let payload: { sub: number; username: string; type: string; jti: string }
+		let payload: { sub: number; type: string; jti: string }
 		try {
 			payload = await this.jwtService.verifyAsync(refreshToken, { secret: process.env.JWT_REFRESH_SECRET })
 		} catch {
@@ -51,9 +51,13 @@ export class AuthService {
 			await this.refreshTokensServices.revokeAllForUser(row.userId)
 			throw new UnauthorizedException('Invalid refresh token')
 		}
+		const user = await this.usersService.findById(payload.sub)
+		if (!user) {
+			throw new UnauthorizedException('Invalid refresh token')
+		}
 		await this.refreshTokensServices.revoke(payload.jti)
 		const { jti: newJti } = await this.refreshTokensServices.issue(payload.sub)
-		const newPayload = { sub: payload.sub, username: payload.username }
+		const newPayload = { sub: user.id, username: user.username }
 		const access_token = await this.jwtService.signAsync(newPayload, {
 			secret: process.env.JWT_SECRET,
 			expiresIn: '60s'

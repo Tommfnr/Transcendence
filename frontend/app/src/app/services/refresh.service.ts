@@ -1,8 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
-import { Observable, tap } from 'rxjs'
-import { LoginResponse, RefreshResponse } from '../models/refresh.types'
-import { User } from '../models/user.model'
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, finalize, shareReplay, tap } from 'rxjs';
+import { LoginResponse, RefreshResponse } from '../models/refresh.types';
+import { User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class RefreshService {
