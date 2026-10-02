@@ -9,6 +9,7 @@ export interface Exchange {
 	kind: 'request' | 'offer';
 	postId: number;
 	title: string;
+	subtitle: string;
 	statusLabel: string;
 	tone: ExchangeTone;
 }

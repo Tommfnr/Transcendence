@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
@@ -38,7 +38,7 @@ export class Dashboard implements OnInit {
 	private refreshService = inject(RefreshService);
 	private lendingService = inject(LendingService);
 	private objectService = inject(ObjectService);
-
+	private router = inject(Router);
 
 	readonly groups = signal<GroupEntity[]>([]);
 	readonly posts = signal<PostEntity[]>([]);
@@ -50,7 +50,6 @@ export class Dashboard implements OnInit {
 	readonly errorMessage = signal<string | null>(null);
 	readonly lendings = signal<LendingEntity[]>([]);
 	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
-	readonly selectedRequestPostId = signal<number | null>(null);
 
 
 	private readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null)
@@ -85,25 +84,14 @@ export class Dashboard implements OnInit {
 	// TODO: count from my exchanges
 	readonly offerCount = 2;
 
-  // TODO(wiring): replace with real exchange data (posts + offers + lendings).
-  // Shapes and labels mirror the Dashboard-myExchanges mock.
-  readonly demoExchanges = [
-    { id: 1, kind: 'request', title: 'Looking for a drill', subtitle: 'my request · 1h ago', statusLabel: '2 offers', status: 'attention', unread: true },
-    { id: 2, kind: 'offer', title: 'Lawn mower → Julien', subtitle: 'my offer · new message', statusLabel: 'accepted', status: 'attention', unread: true },
-    { id: 3, kind: 'offer', title: 'Bosch drill → Sarah', subtitle: 'my offer · sent yesterday', statusLabel: 'pending', status: 'waiting', unread: false },
-    { id: 4, kind: 'request', title: 'Looking for a mouse', subtitle: 'my request · posted 5h ago', statusLabel: 'no reply', status: 'waiting', unread: false },
-    { id: 5, kind: 'offer', title: 'Ladder → Jean', subtitle: 'my offer · returned Monday', statusLabel: 'completed', status: 'done', unread: false },
-  ] as const;
 
-  onExchangePress(exchange: { id: number; kind: 'request' | 'offer' }): void {
-    if (exchange.kind === 'request') {
-      this.modalService.openOffers(exchange.id);
-    }
-    // TODO(chat): an "offer" row is the MAIN entry to its conversation
-    // (decided 28 Sept — see the ExchangeRow doc in Figma). The chat view
-    // belongs to the chat chantier; wire the navigation here once it lands.
-  }
-
+	onExchangePress(exchange: Exchange): void {
+		if (exchange.kind === 'request')
+			this.modalService.openOffers(exchange.postId);
+		else
+			this.router.navigate(['/app/iCanHelp', exchange.postId]);
+		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
+	}
 
 
 	ngOnInit(): void {
@@ -238,7 +226,14 @@ export class Dashboard implements OnInit {
 				tone = 'attention';
 			}
 
-			return { id: `post-${post.id}`, kind: 'request', postId: post.id, title: post.title, statusLabel, tone };
+			return { id: `post-${post.id}`,
+				kind: 'request',
+				postId: post.id,
+				title: post.title,
+				subtitle: `my request · ${formatTimeAgo(post.createdAt)}`,
+				statusLabel,
+				tone 
+			};
 		});
 	}
 
@@ -252,6 +247,7 @@ export class Dashboard implements OnInit {
 				kind: 'offer',
 				postId: l.postId!,
 				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
+				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: OFFER_STATUS[l.status].label,
 				tone: OFFER_STATUS[l.status].tone,
 			}));
