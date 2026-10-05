@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { OfferCardComponent } from '../../components/offer-card/offer-card';
+import { OfferCardComponent, OfferCardState } from '../../components/offer-card/offer-card';
 import { TagComponent } from '../../components/tag/tag';
 import { HelpRequestTag } from '../../models/help-request.model';
 import { GroupsService } from '../../services/groups.service';
@@ -13,7 +13,6 @@ import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
 import { LendingEntity } from '../../models/lending.model';
-import { OfferCardState } from '../../components/offer-card/offer-card';
 import { Observable } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
@@ -31,18 +30,20 @@ export class Offers implements OnInit {
 	private usersService = inject(UsersService);
 	private objectService = inject(ObjectService);
 
-	private readonly postGroups = signal<PostGroupData[]>([]);
+
+	private readonly groupsPost = signal<PostGroupData[]>([]);
 	private readonly memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
 	readonly post = signal<PostEntity | null>(null);
 	private readonly lendings = signal<LendingEntity[]>([]);
-	private readonly usersById = signal<Map<number, User>>(new Map());
+	private readonly lendersById = signal<Map<number, User>>(new Map());
 	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	readonly errorMessage = signal<string | null>(null);
+
 
 	readonly offers = computed(() =>
 		this.lendings().map((l) => ({
 			id: l.id,
-			name: this.usersById().get(l.lenderId)?.username ?? '…',
+			name: this.lendersById().get(l.lenderId)?.username ?? '…',
 			group: this.sharedGroupName(l.lenderId),
 			time: formatTimeAgo(l.createdAt),
 			objectName: this.objectsById().get(l.objectId)?.name ?? '…',
@@ -51,18 +52,11 @@ export class Offers implements OnInit {
 		}))
 	);
 
-
 	readonly requestTags = computed<HelpRequestTag[]>(() => {
 		const post = this.post();
 		return post ? [{ label: post.objectType, icon: 'tag' }] : [];
 	});
 
-
-	// TODO(chat): open the conversation with this offerer — the chat view
-	// belongs to the chat chantier; this seam is the agreed entry point (A).
-	openConversation(offerId: number): void {
-		void offerId;
-	}
 
 	ngOnInit(): void {
 		const postId = this.modalService.offersPostId();
@@ -84,7 +78,7 @@ export class Offers implements OnInit {
 	private loadGroupsPost(postId: number): void {
 		this.postsService.findGroups(postId).subscribe({
 			next: (groups) => {
-				this.postGroups.set(groups);
+				this.groupsPost.set(groups);
 				this.loadMemberIdsByGroupId(groups);
 			},
 			error: (err) => console.error('Failed to load the request groups', err),
@@ -101,7 +95,6 @@ export class Offers implements OnInit {
 		}
 	}
 
-
 	private loadReceivedOffers(postId: number): void {
 		this.lendingService.listAll().subscribe({
 			next: (lendings) => {
@@ -113,14 +106,13 @@ export class Offers implements OnInit {
 				this.loadObjectsById(offers);
 			},
 			error: (err) => console.error('Failed to load offers', err),
-		});	/** A group of the request this lender belongs to, e.g. "Best Mates". */
-
+		});
 	}
 
 	private loadLendersById(offers: LendingEntity[]): void {
 		for (const lenderId of new Set(offers.map((l) => l.lenderId))) {
 			this.usersService.findOne(lenderId).subscribe({
-				next: (user) => this.usersById.update((map) => new Map(map).set(lenderId, user)),
+				next: (user) => this.lendersById.update((map) => new Map(map).set(lenderId, user)),
 				error: (err) => console.error('Failed to load offerer', err),
 			});
 		}
@@ -135,6 +127,12 @@ export class Offers implements OnInit {
 		}
 	}
 
+
+	// TODO(chat): open the conversation with this offerer — the chat view
+	// belongs to the chat chantier; this seam is the agreed entry point (A).
+	openConversation(offerId: number): void {
+		void offerId;
+	}
 
 	onAccept(lendingId: number): void {
 		this.decideOffer(this.lendingService.accept(lendingId));
@@ -161,11 +159,9 @@ export class Offers implements OnInit {
 	}
 
 	private sharedGroupName(lenderId: number): string {
-		const group = this.postGroups().find((g) =>
+		const group = this.groupsPost().find((g) =>
 			this.memberIdsByGroupId().get(g.id)?.includes(lenderId)
 		);
 		return (group?.name ?? '');
 	}
-
-
 }

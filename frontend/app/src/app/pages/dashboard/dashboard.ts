@@ -67,8 +67,8 @@ export class Dashboard implements OnInit {
 		if (groupId === null) {
 			return (this.posts());
 		}
-		return (this.posts()).filter((post) =>
-			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false);
+		return (this.posts().filter((post) =>
+			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false));
 	});
 
 	readonly displayedRequests = computed<HelpRequest[]>(() =>
@@ -77,8 +77,8 @@ export class Dashboard implements OnInit {
 
 	readonly pendingReceivedOffers = computed(() => {
 		const myPostIds = new Set(this.myPosts().map((post) => post.id));
-		return (this.lendings()).filter((l) =>
-			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending');
+		return (this.lendings().filter((l) =>
+			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'));
 	});
 
 	readonly myExchanges = computed<Exchange[]>(() =>
@@ -90,14 +90,7 @@ export class Dashboard implements OnInit {
 
 	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
-	onExchangePress(exchange: Exchange): void {
-		if (exchange.kind === 'request')
-			this.modalService.openOffers(exchange.postId);
-		else
-			this.router.navigate(['/app/chatPreview']);
-		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
-	}
-
+	
 	// Reload what a modal may have changed (an accepted offer, a new request...) once it closes
 	constructor() {
 		effect(() => {
@@ -171,6 +164,14 @@ export class Dashboard implements OnInit {
 
 	selectTab(tab: DashboardTab): void {
 		this.activeTab.set(tab);
+	}
+
+	onExchangePress(exchange: Exchange): void {
+		if (exchange.kind === 'request')
+			this.modalService.openOffers(exchange.postId);
+		else
+			this.router.navigate(['/app/chatPreview']);
+		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
 	}
 
 	onGroupFilterChange(event: Event): void {
