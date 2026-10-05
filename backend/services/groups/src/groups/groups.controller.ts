@@ -14,8 +14,8 @@ export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
 
 	@Get()
-	findAll() {
-		return (this.groupsService.findAll())
+	findAll(@CurrentUser('sub') userId: number) {
+		return (this.groupsService.findAll(userId))
 	}
 
 	@Get('my')

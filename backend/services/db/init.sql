@@ -20,13 +20,10 @@ END $$;
 DO $$
 BEGIN
 	CREATE TYPE object_type AS ENUM (
-		'Tools',
+		'DIY',
 		'Electronics',
-		'Vehicles',
-		'Outdoor & Recreation',
-		'Media',
-		'Events',
-		'Clothing & Gear'
+		'Leisure',
+		'Other'
 	);
 EXCEPTION
 	WHEN duplicate_object THEN null;

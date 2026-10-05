@@ -13,11 +13,6 @@ import { ObjectOwnerGuard } from './guards/object-owner.guard'
 export class ObjectsController {
 	constructor(private readonly objectsService: ObjectsService) {}
 
-	@Get()
-	findAll() {
-		return (this.objectsService.findAll())
-	}
-
 	@Get('my')
 	findMy(@CurrentUser('sub') userId: number) {
 		return (this.objectsService.findByUserId(userId))
