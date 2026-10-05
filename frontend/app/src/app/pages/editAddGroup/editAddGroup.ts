@@ -6,7 +6,7 @@ import { GroupInput, GroupMemberView } from '../../models/group.model';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { RefreshService } from '../../services/refresh.service';
-import { firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ButtonDirective } from '../../components/button/button.directive';
@@ -68,10 +68,17 @@ export class EditAddGroup implements OnInit {
 				: forkJoin(members.map((member) =>
 					this.usersService.findOne(member.userId).pipe(
 						map((user) => ({ ...member, username: user.username })),
+						// One failed lookup must not drop the whole list (and the admin controls with it)
+						catchError(() => of({ ...member, username: 'Unknown user' })),
 					),
 				)),
 			),
-		).subscribe((members) => this.members.set(members));
+		).subscribe({
+			next: (members) => this.members.set(members),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not load the group members');
+			},
+		});
 	}
 
 	roleLabel(member: GroupMemberView): string {
