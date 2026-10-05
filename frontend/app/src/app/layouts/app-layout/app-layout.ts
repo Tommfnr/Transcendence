@@ -8,10 +8,11 @@ import { ChatSocketService } from '../../services/chat-socket.service';
 import { EditProfile } from '../../pages/editProfile/edit-profile';
 import { HeaderAppDesktopComponent } from '../../components/header-app-desktop/header-app-desktop';
 import { Offers } from '../../pages/offers/offers';
+import { FooterApp } from '../../components/footer-app/footer-app';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, Offers],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, Offers, FooterApp],
   templateUrl: './app-layout.html',
 })
 export class AppLayout implements OnInit, OnDestroy {
