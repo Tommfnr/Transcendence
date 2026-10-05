@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, effect, untracked } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
@@ -99,11 +99,19 @@ export class Dashboard implements OnInit {
 		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
 	}
 
+	// Reload what a modal may have changed (an accepted offer, a new request...) once it closes
+	constructor() {
+		effect(() => {
+			if (this.modalService.activeModal() === null)
+				untracked(() => {
+					this.loadPosts();
+					this.loadLendings();
+				});
+		});
+	}
 
 	ngOnInit(): void {
 		this.loadGroups();
-		this.loadPosts();
-		this.loadLendings();
 		this.loadMyObjects();
 	}
 
