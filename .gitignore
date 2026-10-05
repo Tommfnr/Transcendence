@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+*log.md
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -26,4 +27,10 @@ dist-ssr
 .env*
 secrets/
 docs/
-zhelp
+zhelp*
+scripts/
+coverage/
+.bruno*
+
+# Test files
+*.spec.ts
