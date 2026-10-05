@@ -77,9 +77,8 @@ export class Dashboard implements OnInit {
 
 	readonly pendingReceivedOffers = computed(() => {
 		const myPostIds = new Set(this.myPosts().map((post) => post.id));
-		return this.lendings().filter((l) =>
-			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'
-		);
+		return (this.lendings()).filter((l) =>
+			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending');
 	});
 
 	readonly myExchanges = computed<Exchange[]>(() =>

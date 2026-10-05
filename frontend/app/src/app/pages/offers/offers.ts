@@ -3,15 +3,16 @@ import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { OfferCardComponent } from '../../components/offer-card/offer-card';
 import { TagComponent } from '../../components/tag/tag';
-import { PostsService } from '../../services/posts.service';
-import { PostEntity } from '../../models/post.model';
 import { HelpRequestTag } from '../../models/help-request.model';
-import { LendingService } from '../../services/lending.service';
-import { UsersService } from '../../services/users.service';
+import { GroupsService } from '../../services/groups.service';
+import { PostsService } from '../../services/posts.service';
+import { PostEntity, PostGroupData } from '../../models/post.model';
 import { ObjectService } from '../../services/object.service';
-import { LendingEntity } from '../../models/lending.model';
-import { User } from '../../models/user.model';
 import { ObjectEntity } from '../../models/object.model';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../models/user.model';
+import { LendingService } from '../../services/lending.service';
+import { LendingEntity } from '../../models/lending.model';
 import { OfferCardState } from '../../components/offer-card/offer-card';
 import { Observable } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
@@ -24,23 +25,25 @@ import { formatTimeAgo } from '../../shared/date-format';
 })
 export class Offers implements OnInit {
 	readonly modalService = inject(ModalService);
+	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
 	private lendingService = inject(LendingService);
 	private usersService = inject(UsersService);
 	private objectService = inject(ObjectService);
 
+	private readonly postGroups = signal<PostGroupData[]>([]);
+	private readonly memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
 	readonly post = signal<PostEntity | null>(null);
 	private readonly lendings = signal<LendingEntity[]>([]);
 	private readonly usersById = signal<Map<number, User>>(new Map());
 	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
-	private readonly groupNames = signal('');
 	readonly errorMessage = signal<string | null>(null);
 
 	readonly offers = computed(() =>
 		this.lendings().map((l) => ({
 			id: l.id,
 			name: this.usersById().get(l.lenderId)?.username ?? '…',
-			group: this.groupNames(),
+			group: this.sharedGroupName(l.lenderId),
 			time: formatTimeAgo(l.createdAt),
 			objectName: this.objectsById().get(l.objectId)?.name ?? '…',
 			message: l.message,
@@ -80,10 +83,24 @@ export class Offers implements OnInit {
 
 	private loadGroupsPost(postId: number): void {
 		this.postsService.findGroups(postId).subscribe({
-			next: (groups) => this.groupNames.set(groups.map((g) => g.name).join(', ')),
+			next: (groups) => {
+				this.postGroups.set(groups);
+				this.loadMemberIdsByGroupId(groups);
+			},
 			error: (err) => console.error('Failed to load the request groups', err),
 		});
 	}
+
+	private loadMemberIdsByGroupId(groups: PostGroupData[]): void {
+		for (const group of groups) {
+			this.groupsService.findMembers(group.id).subscribe({
+				next: (members) => this.memberIdsByGroupId.update((map) =>
+					new Map(map).set(group.id, members.map((m) => m.userId))),
+				error: (err) => console.error('Failed to load group members', err),
+			});
+		}
+	}
+
 
 	private loadReceivedOffers(postId: number): void {
 		this.lendingService.listAll().subscribe({
@@ -96,7 +113,8 @@ export class Offers implements OnInit {
 				this.loadObjectsById(offers);
 			},
 			error: (err) => console.error('Failed to load offers', err),
-		});
+		});	/** A group of the request this lender belongs to, e.g. "Best Mates". */
+
 	}
 
 	private loadLendersById(offers: LendingEntity[]): void {
@@ -141,5 +159,13 @@ export class Offers implements OnInit {
 			},
 		});
 	}
+
+	private sharedGroupName(lenderId: number): string {
+		const group = this.postGroups().find((g) =>
+			this.memberIdsByGroupId().get(g.id)?.includes(lenderId)
+		);
+		return (group?.name ?? '');
+	}
+
 
 }
