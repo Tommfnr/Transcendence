@@ -81,8 +81,13 @@ export class Dashboard implements OnInit {
 	);
 
 	readonly requestCount = computed(() => this.displayedRequests().length);
-	// TODO: count from my exchanges
-	readonly offerCount = 2;
+	readonly offerCount = computed(() => {
+		const myPostIds = new Set(this.myPosts().map((post) => post.id));
+		return this.lendings().filter((l) =>
+			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'
+		).length;
+	});
+
 
 
 	onExchangePress(exchange: Exchange): void {
@@ -226,13 +231,14 @@ export class Dashboard implements OnInit {
 				tone = 'attention';
 			}
 
-			return { id: `post-${post.id}`,
+			return {
+				id: `post-${post.id}`,
 				kind: 'request',
 				postId: post.id,
 				title: post.title,
 				subtitle: `my request · ${formatTimeAgo(post.createdAt)}`,
 				statusLabel,
-				tone 
+				tone
 			};
 		});
 	}
