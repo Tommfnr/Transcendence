@@ -69,7 +69,8 @@ export class Offers implements OnInit {
 			next: (post) => this.post.set(post),
 			error: (err) => console.error('Failed to load the request', err),
 		});
-		this.loadOffers(postId);
+
+		this.loadReceivedOffers(postId);
 
 		this.postsService.findGroups(postId).subscribe({
 			next: (groups) => this.groupNames.set(groups.map((g) => g.name).join(', ')),
@@ -77,29 +78,36 @@ export class Offers implements OnInit {
 		});
 	}
 
-	private loadOffers(postId: number): void {
+	private loadReceivedOffers(postId: number): void {
 		this.lendingService.listAll().subscribe({
 			next: (lendings) => {
 				const offers = lendings.filter((l) =>
 					l.postId === postId && (l.status === 'pending' || l.status === 'accepted')
 				);
 				this.lendings.set(offers);
-
-				for (const lenderId of new Set(offers.map((l) => l.lenderId))) {
-					this.usersService.findOne(lenderId).subscribe({
-						next: (user) => this.usersById.update((map) => new Map(map).set(lenderId, user)),
-						error: (err) => console.error('Failed to load offerer', err),
-					});
-				}
-				for (const objectId of new Set(offers.map((l) => l.objectId))) {
-					this.objectService.findOne(objectId).subscribe({
-						next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
-						error: (err) => console.error('Failed to load offered object', err),
-					});
-				}
+				this.loadLendersById(offers);
+				this.loadObjectsById(offers);
 			},
 			error: (err) => console.error('Failed to load offers', err),
 		});
+	}
+
+	private loadLendersById(offers: LendingEntity[]): void {
+		for (const lenderId of new Set(offers.map((l) => l.lenderId))) {
+			this.usersService.findOne(lenderId).subscribe({
+				next: (user) => this.usersById.update((map) => new Map(map).set(lenderId, user)),
+				error: (err) => console.error('Failed to load offerer', err),
+			});
+		}
+	}
+
+	private loadObjectsById(offers: LendingEntity[]): void {
+		for (const objectId of new Set(offers.map((l) => l.objectId))) {
+			this.objectService.findOne(objectId).subscribe({
+				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
+				error: (err) => console.error('Failed to load offered object', err),
+			});
+		}
 	}
 
 }
