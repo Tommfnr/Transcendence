@@ -1,7 +1,8 @@
 // Service files defines the functions used in backend
 // See : https://docs.nestjs.com/providers#services
 
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { pgErrorCode } from '@pep/shared'
 import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../database/schema'
@@ -40,11 +41,17 @@ export class ObjectsService {
 		return (object)
 	}
 
-	create(userId: number, dto: CreateObjectDto) {
-		return (this.db
-				.insert(objects)
-				.values({ ...dto, ownerId: userId })
-				.returning())
+	async create(userId: number, dto: CreateObjectDto) {
+		try {
+			return (await this.db
+					.insert(objects)
+					.values({ ...dto, ownerId: userId })
+					.returning())
+		} catch (err: unknown) {
+			if (pgErrorCode(err) === '23503')
+				throw new UnauthorizedException('User no longer exists')
+			throw err
+		}
 	}
 
 	update(objectId: number, dto: UpdateObjectDto) {

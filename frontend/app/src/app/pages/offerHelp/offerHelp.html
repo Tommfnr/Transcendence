@@ -1,18 +1,18 @@
 <app-title-bar title="Offer my help" leading="back"></app-title-bar>
 <div class="flex flex-col gap-4 pt-14 flex-1">
-    <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
-        <app-avatar tone="brand"></app-avatar>
-        <div class="flex flex-col gap-1">
-            <p class="text-text-secondary text-xs">
-                For NAME 's request has really really long name
-            </p>
-            <p class="font-bold text-sm">Looking for OBJECT</p>
-        </div>
-    </section>
+    @if (post(); as p) {
+        <section class="bg-card rounded-card flex p-4 gap-4 shadow-card">
+            <app-avatar tone="brand"></app-avatar>
+            <div class="flex flex-col gap-1">
+                @if (authorName()) {
+                    <p class="text-text-secondary text-xs">For {{ authorName() }}'s request</p>
+                }
+                <p class="font-bold text-sm">{{ p.title }}</p>
+            </div>
+        </section>
+    }
     <section class="gap-3 flex flex-col">
-        <h2 class="text-sm font-bold">
-            Pick an item from my catalog
-        </h2>
+        <h2 class="text-sm font-bold">Pick an item from my catalog</h2>
         <div class="flex gap-4">
             <app-text-field
                 placeholder="Search my items…"
@@ -25,7 +25,7 @@
                 (click)="openAddObjectModal()"
                 class="flex justify-center rounded-card px-4 items-center gap-2 border-2 border-dashed border-text-secondary/40 cursor-pointer transition-shadow hover:shadow-card"
             >
-                <img src="/icons/add.svg" class="size-4" />
+                <img src="/icons/add.svg" class="size-4" alt="" />
                 <p>Add item</p>
             </button>
         </div>
@@ -41,11 +41,11 @@
             }
         </div>
         <div class="flex flex-wrap gap-2">
-            @for (item of searchItems(); track item.id) {
+            @for (object of searchedObjects(); track object.id) {
                 <app-object-mini
-                    [name]="item.name"
-                    [selected]="item.id === selectedObjectId()"
-                    (pick)="selectedObjectId.set(item.id)"
+                    [name]="object.name"
+                    [selected]="object.id === selectedObjectId()"
+                    (pick)="selectedObjectId.set(object.id)"
                 />
             } @empty {
                 <p class="text-xs text-text-secondary">No items match your search/filter.</p>
@@ -56,10 +56,27 @@
         <app-text-field
             multiline
             label="Message (optional)"
+            [(value)]="message"
             placeholder="E.g. I can drop it off Saturday morning, I also have concrete bits…"
         ></app-text-field>
     </section>
-    <button appButton block variant="secondary" type="button" size="large" class="mt-auto lg:mt-0 lg:w-auto lg:self-center">
+    @if (bannerErrors().length > 0) {
+        <div class="rounded-card border border-error p-3 text-sm text-error">
+            @for (msg of bannerErrors(); track msg) {
+                <p>{{ msg }}</p>
+            }
+        </div>
+    }
+    <button
+        appButton
+        block
+        variant="secondary"
+        type="button"
+        size="large"
+        class="mt-auto lg:mt-0 lg:w-auto lg:self-center"
+        [disabled]="submitting()"
+        (click)="onSubmit()"
+    >
         Send my offer
     </button>
 </div>

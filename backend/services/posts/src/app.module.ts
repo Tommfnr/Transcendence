@@ -13,11 +13,13 @@ import { DatabaseModule } from './database/database.module'
 import { PostsModule } from './posts/posts.module'
 import { PostsService } from './posts/posts.service'
 import { userDeletedHandler } from './posts/user-deleted.handler'
+import { InternalPostsModule } from './internal/internal-posts.module'
 
 @Module({
 	imports: [
 		DatabaseModule,
 		PostsModule,
+		InternalPostsModule,
 		SharedEventsModule.register({
 			imports: [PostsModule],
 			handlers: [
