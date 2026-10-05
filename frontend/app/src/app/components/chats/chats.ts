@@ -13,7 +13,6 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
-import { ButtonDirective } from '../button/button.directive';
 import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
 import { RefreshService } from '../../services/refresh.service';
@@ -40,7 +39,7 @@ function mergeMessages(current: MessageEntity[], incoming: MessageEntity[]): Mes
  */
 @Component({
     selector: 'app-chat',
-    imports: [DatePipe, ButtonDirective],
+    imports: [DatePipe],
     templateUrl: './chats.html',
     host: { class: 'flex min-h-0 flex-col overflow-hidden rounded-card bg-card shadow-card' },
 })

@@ -7,11 +7,10 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
-import { FooterApp } from '../../components/footer-app/footer-app';
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, ButtonDirective, TextFieldComponent, FooterApp],
+  imports: [FormField, ButtonDirective, TextFieldComponent],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
