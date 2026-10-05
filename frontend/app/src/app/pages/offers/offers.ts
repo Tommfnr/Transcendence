@@ -13,6 +13,7 @@ import { LendingEntity } from '../../models/lending.model';
 import { User } from '../../models/user.model';
 import { ObjectEntity } from '../../models/object.model';
 import { OfferCardState } from '../../components/offer-card/offer-card';
+import { Observable } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
@@ -65,13 +66,19 @@ export class Offers implements OnInit {
 		if (postId === null)
 			return;
 
+		this.loadPost(postId);
+		this.loadGroupsPost(postId);
+		this.loadReceivedOffers(postId);
+	}
+
+	private loadPost(postId: number): void {
 		this.postsService.findOne(postId).subscribe({
 			next: (post) => this.post.set(post),
 			error: (err) => console.error('Failed to load the request', err),
 		});
+	}
 
-		this.loadReceivedOffers(postId);
-
+	private loadGroupsPost(postId: number): void {
 		this.postsService.findGroups(postId).subscribe({
 			next: (groups) => this.groupNames.set(groups.map((g) => g.name).join(', ')),
 			error: (err) => console.error('Failed to load the request groups', err),
@@ -108,6 +115,31 @@ export class Offers implements OnInit {
 				error: (err) => console.error('Failed to load offered object', err),
 			});
 		}
+	}
+
+
+	onAccept(lendingId: number): void {
+		this.decideOffer(this.lendingService.accept(lendingId));
+	}
+
+	onDecline(lendingId: number): void {
+		this.decideOffer(this.lendingService.reject(lendingId));
+	}
+
+
+	private decideOffer(decision: Observable<LendingEntity>): void {
+		const postId = this.modalService.offersPostId();
+		if (postId === null)
+			return;
+
+		this.errorMessage.set(null);
+		decision.subscribe({
+			next: () => this.loadReceivedOffers(postId),
+			error: (err) => {
+				console.error('Failed to update the offer', err);
+				this.errorMessage.set('Could not update this offer, please try again');
+			},
+		});
 	}
 
 }
