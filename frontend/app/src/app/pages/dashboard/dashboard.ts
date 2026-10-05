@@ -75,26 +75,27 @@ export class Dashboard implements OnInit {
 		this.otherPosts().map((post) => this.toHelpRequest(post))
 	);
 
+	readonly pendingReceivedOffers = computed(() => {
+		const myPostIds = new Set(this.myPosts().map((post) => post.id));
+		return this.lendings().filter((l) =>
+			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'
+		);
+	});
+
 	readonly myExchanges = computed<Exchange[]>(() =>
 		[...this.myRequestExchanges(), ...this.myOfferExchanges()]
 			.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone])
 	);
 
 	readonly requestCount = computed(() => this.displayedRequests().length);
-	readonly offerCount = computed(() => {
-		const myPostIds = new Set(this.myPosts().map((post) => post.id));
-		return this.lendings().filter((l) =>
-			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'
-		).length;
-	});
 
-
+	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
 	onExchangePress(exchange: Exchange): void {
 		if (exchange.kind === 'request')
 			this.modalService.openOffers(exchange.postId);
 		else
-			this.router.navigate(['/app/iCanHelp', exchange.postId]);
+			this.router.navigate(['/app/chatPreview']);
 		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
 	}
 
