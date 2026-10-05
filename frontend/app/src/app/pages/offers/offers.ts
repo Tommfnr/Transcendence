@@ -6,7 +6,14 @@ import { TagComponent } from '../../components/tag/tag';
 import { PostsService } from '../../services/posts.service';
 import { PostEntity } from '../../models/post.model';
 import { HelpRequestTag } from '../../models/help-request.model';
-
+import { LendingService } from '../../services/lending.service';
+import { UsersService } from '../../services/users.service';
+import { ObjectService } from '../../services/object.service';
+import { LendingEntity } from '../../models/lending.model';
+import { User } from '../../models/user.model';
+import { ObjectEntity } from '../../models/object.model';
+import { OfferCardState } from '../../components/offer-card/offer-card';
+import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
 	selector: 'app-offers',
@@ -17,8 +24,29 @@ import { HelpRequestTag } from '../../models/help-request.model';
 export class Offers implements OnInit {
 	readonly modalService = inject(ModalService);
 	private postsService = inject(PostsService);
+	private lendingService = inject(LendingService);
+	private usersService = inject(UsersService);
+	private objectService = inject(ObjectService);
 
 	readonly post = signal<PostEntity | null>(null);
+	private readonly lendings = signal<LendingEntity[]>([]);
+	private readonly usersById = signal<Map<number, User>>(new Map());
+	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
+	private readonly groupNames = signal('');
+	readonly errorMessage = signal<string | null>(null);
+
+	readonly offers = computed(() =>
+		this.lendings().map((l) => ({
+			id: l.id,
+			name: this.usersById().get(l.lenderId)?.username ?? '…',
+			group: this.groupNames(),
+			time: formatTimeAgo(l.createdAt),
+			objectName: this.objectsById().get(l.objectId)?.name ?? '…',
+			message: l.message,
+			state: (l.status === 'accepted' ? 'accepted' : 'pending') as OfferCardState,
+		}))
+	);
+
 
 	readonly requestTags = computed<HelpRequestTag[]>(() => {
 		const post = this.post();
@@ -32,27 +60,6 @@ export class Offers implements OnInit {
 		void offerId;
 	}
 
-	readonly demoOffers = [
-		{
-			id: 1,
-			name: 'Julien',
-			group: 'Best Mates',
-			time: '1h ago',
-			objectName: 'Bosch drill',
-			message: "I can lend it to you this weekend, it's charged.",
-			state: 'pending',
-		},
-		{
-			id: 2,
-			name: 'Sarah',
-			group: 'Bellevue Neighbours',
-			time: '3h ago',
-			objectName: 'Makita drill',
-			message: 'Available from Saturday morning, come by when…',
-			state: 'pending',
-		},
-	] as const;
-
 	ngOnInit(): void {
 		const postId = this.modalService.offersPostId();
 		if (postId === null)
@@ -62,5 +69,37 @@ export class Offers implements OnInit {
 			next: (post) => this.post.set(post),
 			error: (err) => console.error('Failed to load the request', err),
 		});
+		this.loadOffers(postId);
+
+		this.postsService.findGroups(postId).subscribe({
+			next: (groups) => this.groupNames.set(groups.map((g) => g.name).join(', ')),
+			error: (err) => console.error('Failed to load the request groups', err),
+		});
 	}
+
+	private loadOffers(postId: number): void {
+		this.lendingService.listAll().subscribe({
+			next: (lendings) => {
+				const offers = lendings.filter((l) =>
+					l.postId === postId && (l.status === 'pending' || l.status === 'accepted')
+				);
+				this.lendings.set(offers);
+
+				for (const lenderId of new Set(offers.map((l) => l.lenderId))) {
+					this.usersService.findOne(lenderId).subscribe({
+						next: (user) => this.usersById.update((map) => new Map(map).set(lenderId, user)),
+						error: (err) => console.error('Failed to load offerer', err),
+					});
+				}
+				for (const objectId of new Set(offers.map((l) => l.objectId))) {
+					this.objectService.findOne(objectId).subscribe({
+						next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
+						error: (err) => console.error('Failed to load offered object', err),
+					});
+				}
+			},
+			error: (err) => console.error('Failed to load offers', err),
+		});
+	}
+
 }
