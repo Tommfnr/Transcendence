@@ -33,7 +33,7 @@
 
     @if (isOpen()) {
       <a
-        routerLink="/app/iCanHelp"
+        [routerLink]="['/app/iCanHelp', request().id]"
         (click)="help.emit(request())"
         appButton
         size="xsmall"

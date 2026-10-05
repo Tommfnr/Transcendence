@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts } from '../../database/schema'
 import { DB } from '../../database/database.module'
+import { parseId } from '@pep/shared'
 
 @Injectable()
 export class PostOwnerGuard implements CanActivate {
@@ -10,7 +11,7 @@ export class PostOwnerGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest()
-		const postId = Number(req.params.postId)
+		const postId = parseId(req.params.postId)
 
 		const [post] = await this.db
 			.select()

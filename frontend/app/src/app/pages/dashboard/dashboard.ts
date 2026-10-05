@@ -1,168 +1,258 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
+import { Exchange, ExchangeTone, OFFER_STATUS, TONE_ORDER } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
 import { PostsService } from '../../services/posts.service';
+import { PostEntity, PostGroupData } from '../../models/post.model';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../models/user.model';
+import { LendingService } from '../../services/lending.service';
+import { LendingEntity } from '../../models/lending.model';
+import { ObjectService } from '../../services/object.service';
+import { ObjectEntity } from '../../models/object.model';
+import { RefreshService } from '../../services/refresh.service';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
-import { PostEntity, PostGroupData } from '../../models/post.model';
+import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
 
 type DashboardTab = 'requests' | 'exchanges';
 
 @Component({
-  selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent, ExchangeRowComponent],
-  templateUrl: './dashboard.html',
+	selector: 'app-dashboard',
+	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent, ExchangeRowComponent],
+	templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
-  private groupsService = inject(GroupsService);
-  private postsService = inject(PostsService);
 
-  readonly posts = signal<PostEntity[]>([]);
-  readonly selectedGroupId = signal<number | null>(null);
-  private postGroup = signal<Map<number, PostGroupData[]>>(new Map());
+	private groupsService = inject(GroupsService);
+	private postsService = inject(PostsService);
+	private usersService = inject(UsersService);
+	readonly modalService = inject(ModalService);
+	private refreshService = inject(RefreshService);
+	private lendingService = inject(LendingService);
+	private objectService = inject(ObjectService);
+	private router = inject(Router);
 
-  readonly filteredPosts = computed(() => {
-    const groupId = this.selectedGroupId();
-    if (groupId === null) {
-      return this.posts();
-    }
-
-    const postGroup = this.postGroup();
-    return this.posts().filter((post) => postGroup.get(post.id)?.some((group) => group.id === groupId) ?? false);
-  });
-
-  readonly displayedRequests = computed<HelpRequest[]>(() =>
-    this.filteredPosts().map((post) => this.toHelpRequest(post))
-  );
-
-  readonly modalService = inject(ModalService);
-
-  readonly activeTab = signal<DashboardTab>('requests');
-
-  readonly groups = signal<GroupEntity[]>([]);
-  readonly errorMessage = signal<string | null>(null);
-
-  readonly requestCount = computed(() => this.displayedRequests().length);
-  readonly offerCount = 2;
-
-  // TODO(wiring): replace with real exchange data (posts + offers + lendings).
-  // Shapes and labels mirror the Dashboard-myExchanges mock.
-  readonly demoExchanges = [
-    { id: 1, kind: 'request', title: 'Looking for a drill', subtitle: 'my request · 1h ago', statusLabel: '2 offers', status: 'attention', unread: true },
-    { id: 2, kind: 'offer', title: 'Lawn mower → Julien', subtitle: 'my offer · new message', statusLabel: 'accepted', status: 'attention', unread: true },
-    { id: 3, kind: 'offer', title: 'Bosch drill → Sarah', subtitle: 'my offer · sent yesterday', statusLabel: 'pending', status: 'waiting', unread: false },
-    { id: 4, kind: 'request', title: 'Looking for a mouse', subtitle: 'my request · posted 5h ago', statusLabel: 'no reply', status: 'waiting', unread: false },
-    { id: 5, kind: 'offer', title: 'Ladder → Jean', subtitle: 'my offer · returned Monday', statusLabel: 'completed', status: 'done', unread: false },
-  ] as const;
-
-  onExchangePress(exchange: { id: number; kind: 'request' | 'offer' }): void {
-    if (exchange.kind === 'request') {
-      this.modalService.openOffers(exchange.id);
-    }
-    // TODO(chat): an "offer" row is the MAIN entry to its conversation
-    // (decided 28 Sept — see the ExchangeRow doc in Figma). The chat view
-    // belongs to the chat chantier; wire the navigation here once it lands.
-  }
+	readonly groups = signal<GroupEntity[]>([]);
+	readonly posts = signal<PostEntity[]>([]);
+	private authorsById = signal<Map<number, User>>(new Map());
+	private groupsByPostId = signal<Map<number, PostGroupData[]>>(new Map());
+	readonly selectedGroupId = signal<number | null>(null);
+	readonly activeTab = signal<DashboardTab>('requests');
+	readonly fabOpen = signal(false);
+	readonly errorMessage = signal<string | null>(null);
+	readonly lendings = signal<LendingEntity[]>([]);
+	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
 
 
+	private readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null)
 
-  ngOnInit(): void {
-    this.groupsService.findMy().subscribe({
-      next: (data) => this.groups.set(data),
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Error while showing group(s)');
-      },
-    });
+	readonly myPosts = computed(() =>
+		this.filteredPosts().filter((post) => post.ownerId === this.currentUserId())
+	);
 
-    this.postsService.findMy().subscribe((data) => {
-      this.posts.set(data);
+	readonly otherPosts = computed(() =>
+		this.filteredPosts().filter((post) => post.ownerId !== this.currentUserId())
+	);
 
-      for (const post of data) {
-        this.postsService.findGroups(post.id).subscribe((groups) => {
-          this.postGroup.update((map) => new Map(map).set(post.id, groups));
-        });
-      }
-    });
-  }
+	readonly filteredPosts = computed(() => {
+		const groupId = this.selectedGroupId();
+		if (groupId === null) {
+			return (this.posts());
+		}
+		return (this.posts()).filter((post) =>
+			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false);
+	});
 
-  selectTab(tab: DashboardTab): void {
-    this.activeTab.set(tab);
-  }
+	readonly displayedRequests = computed<HelpRequest[]>(() =>
+		this.otherPosts().map((post) => this.toHelpRequest(post))
+	);
 
-  onGroupFilterChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedGroupId.set(value === '' ? null : Number(value));
-  }
+	readonly myExchanges = computed<Exchange[]>(() =>
+		[...this.myRequestExchanges(), ...this.myOfferExchanges()]
+			.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone])
+	);
 
-  onHelp(request: HelpRequest): void {
-    // TODO: send the offer of help once the API endpoint exists.
-    void request;
-  }
+	readonly requestCount = computed(() => this.displayedRequests().length);
+	// TODO: count from my exchanges
+	readonly offerCount = 2;
 
-  readonly fabOpen = signal(false);
 
-  toggleFab(): void {
-    this.fabOpen.update(open => !open);
-  }
+	onExchangePress(exchange: Exchange): void {
+		if (exchange.kind === 'request')
+			this.modalService.openOffers(exchange.postId);
+		else
+			this.router.navigate(['/app/iCanHelp', exchange.postId]);
+		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
+	}
 
-  closeFab(): void {
-    this.fabOpen.set(false);
-  }
 
-  openAddObjectModal(): void {
-    this.closeFab();
-    this.modalService.openAddObject();
-  }
+	ngOnInit(): void {
+		this.loadGroups();
+		this.loadPosts();
+		this.loadLendings();
+		this.loadMyObjects();
+	}
 
-  openAddPostModal(): void {
-    this.closeFab();
-    this.modalService.openAddPost();
-  }
+	private loadGroups(): void {
+		this.groupsService.findMy().subscribe({
+			next: (groups) => this.groups.set(groups),
+			error: (err) => {
+				console.error(err);
+				this.errorMessage.set('Could not load your group(s)');
+			},
+		});
+	}
 
-  openAddGroupModal(): void {
-    this.closeFab();
-    this.modalService.openAddGroup();
-  }
+	private loadPosts(): void {
+		this.postsService.findFromMyGroups().subscribe({
+			next: (posts) => {
+				this.posts.set(posts);
+				this.loadAuthorsById(posts);
+				this.loadGroupsByPostId(posts);
+			},
+			error: (err) => console.error('Failed to load posts', err),
+		});
+	}
 
-    /** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
-  private toHelpRequest(post: PostEntity): HelpRequest {
-    const groups = this.postGroup().get(post.id) ?? [];
+	private loadAuthorsById(posts: PostEntity[]): void {
+		const ownerIds = new Set(posts.map((post) => post.ownerId));
+		for (const ownerId of ownerIds) {
+			this.usersService.findOne(ownerId).subscribe({
+				next: (user) => this.authorsById.update((map) => new Map(map).set(ownerId, user)),
+				error: (err) => console.error('Failed to load author', err),
+			});
+		}
+	}
 
-    return {
-      id: post.id,
-      authorName: 'Moi', // TODO: remplacer par le vrai nom une fois l API user exposee
-      groupName: groups.map((g) => g.name).join(', ') || 'Aucun groupe',
-      timeAgo: this.formatTimeAgo(post.createdAt),
-      title: post.title,
-      description: post.description ?? '',
-      tags: [
-        { icon: 'tag', label: post.objectType },
-        { icon: 'calendar', label: this.formatDateRange(post.fromDate, post.toDate) },
-      ],
-      status: post.status === 'closed' ? 'done' : 'open',
-    };
-  }
+	private loadGroupsByPostId(posts: PostEntity[]): void {
+		for (const post of posts) {
+			this.postsService.findGroups(post.id).subscribe({
+				next: (groups) => this.groupsByPostId.update((map) => new Map(map).set(post.id, groups)),
+				error: (err) => console.error('Failed to load post groups', err),
+			});
+		}
+	}
 
-  private formatTimeAgo(dateIso: string): string {
-    const diffMs = Date.now() - new Date(dateIso).getTime();
-    const diffH = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffH < 1) return "il y a moins d'1h";
-    if (diffH < 24) return `il y a ${diffH}h`;
-    const diffJ = Math.floor(diffH / 24);
-    return `il y a ${diffJ}j`;
-  }
+	private loadLendings(): void {
+		this.lendingService.listAll().subscribe({
+			next: (lendings) => this.lendings.set(lendings),
+			error: (err) => console.error('Failed to load lendings', err),
+		});
+	}
 
-  private formatDateRange(fromDate: string, toDate: string): string {
-    const from = new Date(fromDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    const to = new Date(toDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    return `${from}-${to}`;
-  }
+	private loadMyObjects(): void {
+		this.objectService.findMy().subscribe({
+			next: (objects) => this.objectsById.set(new Map(objects.map((object) => [object.id, object]))),
+			error: (err) => console.error('Failed to load my objects', err),
+		});
+	}
+
+
+	selectTab(tab: DashboardTab): void {
+		this.activeTab.set(tab);
+	}
+
+	onGroupFilterChange(event: Event): void {
+		const value = (event.target as HTMLSelectElement).value;
+		this.selectedGroupId.set(value === '' ? null : Number(value));
+	}
+
+	toggleFab(): void {
+		this.fabOpen.update(open => !open);
+	}
+
+	closeFab(): void {
+		this.fabOpen.set(false);
+	}
+
+	openAddObjectModal(): void {
+		this.closeFab();
+		this.modalService.openAddObject();
+	}
+
+	openAddPostModal(): void {
+		this.closeFab();
+		this.modalService.openAddPost();
+	}
+
+	openAddGroupModal(): void {
+		this.closeFab();
+		this.modalService.openAddGroup();
+	}
+
+
+	/** Transforme un PostEntity brut en HelpRequest utilisable par RequestCard. */
+	private toHelpRequest(post: PostEntity): HelpRequest {
+		const groups = this.groupsByPostId().get(post.id) ?? [];
+
+		return {
+			id: post.id,
+			authorName: this.authorsById().get(post.ownerId)?.username ?? '',
+			groupName: groups.map((g) => g.name).join(', ') || 'No group',
+			timeAgo: formatTimeAgo(post.createdAt),
+			title: post.title,
+			description: post.description ?? '',
+			tags: [
+				{ icon: 'tag', label: post.objectType },
+				{ icon: 'calendar', label: formatDateRange(post.fromDate, post.toDate) },
+			],
+			status: post.status === 'closed' ? 'done' : 'open',
+		};
+	}
+
+	private myRequestExchanges(): Exchange[] {
+		const me = this.currentUserId();
+
+		return this.myPosts().map((post) => {
+			const offers = this.lendings().filter((l) =>
+				l.postId === post.id && l.borrowerId === me && (l.status === 'pending' || l.status === 'accepted')
+			).length;
+
+			let statusLabel = 'no reply';
+			let tone: ExchangeTone = 'waiting';
+			if (post.status === 'closed') {
+				statusLabel = 'helper chosen';
+				tone = 'done';
+			} else if (offers > 0) {
+				statusLabel = `${offers} offer${offers > 1 ? 's' : ''}`;
+				tone = 'attention';
+			}
+
+			return { id: `post-${post.id}`,
+				kind: 'request',
+				postId: post.id,
+				title: post.title,
+				subtitle: `my request · ${formatTimeAgo(post.createdAt)}`,
+				statusLabel,
+				tone 
+			};
+		});
+	}
+
+	private myOfferExchanges(): Exchange[] {
+		const me = this.currentUserId();
+
+		return this.lendings()
+			.filter((l) => l.lenderId === me && l.postId !== null)
+			.map((l) => ({
+				id: `lending-${l.id}`,
+				kind: 'offer',
+				postId: l.postId!,
+				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
+				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
+				statusLabel: OFFER_STATUS[l.status].label,
+				tone: OFFER_STATUS[l.status].tone,
+			}));
+	}
+
 }
+
+

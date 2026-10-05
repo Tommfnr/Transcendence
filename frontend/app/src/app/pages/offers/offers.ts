@@ -1,8 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { OfferCardComponent } from '../../components/offer-card/offer-card';
 import { TagComponent } from '../../components/tag/tag';
+import { PostsService } from '../../services/posts.service';
+import { PostEntity } from '../../models/post.model';
+import { HelpRequestTag } from '../../models/help-request.model';
+
 
 @Component({
 	selector: 'app-offers',
@@ -10,18 +14,17 @@ import { TagComponent } from '../../components/tag/tag';
 	imports: [Modal, OfferCardComponent, TagComponent],
 	templateUrl: './offers.html',
 })
-export class Offers {
+export class Offers implements OnInit {
 	readonly modalService = inject(ModalService);
+	private postsService = inject(PostsService);
 
-	// TODO(wiring): load the real request (modalService.offersPostId()) and its
-	// offers from the backend. Shapes mirror the Dashboard-myExchanges-Overlay mock.
-	readonly demoRequest = {
-		title: 'Looking for a drill',
-		tags: [
-			{ label: 'DIY', icon: 'tag' },
-			{ label: 'No preference', icon: 'tag' },
-		],
-	} as const;
+	readonly post = signal<PostEntity | null>(null);
+
+	readonly requestTags = computed<HelpRequestTag[]>(() => {
+		const post = this.post();
+		return post ? [{ label: post.objectType, icon: 'tag' }] : [];
+	});
+
 
 	// TODO(chat): open the conversation with this offerer — the chat view
 	// belongs to the chat chantier; this seam is the agreed entry point (A).
@@ -49,4 +52,15 @@ export class Offers {
 			state: 'pending',
 		},
 	] as const;
+
+	ngOnInit(): void {
+		const postId = this.modalService.offersPostId();
+		if (postId === null)
+			return;
+
+		this.postsService.findOne(postId).subscribe({
+			next: (post) => this.post.set(post),
+			error: (err) => console.error('Failed to load the request', err),
+		});
+	}
 }

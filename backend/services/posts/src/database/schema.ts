@@ -2,7 +2,7 @@ import { pgTable, pgEnum, serial, varchar, integer, timestamp, unique } from 'dr
 
 const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
-export const objectTypeEnum = pgEnum('object_type', ['Tools', 'Electronics', 'Vehicles', 'Outdoor & Recreation', 'Media', 'Events', 'Clothing & Gear'])
+export const objectTypeEnum = pgEnum('object_type', ['DIY', 'Electronics', 'Leisure', 'Other'])
 
 export const postStatusEnum = pgEnum('post_status', ['open', 'closed'])
 
@@ -23,6 +23,7 @@ export const postGroups = pgTable('post_groups', {
 	id:				serial('id').primaryKey(),
 	postId:		integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
 	groupId:	integer('group_id').notNull(),
+	updatedAt:	timestamptz('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniquePostGroup: unique().on(table.postId, table.groupId),
 }))

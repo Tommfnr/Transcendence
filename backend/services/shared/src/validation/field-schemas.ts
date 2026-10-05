@@ -49,13 +49,10 @@ export const descriptionSchema = z
 
 export const objectTypeSchema = z
 	.enum([
-		'Tools',
+		'DIY',
 		'Electronics',
-		'Vehicles',
-		'Outdoor & Recreation',
-		'Media',
-		'Events',
-		'Clothing & Gear',
+		'Leisure',
+		'Other',
 	])
 
 export const objectConditionSchema = z

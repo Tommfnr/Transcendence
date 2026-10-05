@@ -1,5 +1,5 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { eq, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { posts, postGroups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -10,9 +10,9 @@ import { GroupsProxyService } from './groups-proxy.service'
 @Injectable()
 export class PostsService {
 	constructor(
-		@Inject(DB) private db : PostgresJsDatabase,
+		@Inject(DB) private db: PostgresJsDatabase,
 		private readonly groupsProxy: GroupsProxyService,
-	) {}
+	) { }
 
 	findAll() {
 		return (this.db.select().from(posts).orderBy(posts.id))
@@ -20,9 +20,9 @@ export class PostsService {
 
 	findByUserId(userId: number) {
 		return (this.db
-				.select()
-				.from(posts)
-				.where(eq(posts.ownerId, userId))
+			.select()
+			.from(posts)
+			.where(eq(posts.ownerId, userId))
 		)
 	}
 
@@ -35,19 +35,42 @@ export class PostsService {
 		return (post)
 	}
 
-	async findGroups(postId: number) {
+	async findGroupIds(postId: number) {
 		const rows = await this.db
-				.select({ groupId: postGroups.groupId })
-				.from(postGroups)
-				.where(eq(postGroups.postId, postId))
+			.select({ groupId: postGroups.groupId })
+			.from(postGroups)
+			.where(eq(postGroups.postId, postId))
 
-		const groupIds = rows.map((row) => row.groupId)
+		return (rows.map((row) => row.groupId))
+	}
+
+	async findGroups(postId: number) {
+		const groupIds = await this.findGroupIds(postId)
 
 		if (groupIds.length === 0)
 			return ([])
 
 		return (this.groupsProxy.findByIds(groupIds))
 	}
+
+	async findFromMyGroups(userId: number) {
+		const groupIds = await this.groupsProxy.findIdsForUser(userId)
+
+		if (groupIds.length === 0)
+			return ([])
+
+		const postIdsInMyGroups = this.db
+			.select({ id: postGroups.postId })
+			.from(postGroups)
+			.where(inArray(postGroups.groupId, groupIds))
+
+		return (this.db
+			.select()
+			.from(posts)
+			.where(inArray(posts.id, postIdsInMyGroups))
+			.orderBy(posts.id))
+	}
+
 
 	async create(userId: number, dto: CreatePostDto) {
 		const { groupIds: rawGroupIds, ...postFields } = dto
@@ -60,9 +83,9 @@ export class PostsService {
 
 		return (this.db.transaction(async (t) => {
 			const [post] = await t
-					.insert(posts)
-					.values({ ...postFields, ownerId: userId })
-					.returning()
+				.insert(posts)
+				.values({ ...postFields, ownerId: userId })
+				.returning()
 
 			await t.insert(postGroups).values(
 				groupIds.map((groupId) => ({ postId: post.id, groupId }))
@@ -81,6 +104,18 @@ export class PostsService {
 
 		let post = await this.findOne(postId)
 
+		const fromDate = postFields.fromDate ?? post.fromDate
+		const toDate = postFields.toDate ?? post.toDate
+
+		if (toDate < fromDate) {
+			throw new BadRequestException({
+				statusCode: 400,
+				message: 'Validation failed',
+				errors: { toDate: ['toDate must be on or after fromDate'] },
+				formErrors: [],
+			})
+		}
+
 		if (groupIds) {
 			const isMember = await this.groupsProxy.isMemberOfAll(userId, groupIds)
 
@@ -91,10 +126,10 @@ export class PostsService {
 		return (this.db.transaction(async (t) => {
 			if (Object.keys(postFields).length > 0) {
 				[post] = await t
-						.update(posts)
-						.set({ ...postFields, updatedAt: new Date() })
-						.where(eq(posts.id, postId))
-						.returning()
+					.update(posts)
+					.set({ ...postFields, updatedAt: new Date() })
+					.where(eq(posts.id, postId))
+					.returning()
 			}
 
 			if (groupIds) {
@@ -114,6 +149,13 @@ export class PostsService {
 
 			return (post)
 		}))
+	}
+
+	async closeInternal(postId: number) {
+		await this.db
+			.update(posts)
+			.set({ status: 'closed', updatedAt: new Date() })
+			.where(eq(posts.id, postId))
 	}
 
 	async remove(postId: number) {

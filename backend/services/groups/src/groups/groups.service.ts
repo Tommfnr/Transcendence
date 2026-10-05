@@ -1,8 +1,9 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, ne, and, inArray, notInArray } from 'drizzle-orm'
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { eq, ne, and, inArray, notInArray, count, countDistinct } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
+import { pgErrorCode } from '@pep/shared'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 
@@ -10,10 +11,27 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	findAll() {
+	// Groups the user belongs to, with their role and how many members each group has
+	findAll(userId: number) {
+		const memberCounts = this.db
+			.select({ groupId: groupMembers.groupId, memberCount: count().as('member_count') })
+			.from(groupMembers)
+			.groupBy(groupMembers.groupId)
+			.as('member_counts')
+
 		return this.db
-			.select()
-			.from(groups)
+			.select({
+				id: groups.id,
+				name: groups.name,
+				description: groups.description,
+				ownerId: groups.ownerId,
+				role: groupMembers.role,
+				memberCount: memberCounts.memberCount,
+			})
+			.from(groupMembers)
+			.innerJoin(groups, eq(groupMembers.groupId, groups.id))
+			.innerJoin(memberCounts, eq(memberCounts.groupId, groups.id))
+			.where(eq(groupMembers.userId, userId))
 			.orderBy(groups.id)
 	}
 
@@ -76,27 +94,51 @@ export class GroupsService {
 		return memberships.length === groupIds.length
 	}
 
+	async sharesGroup(userIds: number[], groupIds?: number[]) {
+		const uniqueUserIds = [...new Set(userIds)]
+		const conditions = [inArray(groupMembers.userId, uniqueUserIds)]
+
+		if (groupIds)
+			conditions.push(inArray(groupMembers.groupId, groupIds))
+
+		const [shared] = await this.db
+			.select({ groupId: groupMembers.groupId })
+			.from(groupMembers)
+			.where(and(...conditions))
+			.groupBy(groupMembers.groupId)
+			.having(eq(countDistinct(groupMembers.userId), uniqueUserIds.length))
+			.limit(1)
+
+		return shared !== undefined
+	}
+
 	async createGroup(adminId: number, dto: CreateGroupDto) {
-		return this.db.transaction(async (t) => {
-			const [group] = await t
-				.insert(groups)
-				.values({
-					name: dto.name,
-					description: dto.description,
-					ownerId: adminId
-				})
-				.returning()
+		try {
+			return await this.db.transaction(async (t) => {
+				const [group] = await t
+					.insert(groups)
+					.values({
+						name: dto.name,
+						description: dto.description,
+						ownerId: adminId
+					})
+					.returning()
 
-			await t
-				.insert(groupMembers)
-				.values({
-					groupId: group.id,
-					userId: adminId,
-					role: 'admin',
-				})
+				await t
+					.insert(groupMembers)
+					.values({
+						groupId: group.id,
+						userId: adminId,
+						role: 'admin',
+					})
 
-			return group
-		})
+				return group
+			})
+		} catch (err: unknown) {
+			if (pgErrorCode(err) === '23503')
+				throw new UnauthorizedException('User no longer exists')
+			throw err
+		}
 	}
 
 	async updateGroup(groupId: number, dto: UpdateGroupDto) {
@@ -122,12 +164,24 @@ export class GroupsService {
 		if (existingUser)
 			throw new ForbiddenException('User already in group')
 
-		const [member] = await this.db
-			.insert(groupMembers)
-			.values({ groupId, userId: targetUserId, role: 'member' })
-			.returning()
+		try {
+			const [member] = await this.db
+				.insert(groupMembers)
+				.values({ groupId, userId: targetUserId, role: 'member' })
+				.returning()
 
-		return member
+			return member
+		} catch (err: unknown) {
+			const wrappedCause = err instanceof Error ? (err as { cause?: unknown }).cause : undefined
+			const cause = wrappedCause instanceof Error ? wrappedCause : err
+			const code = cause instanceof Error && 'code' in cause ? cause.code : undefined
+
+			if (code === '23503')
+				throw new NotFoundException('User not found')
+			if (code === '23505')
+				throw new ForbiddenException('User already in group')
+			throw err
+		}
 	}
 
 	async updateMemberRole(groupId: number, targetUserId: number, role: 'admin' | 'member') {

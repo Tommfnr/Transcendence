@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
@@ -6,6 +6,7 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { GroupCardComponent } from '../../components/group-card/group-card';
 import { ModalService } from '../../services/modal.service';
+import { RefreshService } from '../../services/refresh.service';
 import { Location } from '@angular/common';
 
 
@@ -23,8 +24,27 @@ export class GroupParameter implements OnInit {
 	readonly modalService = inject(ModalService);
 	private location = inject(Location);
 	private router = inject(Router);
+	private refreshService = inject(RefreshService);
+
+	private previousModal = this.modalService.activeModal();
+
+	constructor() {
+		// Reload once the add/edit group modal closes: a group may have been
+		// created, renamed, deleted or left, or its members changed.
+		effect(() => {
+			const modal = this.modalService.activeModal();
+
+			if (this.previousModal === 'addGroup' && modal === null)
+				this.loadGroups();
+			this.previousModal = modal;
+		});
+	}
 
 	ngOnInit(): void {
+		this.loadGroups();
+	}
+
+	private loadGroups(): void {
 		this.groupsService.findMy().subscribe((data) => {
 			this.groupData.set(data);
 
@@ -34,6 +54,12 @@ export class GroupParameter implements OnInit {
 				});
 			}
 		});
+	}
+
+	roleLabel(group: GroupEntity): string {
+		if (group.ownerId === this.refreshService.user()?.id)
+			return ('Owner');
+		return (group.role === 'admin' ? 'Admin' : 'Member');
 	}
 
 	deleteGroup(groupId: number): void {
