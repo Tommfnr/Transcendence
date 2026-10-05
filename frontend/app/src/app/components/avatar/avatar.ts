@@ -1,34 +1,40 @@
 import { Component, Input } from '@angular/core';
 
-export type AvatarTone = 'neutral' | 'brand';
+export type AvatarKind = 'person' | 'group' | 'mySelf';
 export type AvatarSize = 'md' | 'lg';
 
 /**
- * User placeholder shown before a photo loads, and when there is none.
+ * Placeholder avatar shown before a photo loads, and when there is none.
  *
- * `neutral` is other people (request cards); `brand` is the signed-in user
- * (app header). The distinction is deliberate — don't pick by taste.
+ * The artwork (circle + silhouette) is baked into the SVG files:
+ * `person` for any other user, `group` for any group, and `mySelf`
+ * (inverted colours) for the signed-in user — don't pick by taste.
  */
 @Component({
 	selector: 'app-avatar',
 	standalone: true,
-	template: `<span [class]="classes"></span>`,
+	template: `<img [src]="icon" alt="" [class]="classes">`,
 })
 
 export class AvatarComponent {
-	@Input() tone: AvatarTone = 'neutral';
 	@Input() size: AvatarSize = 'md';
+	@Input() kind: AvatarKind = 'person';
+
+	get icon(): string {
+		const icons: Record<AvatarKind, string> = {
+			person: '/icons/avatar-person.svg',
+			group: '/icons/avatar-group.svg',
+			mySelf: '/icons/avatar-myself.svg',
+		};
+		return icons[this.kind];
+	}
 
 	get classes(): string {
 		const base = 'block shrink-0 rounded-full';
 		const sizes: Record<AvatarSize, string> = {
 			md: 'size-10',
-			lg: 'size-16',
+			lg: 'size-12',
 		};
-		const tones: Record<AvatarTone, string> = {
-			neutral: 'bg-muted/50',
-			brand: 'bg-primary/50',
-		};
-		return `${base} ${sizes[this.size]} ${tones[this.tone]}`;
+		return `${base} ${sizes[this.size]}`;
 	}
 }
