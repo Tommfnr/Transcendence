@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { conversationMembers } from '../../database/schema'
 import { DB } from '../../database/database.module'
+import { parseId } from '@pep/shared'
 
 @Injectable()
 export class ConversationMemberGuard implements CanActivate {
@@ -10,7 +11,7 @@ export class ConversationMemberGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest()
-		const conversationId = Number(req.params.conversationId)
+		const conversationId = parseId(req.params.conversationId)
 
 		const [membership] = await this.db
 			.select()

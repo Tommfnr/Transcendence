@@ -8,9 +8,10 @@ const citext = customType<{ data: string }>({
 
 export const users = pgTable('users', {
 	id: serial('id').primaryKey(),
-	username: varchar('username').notNull(),
+	username: varchar('username').notNull().unique(),
 	email: citext('email').notNull(),
 	h_password: varchar('h_password', { length: 255 }).notNull(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
 export const refreshTokens = pgTable('refresh_tokens', {
@@ -20,4 +21,5 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	revoked: boolean('revoked').notNull().default(false),
 	expiresAt: timestamp('expires_at').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

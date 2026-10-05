@@ -1,5 +1,5 @@
-import { Controller, Get, Delete, HttpCode, NotFoundException, Param, ParseIntPipe, UseGuards } from '@nestjs/common'
-import { InternalAuthGuard, UserView } from '@pep/shared'
+import { Controller, Get, Delete, HttpCode, NotFoundException, Param, UseGuards } from '@nestjs/common'
+import { InternalAuthGuard, UserView, ParseIdPipe } from '@pep/shared'
 import { UsersService } from '../users/users.service'
 
 @UseGuards(InternalAuthGuard)
@@ -18,7 +18,7 @@ export class InternalUsersController {
 	}
 
 	@Get(':id')
-	async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserView> {
+	async findOne(@Param('id', ParseIdPipe) id: number): Promise<UserView> {
 		const user = await this.usersService.findById(id)
 		if (!user) {
 			throw new NotFoundException()
@@ -28,7 +28,7 @@ export class InternalUsersController {
 
 	@Delete(':id')
 	@HttpCode(204)
-	async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+	async remove(@Param('id', ParseIdPipe) id: number): Promise<void> {
 		const deleted = await this.usersService.remove(id)
 		if (!deleted) {
 			throw new NotFoundException()

@@ -11,6 +11,7 @@ async function bootstrap() {
 	app.set('trust proxy', 1)
 	app.use(cookieParser())
 	app.setGlobalPrefix('api', { exclude: ['internal/*path'] })
+	app.getHttpServer().keepAliveTimeout = 65_000
 	await app.listen(3000, '0.0.0.0')
 }
 void bootstrap().catch((err) => {

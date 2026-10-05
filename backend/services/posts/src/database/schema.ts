@@ -23,6 +23,7 @@ export const postGroups = pgTable('post_groups', {
 	id:				serial('id').primaryKey(),
 	postId:		integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
 	groupId:	integer('group_id').notNull(),
+	updatedAt:	timestamptz('updated_at').notNull().defaultNow(),
 }, (table) => ({
 	uniquePostGroup: unique().on(table.postId, table.groupId),
 }))

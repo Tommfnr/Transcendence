@@ -1,4 +1,4 @@
-import type { IncomingMessage } from 'http'
+import { Agent, type IncomingMessage } from 'http'
 import type { Socket } from 'net'
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createProxyMiddleware, RequestHandler as ProxyRequestHandler } from 'http-proxy-middleware'
@@ -9,6 +9,8 @@ export interface RouteEntry {
 	target: string
 	ws?: boolean
 }
+
+const upstreamAgent = new Agent({ keepAlive: true, maxSockets: 256 })
 
 const CHATS_TARGET = optionalEnv('CHATS_SERVICE_URL', 'http://chats:3000')
 
@@ -31,7 +33,7 @@ export function createRouteProxies(routes: RouteEntry[] = ROUTES): Map<string, P
 	return (new Map<string, ProxyRequestHandler>(
 		routes.map((route) => [
 			route.prefix,
-			createProxyMiddleware({ target: route.target, changeOrigin: true, ws: route.ws === true }),
+			createProxyMiddleware({ target: route.target, changeOrigin: true, ws: route.ws === true, agent: upstreamAgent }),
 		]),
 	))
 }

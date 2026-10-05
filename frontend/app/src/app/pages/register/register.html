@@ -13,6 +13,14 @@
 				<p class="text-sm text-text-secondary">Free and only takes a second.</p>
 			</section>
 
+			@if (bannerErrors().length > 0) {
+				<div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+					@for (msg of bannerErrors(); track msg) {
+						<p>{{ msg }}</p>
+					}
+				</div>
+			}
+
 			<form (submit)="onSubmit($event)" class="flex flex-col gap-5">
 				<app-text-field
 					placeholder="john@example.com"

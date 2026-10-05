@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common'
-import { GroupView, InternalAuthGuard } from '@pep/shared'
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards, Param } from '@nestjs/common'
+import { GroupView, InternalAuthGuard, ParseIdPipe } from '@pep/shared'
 import { GroupsService } from '../groups/groups.service'
 import { MembershipCheckDto } from './dto/membership-check.dto'
+import { SharedGroupCheckDto } from './dto/shared-group-check.dto'
 
 function parseIds(raw: string | undefined): number[] {
 	if (!raw) {
@@ -17,7 +18,7 @@ function parseIds(raw: string | undefined): number[] {
 @UseGuards(InternalAuthGuard)
 @Controller('internal/groups')
 export class InternalGroupsController {
-	constructor(private readonly groupsService: GroupsService) {}
+	constructor(private readonly groupsService: GroupsService) { }
 
 	@Get()
 	async findByIds(@Query('ids') ids?: string): Promise<GroupView[]> {
@@ -30,9 +31,21 @@ export class InternalGroupsController {
 		return (this.groupsService.findByIds(groupIds))
 	}
 
+	@Get('member/:userId')
+	async findIdsForUser(@Param('userId', ParseIdPipe) userId: number): Promise<number[]> {
+		const groups = await this.groupsService.findMy(userId)
+		return (groups.map((group) => group.id))
+	}
+
 	@Post('membership-check')
 	@HttpCode(200)
 	async membershipCheck(@Body() dto: MembershipCheckDto): Promise<{ isMemberOfAll: boolean }> {
 		return ({ isMemberOfAll: await this.groupsService.isMemberOfAll(dto.userId, dto.groupIds) })
+	}
+
+	@Post('shared-group-check')
+	@HttpCode(200)
+	async sharedGroupCheck(@Body() dto: SharedGroupCheckDto): Promise<{ sharesGroup: boolean }> {
+		return ({ sharesGroup: await this.groupsService.sharesGroup(dto.userIds, dto.groupIds) })
 	}
 }

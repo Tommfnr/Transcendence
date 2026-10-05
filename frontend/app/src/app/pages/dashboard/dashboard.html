@@ -37,7 +37,7 @@
             tone="success"
             icon="bag-heart"
             [count]="offerCount"
-            label="help offers"
+            label="My exchanges"
             sublabel="recent"
         />
     </section>
@@ -60,7 +60,7 @@
             <button
                 type="button"
                 (click)="selectTab('exchanges')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
                 [ngClass]="
                     activeTab() === 'exchanges'
                         ? 'border-primary text-primary'
@@ -80,7 +80,7 @@
                 </div>
                 <div class="flex flex-col gap-5">
                     @for (request of displayedRequests(); track request.id) {
-                        <app-request-card [request]="request" (help)="onHelp($event)" />
+                        <app-request-card [request]="request" />
                     } @empty {
                         <p class="text-center text-sm text-text-secondary">
                             No requests right now.
@@ -95,17 +95,16 @@
             >
                 <div class="mb-4 hidden items-baseline justify-between lg:flex">
                     <h2 class="text-lg font-bold">My exchanges</h2>
-                    <span class="text-sm text-text-secondary">{{ demoExchanges.length }}</span>
+                    <span class="text-sm text-text-secondary">{{ myExchanges().length }}</span>
                 </div>
                 <div class="flex flex-col gap-3">
                     <div class="flex flex-col gap-3">
-                        @for (exchange of demoExchanges; track exchange.id) {
+                        @for (exchange of myExchanges(); track exchange.id) {
                             <app-exchange-row
                                 [title]="exchange.title"
                                 [subtitle]="exchange.subtitle"
                                 [statusLabel]="exchange.statusLabel"
-                                [status]="exchange.status"
-                                [unread]="exchange.unread"
+                                [status]="exchange.tone"
                                 (press)="onExchangePress(exchange)"
                             />
                         }

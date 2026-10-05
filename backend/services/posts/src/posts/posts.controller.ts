@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, UseGuards, Param, Body, ParseIntPipe } from '@nestjs/common'
-import { CurrentUser, SharedAuthGuard } from '@pep/shared'
+import { Controller, Get, Post, Put, Delete, UseGuards, Param, Body } from '@nestjs/common'
+import { CurrentUser, SharedAuthGuard, ParseIdPipe } from '@pep/shared'
 import { PostsService } from './posts.service'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
@@ -8,7 +8,7 @@ import { PostOwnerGuard } from './guards/post-owner.guard'
 @Controller('posts')
 @UseGuards(SharedAuthGuard)
 export class PostsController {
-	constructor(private readonly postsService: PostsService) {}
+	constructor(private readonly postsService: PostsService) { }
 
 	@Get()
 	findAll() {
@@ -20,13 +20,18 @@ export class PostsController {
 		return (this.postsService.findByUserId(userId))
 	}
 
+	@Get('my-groups')
+	findFromMyGroups(@CurrentUser('sub') userId: number) {
+		return (this.postsService.findFromMyGroups(userId))
+	}
+
 	@Get(':postId')
-	findOne(@Param('postId', ParseIntPipe) postId: number) {
+	findOne(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.findOne(postId))
 	}
 
 	@Get(':postId/groups')
-	findGroups(@Param('postId', ParseIntPipe) postId: number) {
+	findGroups(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.findGroups(postId))
 	}
 
@@ -37,13 +42,13 @@ export class PostsController {
 
 	@Put(':postId')
 	@UseGuards(PostOwnerGuard)
-	update(@Param('postId', ParseIntPipe) postId: number, @CurrentUser('sub') userId: number, @Body() dto: UpdatePostDto) {
+	update(@Param('postId', ParseIdPipe) postId: number, @CurrentUser('sub') userId: number, @Body() dto: UpdatePostDto) {
 		return (this.postsService.update(postId, userId, dto))
 	}
 
 	@Delete(':postId')
 	@UseGuards(PostOwnerGuard)
-	remove(@Param('postId', ParseIntPipe) postId: number) {
+	remove(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.remove(postId))
 	}
 }

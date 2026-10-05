@@ -1,5 +1,5 @@
-import { Controller, Get, Post, UseGuards, Param, Body, ParseIntPipe } from '@nestjs/common'
-import { CurrentUser, SharedAuthGuard } from '@pep/shared'
+import { Controller, Get, Post, UseGuards, Param, Body } from '@nestjs/common'
+import { CurrentUser, SharedAuthGuard, ParseIdPipe } from '@pep/shared'
 import { ChatsService } from './chats.service'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
@@ -17,13 +17,13 @@ export class ChatsController {
 
 	@Get(':conversationId')
 	@UseGuards(ConversationMemberGuard)
-	findOne(@Param('conversationId', ParseIntPipe) conversationId: number) {
+	findOne(@Param('conversationId', ParseIdPipe) conversationId: number) {
 		return (this.chatsService.findByIdOrThrow(conversationId))
 	}
 
 	@Get(':conversationId/messages')
 	@UseGuards(ConversationMemberGuard)
-	findMessages(@Param('conversationId', ParseIntPipe) conversationId: number) {
+	findMessages(@Param('conversationId', ParseIdPipe) conversationId: number) {
 		return (this.chatsService.findMessages(conversationId))
 	}
 
@@ -35,7 +35,7 @@ export class ChatsController {
 	@Post(':conversationId/messages')
 	@UseGuards(ConversationMemberGuard)
 	createMessage(
-		@Param('conversationId', ParseIntPipe) conversationId: number,
+		@Param('conversationId', ParseIdPipe) conversationId: number,
 		@CurrentUser('sub') userId: number,
 		@Body() dto: CreateMessageDto
 	) {
