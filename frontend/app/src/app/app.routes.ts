@@ -117,7 +117,15 @@ export const routes: Routes = [
       {
         path: 'chatPreview',
         component: ChatPreview
-      }
+      },
+	  {
+		path: 'privacyPolicy',
+		component: PrivacyPolicy
+	  },
+	  {
+		path: 'termsOfService',
+		component: TermsOfService,
+	  }
     ]
   },
 

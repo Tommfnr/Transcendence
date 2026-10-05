@@ -52,9 +52,16 @@
 
         <section class="flex flex-col gap-2">
             <h2 class="text-2xs font-semibold tracking-tight text-text-secondary">ACCOUNT</h2>
-            <app-list-row label="Settings and privacy" link="/app"></app-list-row>
+            <app-list-row label="User analytics" link="/app"></app-list-row>
             <app-list-row label="Help and support" link="/app"></app-list-row>
         </section>
+
     </div>
 </div>
-<button appButton [block]="true" size="large" variant="secondary" type="button" class="mt-6 lg:w-auto lg:self-center" (click)="onLogout()">Log out</button>
+
+<div class="flex flex-col lg:w-fit lg:mx-auto">
+	<button appButton [block]="true" size="large" variant="secondary" type="button" class="mt-6 lg:self-center" (click)="onLogout()">Log out</button>
+	<button appButton [block]="true" size="large" variant="muted" type="button" class="mt-4 hover:bg-alert lg:w-auto lg:self-center" (click)="onDeleteUser()">
+		Delete my account
+	</button>
+</div>
