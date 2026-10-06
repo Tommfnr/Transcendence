@@ -70,9 +70,25 @@ export class GroupsService {
 		return membership
 	}
 
-	// Per-user figures for the stats page
 	async stats(userId: number) {
-		return ({})
+		const myMemberships = await this.db
+			.select({ groupId: groupMembers.groupId })
+			.from(groupMembers)
+			.where(eq(groupMembers.userId, userId))
+
+		const myGroupIds = myMemberships.map((membership) => membership.groupId)
+		const total = myGroupIds.length
+
+		if (total === 0)
+			return ({ total: 0, neighbours: 0 })
+
+		const neighboursOfMine = await this.db
+			.selectDistinct({ userId: groupMembers.userId })
+			.from(groupMembers)
+			.where(and(inArray(groupMembers.groupId, myGroupIds), ne(groupMembers.userId, userId),
+			))
+
+		return ({ total, neighbours: neighboursOfMine.length })
 	}
 
 	findMy(userId: number) {
