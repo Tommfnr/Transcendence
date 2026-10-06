@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { eq, inArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { posts, postGroups } from '../database/schema'
+import { posts, postGroups, objectTypeEnum } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
@@ -25,10 +25,25 @@ export class PostsService {
 			.where(eq(posts.ownerId, userId))
 		)
 	}
-
-	// Per-user figures for the stats page
+	
 	async stats(userId: number) {
-		return ({})
+		const myPosts = await this.findByUserId(userId)
+
+		const total = myPosts.length
+		const open = myPosts.filter((post) => post.status === 'open').length
+		const closed = total - open
+
+		let topCategory: string | null = null
+		let topCount = 0
+		for (const category of objectTypeEnum.enumValues) {
+			const count = myPosts.filter((post) => post.objectType === category).length
+			if (count > topCount) {
+				topCategory = category
+				topCount = count
+			}
+		}
+
+		return ({ total, open, closed, topCategory })
 	}
 
 	async findOne(postId: number) {

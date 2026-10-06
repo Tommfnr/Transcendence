@@ -14,7 +14,6 @@ import { UpdateObjectDto } from './dto/update-object.dto'
 export class ObjectsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
-	// Per-user figures for the stats page
 	async stats(userId: number) {
 		const rows = await this.findByUserId(userId)
 
