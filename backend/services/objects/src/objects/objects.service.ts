@@ -16,7 +16,12 @@ export class ObjectsService {
 
 	// Per-user figures for the stats page
 	async stats(userId: number) {
-		return ({})
+		const rows = await this.findByUserId(userId)
+
+		return ({
+			total: rows.length,
+			available: rows.filter((object) => object.isAvailable).length,
+		})
 	}
 
 	findByUserId(userId: number) {
