@@ -21,9 +21,23 @@ export class LendingService {
 		private readonly groupsProxy: GroupsProxyService,
 	) {}
 
-	// Per-user figures for the stats page
 	async stats(userId: number) {
-		return ({})
+		const myLendings = await this.db
+			.select()
+			.from(lending)
+			.where(or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)))
+
+		const happenedStatuses: string[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue', 'returned', 'disputed']
+
+		const lent = myLendings.filter((loan) =>
+			loan.lenderId === userId && happenedStatuses.includes(loan.status)).length
+
+		const borrowed = myLendings.filter((loan) =>
+			loan.borrowerId === userId && happenedStatuses.includes(loan.status)).length
+
+		const requestsAnswered = myLendings.filter((loan) => loan.lenderId === userId).length
+
+		return ({ lent, borrowed, requestsAnswered })
 	}
 
 	async listAll(userId: number) {

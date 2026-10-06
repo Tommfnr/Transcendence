@@ -72,7 +72,6 @@ export class ChatsService {
 			.from(messages)
 			.where(eq(messages.ownerId, userId))
 
-		// Count my messages for each weekday and keep the busiest one
 		const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 		let topDay: string | null = null
 		let topCount = 0
