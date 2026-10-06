@@ -1,6 +1,6 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common'
 import { ObjectsService } from './objects.service'
-import { ApiKeyGuard, ParseIdPipe } from '@pep/shared'
+import { ApiKeyGuard, CurrentUser, ParseIdPipe } from '@pep/shared'
 
 @UseGuards(ApiKeyGuard)
 @Controller('public/v1/objects')
@@ -12,6 +12,11 @@ export class PublicObjectsController {
 		return (this.objectsService.findAll())
 	}
 
+	@Get('my')
+	findMy(@CurrentUser('sub') userId: number) {
+		return (this.objectsService.findByUserId(userId))
+	}
+	
 	@Get(':objectId')
 	findOne(@Param('objectId', ParseIdPipe) objectId: number) {
 		return (this.objectsService.findByIdOrThrow(objectId))
