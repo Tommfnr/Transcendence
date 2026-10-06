@@ -21,6 +21,11 @@ export class LendingService {
 		private readonly groupsProxy: GroupsProxyService,
 	) {}
 
+	// Per-user figures for the stats page
+	async stats(userId: number) {
+		return ({})
+	}
+
 	async listAll(userId: number) {
 		return (this.db
 			.select()

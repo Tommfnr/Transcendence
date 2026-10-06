@@ -18,6 +18,12 @@ export class ObjectsController {
 		return (this.objectsService.findByUserId(userId))
 	}
 
+	// Declared before ':objectId' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.objectsService.stats(userId))
+	}
+
 	@Get(':objectId')
 	findOne(@Param('objectId', ParseIdPipe) objectId: number) {
 		return (this.objectsService.findByIdOrThrow(objectId))

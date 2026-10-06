@@ -26,6 +26,11 @@ export class PostsService {
 		)
 	}
 
+	// Per-user figures for the stats page
+	async stats(userId: number) {
+		return ({})
+	}
+
 	async findOne(postId: number) {
 		const [post] = await this.db.select().from(posts).where(eq(posts.id, postId))
 

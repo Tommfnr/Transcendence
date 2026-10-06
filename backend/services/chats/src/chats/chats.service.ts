@@ -61,6 +61,11 @@ export class ChatsService {
 		return byConversation
 	}
 
+	// Per-user figures for the stats page
+	async stats(userId: number) {
+		return ({})
+	}
+
 	async findMy(userId: number) {
 		const rows = await this.db
 				.select({

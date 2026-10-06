@@ -23,6 +23,12 @@ export class LendingController {
 		return (this.lendingService.countForPost(postId))
 	}
 
+	// Declared before ':id' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.lendingService.stats(userId))
+	}
+
 	@Get(':id')
 	findOne(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.findOne(id, userId))

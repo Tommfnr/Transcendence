@@ -70,6 +70,11 @@ export class GroupsService {
 		return membership
 	}
 
+	// Per-user figures for the stats page
+	async stats(userId: number) {
+		return ({})
+	}
+
 	findMy(userId: number) {
 		return this.db
 			.select({
