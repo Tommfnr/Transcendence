@@ -61,9 +61,30 @@ export class ChatsService {
 		return byConversation
 	}
 
-	// Per-user figures for the stats page
 	async stats(userId: number) {
-		return ({})
+		const myConversations = await this.db
+			.select({ conversationId: conversationMembers.conversationId })
+			.from(conversationMembers)
+			.where(eq(conversationMembers.userId, userId))
+
+		const myMessages = await this.db
+			.select({ createdAt: messages.createdAt })
+			.from(messages)
+			.where(eq(messages.ownerId, userId))
+
+		// Count my messages for each weekday and keep the busiest one
+		const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+		let topDay: string | null = null
+		let topCount = 0
+		for (let day = 0; day < days.length; day++) {
+			const count = myMessages.filter((message) => message.createdAt.getUTCDay() === day).length
+			if (count > topCount) {
+				topDay = days[day]
+				topCount = count
+			}
+		}
+
+		return ({ conversations: myConversations.length, topDay })
 	}
 
 	async findMy(userId: number) {
