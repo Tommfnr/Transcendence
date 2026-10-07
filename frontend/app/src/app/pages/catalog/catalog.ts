@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -47,6 +47,10 @@ export class Catalog {
 		if (confirm(`Delete "${name}"? This cannot be undone.`)) {
 			this.objectService.remove(id).subscribe(() => {
 				this.objectData.update((objects) => objects.filter((object) => object.id !== id));
+				// deleting the last item of the last page would leave us on an empty page
+				if (this.currentPage() > this.totalPages()) {
+					this.currentPage.set(this.totalPages());
+				}
 			});
 		}
 	}
@@ -93,6 +97,36 @@ export class Catalog {
 
 	toggleSort(): void {
 		this.sortAsc.update((asc) => !asc);
+	}
+
+	readonly pageSize = 8;
+
+	// back to page 1 whenever search, category or sort changes
+	readonly currentPage = linkedSignal({
+		source: () => [this.searchTerm(), this.activeCategory(), this.sortAsc()],
+		computation: () => 1,
+	});
+
+	readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sortedObjects().length / this.pageSize)));
+
+	readonly pagedObjects = computed(() => {
+		const start = (this.currentPage() - 1) * this.pageSize;
+		return this.sortedObjects().slice(start, start + this.pageSize);
+	});
+
+	readonly hasPrev = computed(() => this.currentPage() > 1);
+	readonly hasNext = computed(() => this.currentPage() < this.totalPages());
+
+	prevPage(): void {
+		if (this.hasPrev()) {
+			this.currentPage.update((page) => page - 1);
+		}
+	}
+
+	nextPage(): void {
+		if (this.hasNext()) {
+			this.currentPage.update((page) => page + 1);
+		}
 	}
 
 	readonly fabOpen = signal(false);
