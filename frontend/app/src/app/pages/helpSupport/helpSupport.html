@@ -4,8 +4,13 @@
 	<h1 class="hidden text-lg font-bold lg:block">Help and support</h1>
 	<div class="sm:pt-12 flex flex-col gap-4">
 
-		<p>How to use api: <a href="https://pep.localhost:8443/api/public/docs/#/" class="text-complementary font-bold"> api doc</a></p>
+		<p>How to use api: <a href="https://pep.localhost:8443/api/public/docs/#/" class="text-complementary font-bold" target="_blank"> api doc</a></p>
 		<div class="w-fit">
-			<button appButton block href="https://pep.localhost:8443/api/public/docs/#/" class="">Get api key</button>
-		</div>
+			
+
+				<button appButton block href="https://pep.localhost:8443/api/public/docs/#/" class="" (click)="generate()">Get api key</button>
+				
+				
+			</div>
+			<code class="break-all text-sm font-bold text-strong">{{ newKey() }}</code>
 	</div>
