@@ -26,12 +26,12 @@ dist-ssr
 .env
 .env*
 secrets/
-docs/
 zhelp*
 scripts/
 coverage/
 tests/
 .bruno*
+postman/
 
 # Test files
 *.spec.ts
