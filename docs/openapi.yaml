@@ -27,6 +27,114 @@ tags:
     description: Objects that users list for lending
 
 paths:
+  /api/public/v1/objects:
+    get:
+      tags:
+        - Objects
+      operationId: listObjects
+      summary: List all objects
+      description: Returns every object, whoever owns it, ordered by id.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: All objects
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags:
+        - Objects
+      operationId: createObject
+      summary: Create an object
+      description: |
+        Creates an object owned by the user the API key belongs to.
+        The response is an array holding the created object.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObjectInput'
+            example:
+              name: Cordless drill
+              type: Tools
+              description: 18V drill with two batteries
+              condition: good
+              isAvailable: true
+      responses:
+        '201':
+          description: The created object, as a one-element array
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '400':
+          description: Body is missing a required field or has an invalid value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /api/public/v1/objects/my:
+    get:
+      tags:
+        - Objects
+      operationId: listMyObjects
+      summary: List my objects
+      description: Returns the objects owned by the user the API key belongs to.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Objects owned by the key's user, empty if there are none
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
   /api/public/v1/objects/{objectId}:
     get:
       tags:
@@ -73,46 +181,101 @@ paths:
                 message: Invalid id
                 error: Bad Request
         '401':
-          description: API key missing or invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                missing:
-                  value:
-                    statusCode: 401
-                    message: Missing API key
-                    error: Unauthorized
-                invalid:
-                  value:
-                    statusCode: 401
-                    message: Invalid API key
-                    error: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
         '404':
-          description: No object has this id
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                statusCode: 404
-                message: Object 42 not found
-                error: Not Found
+          $ref: '#/components/responses/ObjectNotFound'
         '429':
-          description: Rate limit exceeded
+          $ref: '#/components/responses/TooManyRequests'
+    put:
+      tags:
+        - Objects
+      operationId: updateObject
+      summary: Update an object
+      description: |
+        Updates the given fields of an object. Only the owner can do this.
+        At least one field must be provided.
+        The response is an array holding the updated object.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObjectUpdate'
+            example:
+              condition: worn
+              isAvailable: false
+      responses:
+        '200':
+          description: The updated object, as a one-element array
           headers:
-            Retry-After:
-              description: Seconds to wait before sending another request
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
               schema:
-                type: integer
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '400':
+          description: '`objectId` is not a valid id, or the body is empty or has an invalid value'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/NotOwner'
+        '404':
+          $ref: '#/components/responses/ObjectNotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags:
+        - Objects
+      operationId: deleteObject
+      summary: Delete an object
+      description: Permanently deletes an object. Only the owner can do this.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '204':
+          description: The object was deleted
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+        '400':
+          description: '`objectId` is not a valid id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                statusCode: 429
-                message: Too many requests, please try again later
+                statusCode: 400
+                message: Invalid id
+                error: Bad Request
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/NotOwner'
+        '404':
+          $ref: '#/components/responses/ObjectNotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
 
 components:
   securitySchemes:
@@ -133,6 +296,59 @@ components:
         minimum: 1
         maximum: 2147483647
       example: 42
+
+  responses:
+    Unauthorized:
+      description: API key missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            missing:
+              value:
+                statusCode: 401
+                message: Missing API key
+                error: Unauthorized
+            invalid:
+              value:
+                statusCode: 401
+                message: Invalid API key
+                error: Unauthorized
+    NotOwner:
+      description: The object belongs to another user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 403
+            message: Only the object owner can do this action
+            error: Forbidden
+    ObjectNotFound:
+      description: No object has this id
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 404
+            message: Object 42 not found
+            error: Not Found
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          description: Seconds to wait before sending another request
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 429
+            message: Too many requests, please try again later
 
   headers:
     RateLimitLimit:
@@ -200,6 +416,68 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    ObjectInput:
+      type: object
+      required:
+        - name
+        - type
+        - condition
+        - isAvailable
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9 ]+$'
+          description: Letters, digits and spaces only
+        type:
+          $ref: '#/components/schemas/ObjectType'
+        description:
+          type: string
+          maxLength: 500
+        condition:
+          $ref: '#/components/schemas/ObjectCondition'
+        isAvailable:
+          type: boolean
+
+    ObjectUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9 ]+$'
+          description: Letters, digits and spaces only
+        type:
+          $ref: '#/components/schemas/ObjectType'
+        description:
+          type: string
+          maxLength: 500
+        condition:
+          $ref: '#/components/schemas/ObjectCondition'
+        isAvailable:
+          type: boolean
+
+    ObjectType:
+      type: string
+      enum:
+        - Tools
+        - Electronics
+        - Vehicles
+        - Outdoor & Recreation
+        - Media
+        - Events
+        - Clothing & Gear
+
+    ObjectCondition:
+      type: string
+      enum:
+        - new
+        - good
+        - worn
 
     Error:
       type: object
