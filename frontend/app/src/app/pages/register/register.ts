@@ -11,7 +11,7 @@ import { TextFieldComponent } from '../../components/text-field/text-field';
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink],
+  imports: [FormField, ButtonDirective, TextFieldComponent],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

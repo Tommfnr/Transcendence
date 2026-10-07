@@ -2,10 +2,11 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { GroupsService } from '../../services/groups.service';
 import { UsersService } from '../../services/users.service';
-import { GroupInput } from '../../models/group.model';
+import { GroupInput, GroupMemberView } from '../../models/group.model';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { firstValueFrom } from 'rxjs';
+import { RefreshService } from '../../services/refresh.service';
+import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ButtonDirective } from '../../components/button/button.directive';
@@ -21,12 +22,20 @@ export class EditAddGroup implements OnInit {
 	private groupsService = inject(GroupsService);
 	private usersService = inject(UsersService);
 	private modalService = inject(ModalService);
+	private refreshService = inject(RefreshService);
 
 	private groupId = this.modalService.editGroupId();
 	readonly isEditMode = computed(() => this.modalService.editGroupId() !== null);
 
 
 	readonly newMemberUsername = signal('');
+
+	readonly members = signal<GroupMemberView[]>([]);
+	readonly ownerId = signal<number | null>(null);
+	readonly currentUserId = computed(() => this.refreshService.user()?.id ?? null);
+	readonly isOwner = computed(() => this.ownerId() !== null && this.ownerId() === this.currentUserId());
+	readonly isAdmin = computed(() =>
+		this.members().some((member) => member.userId === this.currentUserId() && member.role === 'admin'));
 
 
 	bannerErrors = signal<string[]>([]);
@@ -46,17 +55,106 @@ export class EditAddGroup implements OnInit {
 		if (this.isEditMode()) {
 			this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
 				this.group.set({ name: data.name, description: data.description ?? '' });
+				this.ownerId.set(data.ownerId);
 			});
+			this.loadMembers();
 		}
 	}
 
+	private loadMembers(): void {
+		this.groupsService.findMembers(Number(this.groupId)).pipe(
+			switchMap((members) => members.length === 0
+				? of([])
+				: forkJoin(members.map((member) =>
+					this.usersService.findOne(member.userId).pipe(
+						map((user) => ({ ...member, username: user.username })),
+						// One failed lookup must not drop the whole list (and the admin controls with it)
+						catchError(() => of({ ...member, username: 'Unknown user' })),
+					),
+				)),
+			),
+		).subscribe({
+			next: (members) => this.members.set(members),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not load the group members');
+			},
+		});
+	}
+
+	roleLabel(member: GroupMemberView): string {
+		if (member.userId === this.ownerId())
+			return ('Owner');
+		return (member.role === 'admin' ? 'Admin' : 'Member');
+	}
+
 	onAddMember(username: string): void {
-		this.usersService.findByUsername(username).subscribe({
-			next: (user) => {
-				this.groupsService.addMember(Number(this.groupId), user.id).subscribe();
+		const trimmed = username.trim();
+		if (!trimmed)
+			return;
+
+		this.errorMessage.set(null);
+		this.usersService.findByUsername(trimmed).pipe(
+			switchMap((user) => this.groupsService.addMember(Number(this.groupId), user.id)),
+		).subscribe({
+			next: () => {
+				this.newMemberUsername.set('');
+				this.loadMembers();
 			},
 			error: (err) => {
-				this.errorMessage.set(err.error?.message);
+				this.errorMessage.set(err.error?.message ?? 'Could not add this member');
+			},
+		});
+	}
+
+	onToggleRole(member: GroupMemberView): void {
+		const role = member.role === 'admin' ? 'member' : 'admin';
+
+		this.errorMessage.set(null);
+		this.groupsService.updateMemberRole(Number(this.groupId), member.userId, { role }).subscribe({
+			next: (updated) => {
+				this.members.update((members) => members.map((m) =>
+					m.userId === updated.userId ? { ...m, role: updated.role } : m));
+			},
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not change this member role');
+			},
+		});
+	}
+
+	onRemoveMember(member: GroupMemberView): void {
+		this.errorMessage.set(null);
+		this.groupsService.removeMember(Number(this.groupId), member.userId).subscribe({
+			next: () => {
+				this.members.update((members) => members.filter((m) => m.userId !== member.userId));
+			},
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not remove this member');
+			},
+		});
+	}
+
+	onDeleteGroup(): void {
+		if (!confirm(`Delete "${this.group().name}"? This cannot be undone.`))
+			return;
+
+		this.errorMessage.set(null);
+		this.groupsService.deleteGroup(Number(this.groupId)).subscribe({
+			next: () => this.modalService.close(),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not delete this group');
+			},
+		});
+	}
+
+	onLeaveGroup(): void {
+		if (!confirm(`Leave "${this.group().name}"?`))
+			return;
+
+		this.errorMessage.set(null);
+		this.groupsService.leaveGroup(Number(this.groupId)).subscribe({
+			next: () => this.modalService.close(),
+			error: (err) => {
+				this.errorMessage.set(err.error?.message ?? 'Could not leave this group');
 			},
 		});
 	}
@@ -90,27 +188,4 @@ export class EditAddGroup implements OnInit {
 	onCancel(): void {
 		this.modalService.close();
 	}
-
-	/* DEMO — TODO(wiring): remplacer par la vraie logique (voir note de passation)
-	   isAdmin = mon role === 'admin' ; isOwner = group.ownerId === utilisateur courant */
-
-	readonly isAdmin: boolean = true;
-	readonly isOwner: boolean = true;
-
-	readonly demoMembers = signal([
-		{ id: 1, name: 'Pierre', role: 'Owner', isYou: true },
-		{ id: 2, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 3, name: 'Marine', role: 'Admin', isYou: false },
-		{ id: 4, name: 'John', role: 'Member', isYou: false },
-		{ id: 5, name: 'Sebastian', role: 'Member', isYou: false },
-		{ id: 6, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 7, name: 'Marine', role: 'Member', isYou: false },
-		{ id: 8, name: 'John', role: 'Member', isYou: false },
-		{ id: 9, name: 'Sebastian', role: 'Member', isYou: false },
-		{ id: 10, name: 'Julien', role: 'Member', isYou: false },
-		{ id: 11, name: 'Marine', role: 'Member', isYou: false },
-		{ id: 12, name: 'John', role: 'Member', isYou: false },
-		{ id: 13, name: 'Sebastian', role: 'Member', isYou: false },
-	]);
-
 }

@@ -1,10 +1,11 @@
 import { Component, signal, inject, ElementRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
+import { AvatarComponent } from '../avatar/avatar';
 
 @Component({
     selector: 'app-header-app-desktop',
-    imports: [RouterLink],
+    imports: [RouterLink, AvatarComponent],
     templateUrl: './header-app-desktop.html',
 	host: {
 		'(document:click)': 'onDocumentClick($event)',

@@ -65,4 +65,8 @@ export class Profile implements OnInit {
       error: (err) => console.error('Failed to load my groups', err),
     });
   }
+
+//   TODO
+	onDeleteUser(): void {}
+
 }

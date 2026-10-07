@@ -14,13 +14,19 @@ export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
 
 	@Get()
-	findAll() {
-		return (this.groupsService.findAll())
+	findAll(@CurrentUser('sub') userId: number) {
+		return (this.groupsService.findAll(userId))
 	}
 
 	@Get('my')
 	findMy(@CurrentUser('sub') userId: number) {
 		return (this.groupsService.findMy(userId))
+	}
+
+	// Declared before ':groupId' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.groupsService.stats(userId))
 	}
 
 	@Get(':groupId')

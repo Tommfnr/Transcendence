@@ -13,7 +13,7 @@
                 [class.self-start]="!mine"
                 [class.bg-background]="!mine"
             >
-                <p class="text-sm break-words whitespace-pre-line text-text">
+                <p class="text-sm wrap-break-words whitespace-pre-line text-text">
                     {{ message.content }}
                 </p>
                 <span class="text-2xs text-text-secondary" [class.self-end]="mine">
@@ -46,11 +46,13 @@
     ></textarea>
     <button
         type="submit"
-        appButton
-        size="small"
         [disabled]="!canSend()"
-        class="shrink-0 disabled:cursor-not-allowed disabled:opacity-50"
+        class="shrink-0 disabled:cursor-not-allowed disabled:opacity-50 rounded-full cursor-pointer"
     >
-        Envoyer
+        @if (canSend()) {
+            <img src="/icons/send.svg" class="" />
+        } @else {
+            <img src="/icons/send-muted.svg" />
+        }
     </button>
 </form>

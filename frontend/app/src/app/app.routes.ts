@@ -18,114 +18,119 @@ import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { ChatPreview } from './pages/chatPreview/chatPreview';
 import { authGuard } from './guards/auth.guard';
 
-import { Test } from './pages/test/test';
+import { PrivacyPolicy } from './pages/privacyPolicy/privacyPolicy';
+import { TermsOfService } from './pages/termsOfService/termsOfService';
+import { UserAnalytics } from './pages/userAnalytics/userAnalytics';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: MarketingLayout,
-    children: [
-      {
-        path: '',
-        component: Landing
-      },
-      {
-        path: 'login',
-        component: Login
-      },
-      {
-        path: 'register',
-        component: Register
-      },
-	  {
-		path: 'test',
-		component: Test
-	  },
-    ],
-  },
-  {
-    path: 'app',
-    component: AppLayout,
-    canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
-      {
-        path: 'dashboard',
-        component: Dashboard
-      },
-      {
-        path: 'profile',
-        component: Profile
-      },
-      {
-        path: 'catalog',
-        component: Catalog
-      },
-      {
-        path: 'editAddObject',
-        component: EditAddObject
-      },
-      {
-        path: 'editAddObject/:id',
-        component: EditAddObject
-      },
-      {
-        path: 'editAddPost',
-        component: EditAddPost
-      },
-      {
-        path: 'editAddPost/:id',
-        component: EditAddPost
-      },
-      {
-        path: 'groupParameter',
-        component: GroupParameter
-      },
-      {
-        path: 'editAddGroup',
-        component: EditAddGroup
-      },
-      {
-        path: 'editAddGroup/:id',
-        component: EditAddGroup
-      },
-      {
-        path: 'iCanHelp/:postId',
-        component: ICanHelp
-      },
-      {
-        path: 'offerHelp/:postId',
-        component: OfferHelp
-      },
-      {
-        path: 'assistanceOfferDetails',
-        component: AssistanceOfferDetails
-      },
-      {
-        path: 'exampleGroupList',
-        component: ExampleGroupList
-      },
-      {
-        path: 'chatPreview',
-        component: ChatPreview
-      }
-    ]
-  },
-
-  //   {
-  //     path: 'items',
-  //     component: ItemListPageComponent
-  //   },
-  //   {
-  //     path: 'items/:id',
-  //     component: ItemDetailPageComponent
-  //   },
-  //   {
-  //     path: 'profile',
-  //     component: ProfilePageComponent
-  //   },
+	{
+		path: '',
+		component: MarketingLayout,
+		children: [
+			{
+				path: '',
+				component: Landing
+			},
+			{
+				path: 'login',
+				component: Login
+			},
+			{
+				path: 'register',
+				component: Register
+			},
+			{
+				path: 'privacyPolicy',
+				component: PrivacyPolicy
+			},
+			{
+				path: 'termsOfService',
+				component: TermsOfService,
+			}
+		],
+	},
+	{
+		path: 'app',
+		component: AppLayout,
+		canActivate: [authGuard],
+		children: [
+			{
+				path: '',
+				redirectTo: 'dashboard',
+				pathMatch: 'full',
+			},
+			{
+				path: 'dashboard',
+				component: Dashboard
+			},
+			{
+				path: 'profile',
+				component: Profile
+			},
+			{
+				path: 'catalog',
+				component: Catalog
+			},
+			{
+				path: 'editAddObject',
+				component: EditAddObject
+			},
+			{
+				path: 'editAddObject/:id',
+				component: EditAddObject
+			},
+			{
+				path: 'editAddPost',
+				component: EditAddPost
+			},
+			{
+				path: 'editAddPost/:id',
+				component: EditAddPost
+			},
+			{
+				path: 'groupParameter',
+				component: GroupParameter
+			},
+			{
+				path: 'editAddGroup',
+				component: EditAddGroup
+			},
+			{
+				path: 'editAddGroup/:id',
+				component: EditAddGroup
+			},
+			{
+				path: 'iCanHelp/:postId',
+				component: ICanHelp
+			},
+			{
+				path: 'offerHelp/:postId',
+				component: OfferHelp
+			},
+			{
+				path: 'assistanceOfferDetails',
+				component: AssistanceOfferDetails
+			},
+			{
+				path: 'exampleGroupList',
+				component: ExampleGroupList
+			},
+			{
+				path: 'chatPreview',
+				component: ChatPreview
+			},
+			{
+				path: 'userAnalytics',
+				component: UserAnalytics
+			},
+			{
+				path: 'privacyPolicy',
+				component: PrivacyPolicy
+			},
+			{
+				path: 'termsOfService',
+				component: TermsOfService,
+			}
+		]
+	},
 ];

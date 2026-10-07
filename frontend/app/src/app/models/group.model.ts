@@ -22,3 +22,7 @@ export interface GroupMemberEntity {
 }
 
 export type GroupMemberInput = Pick<GroupMemberEntity, 'role'>;
+
+export interface GroupMemberView extends GroupMemberEntity {
+    username: string;
+}

@@ -20,13 +20,10 @@ END $$;
 DO $$
 BEGIN
 	CREATE TYPE object_type AS ENUM (
-		'Tools',
+		'DIY',
 		'Electronics',
-		'Vehicles',
-		'Outdoor & Recreation',
-		'Media',
-		'Events',
-		'Clothing & Gear'
+		'Leisure',
+		'Other'
 	);
 EXCEPTION
 	WHEN duplicate_object THEN null;
@@ -133,6 +130,17 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	expires_at	TIMESTAMPTZ NOT NULL,
 	created_at	TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	updated_at	TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS api_keys (
+	id					SERIAL PRIMARY KEY,
+	user_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	name				VARCHAR(50) NOT NULL,
+	prefix			VARCHAR(16) NOT NULL,
+	key_hash		VARCHAR(64) NOT NULL UNIQUE,
+	last_used_at	TIMESTAMPTZ,
+	revoked_at	TIMESTAMPTZ,
+	created_at	TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 DO $$
