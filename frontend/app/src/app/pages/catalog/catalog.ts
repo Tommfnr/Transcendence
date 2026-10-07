@@ -9,7 +9,7 @@ import { ObjectCard } from '../../components/object-card/object-card';
 import { normalizeForSearch } from '../../shared/normalize-text';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
-import { Location } from '@angular/common';
+import { Location, provideCloudflareLoader } from '@angular/common';
 
 interface Category {
 	label: string;
@@ -43,9 +43,12 @@ export class Catalog {
 	}
 
 	deleteObject(id: number): void {
-		this.objectService.remove(id).subscribe(() => {
-			this.objectData.update((objects) => objects.filter((object) => object.id !== id));
-		});
+		const name = this.objectData().find((object) => object.id === id)?.name;
+		if (confirm(`Delete "${name}"? This cannot be undone.`)) {
+			this.objectService.remove(id).subscribe(() => {
+				this.objectData.update((objects) => objects.filter((object) => object.id !== id));
+			});
+		}
 	}
 
 	categories: Category[] = [
