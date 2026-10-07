@@ -1,6 +1,6 @@
 <app-modal
 	title="Offers"
-	subtitle="{{ demoOffers.length }} received"
+	subtitle="{{ offers().length }} received"
 	(closed)="modalService.close()"
 >
 	<div class="flex flex-col gap-4 p-2 lg:p-6">
@@ -13,8 +13,10 @@
 				}
 			</div>
 		</section>
-
-		@for (offer of demoOffers; track offer.id) {
+		@if (errorMessage()) {
+			<div class="rounded-card border border-error p-3 text-sm text-error">{{ errorMessage() }}</div>
+		}
+		@for (offer of offers(); track offer.id) {
 			<app-offer-card
 				[name]="offer.name"
 				[group]="offer.group"
@@ -23,8 +25,13 @@
 				[message]="offer.message"
 				[state]="offer.state"
 				(press)="openConversation(offer.id)"
+				(accept)="onAccept(offer.id)"
+				(decline)="onDecline(offer.id)"
 			/>
-			<!-- TODO(wiring): (accept)/(decline) once the offers endpoint exists -->
 		}
+		@empty {
+			<p class="text-center text-sm text-text-secondary">No offers yet.</p>
+		}
+
 	</div>
 </app-modal>
