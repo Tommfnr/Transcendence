@@ -15,6 +15,12 @@ export class ChatsController {
 		return (this.chatsService.findMy(userId))
 	}
 
+	// Declared before ':conversationId' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.chatsService.stats(userId))
+	}
+
 	@Get(':conversationId')
 	@UseGuards(ConversationMemberGuard)
 	findOne(@Param('conversationId', ParseIdPipe) conversationId: number) {

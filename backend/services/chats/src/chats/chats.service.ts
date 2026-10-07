@@ -61,6 +61,31 @@ export class ChatsService {
 		return byConversation
 	}
 
+	async stats(userId: number) {
+		const myConversations = await this.db
+			.select({ conversationId: conversationMembers.conversationId })
+			.from(conversationMembers)
+			.where(eq(conversationMembers.userId, userId))
+
+		const myMessages = await this.db
+			.select({ createdAt: messages.createdAt })
+			.from(messages)
+			.where(eq(messages.ownerId, userId))
+
+		const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+		let topDay: string | null = null
+		let topCount = 0
+		for (let day = 0; day < days.length; day++) {
+			const count = myMessages.filter((message) => message.createdAt.getUTCDay() === day).length
+			if (count > topCount) {
+				topDay = days[day]
+				topCount = count
+			}
+		}
+
+		return ({ conversations: myConversations.length, topDay })
+	}
+
 	async findMy(userId: number) {
 		const rows = await this.db
 				.select({

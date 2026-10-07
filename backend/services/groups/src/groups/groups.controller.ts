@@ -23,6 +23,12 @@ export class GroupsController {
 		return (this.groupsService.findMy(userId))
 	}
 
+	// Declared before ':groupId' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.groupsService.stats(userId))
+	}
+
 	@Get(':groupId')
 	findOne(@Param('groupId', ParseIdPipe) groupId: number) {
 		return (this.groupsService.findByIdOrThrow(groupId))
