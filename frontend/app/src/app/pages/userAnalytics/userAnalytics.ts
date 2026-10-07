@@ -10,12 +10,12 @@ import { TitleBarComponent } from '../../components/title-bar/title-bar';
 export class UserAnalytics {
 
 	// TODO (wiring) lent, borrowed, requests
-	readonly lendingStats = { lent: 3, borrowed: 2, requestsAnswered: 1};
+	readonly lendingStats = { lent: 1, borrowed: 1, requestsAnswered: 20};
 
 	readonly donutSegments = [
 		{ label: 'lent', value: this.lendingStats.lent, color: 'var(--color-primary)' },
 		{ label: 'borrowed', value: this.lendingStats.borrowed, color: 'var(--color-secondary)' },
-		{ label: 'offer made', value: this.lendingStats.requestsAnswered, color: 'var(--color-muted)' },
+		{ label: 'offer made', value: this.lendingStats.requestsAnswered, color: 'var(--color-success)' },
 	];
 
 	readonly donutGradient = this.buildGradient();
