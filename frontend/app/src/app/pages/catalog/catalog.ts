@@ -47,7 +47,6 @@ export class Catalog {
 		if (confirm(`Delete "${name}"? This cannot be undone.`)) {
 			this.objectService.remove(id).subscribe(() => {
 				this.objectData.update((objects) => objects.filter((object) => object.id !== id));
-				// deleting the last item of the last page would leave us on an empty page
 				if (this.currentPage() > this.totalPages()) {
 					this.currentPage.set(this.totalPages());
 				}
