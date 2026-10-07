@@ -1,5 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
 import { ObjectEntity, ObjectInput } from '../models/object.model';
 
 @Injectable({
@@ -8,6 +9,9 @@ import { ObjectEntity, ObjectInput } from '../models/object.model';
 
 export class ObjectService {
 	private http = inject(HttpClient)
+
+	// bumped after each create/update so pages listing objects can reload
+	readonly changes = signal(0);
 
 	findMy() {
 		return this.http.get<ObjectEntity[]>('/api/objects/my');
@@ -18,11 +22,15 @@ export class ObjectService {
 	}
 
 	create(body: ObjectInput) {
-		return this.http.post<ObjectEntity[]>('/api/objects', body);
+		return this.http.post<ObjectEntity[]>('/api/objects', body).pipe(
+			tap(() => this.changes.update((n) => n + 1))
+		);
 	}
 
 	update(id: number, body: ObjectInput) {
-		return this.http.put<ObjectEntity[]>(`/api/objects/${id}`, body);
+		return this.http.put<ObjectEntity[]>(`/api/objects/${id}`, body).pipe(
+			tap(() => this.changes.update((n) => n + 1))
+		);
 	}
 
 	remove(id: number) {
