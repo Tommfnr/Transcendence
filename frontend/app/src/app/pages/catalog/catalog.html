@@ -18,7 +18,7 @@
 			[(value)]="searchTerm"
 			class="w-80"
 		></app-text-field>
-		<button class="cursor-pointer" (click)="toggleSort()" [title]="sortAsc() ? 'Sort Z→A' : 'Sort A→Z'"><img src="/icons/sort-by-alpha-rounded.svg" [class.rotate-180]="!sortAsc()"></button>
+		<button class="cursor-pointer" (click)="toggleSort()" [title]="sortAsc() ? 'Sort Z→A' : 'Sort A→Z'"><img [src]="sortAsc() ? '/icons/sort-by-alpha-rounded.svg' : '/icons/sort-by-alpha-desc-rounded.svg'"></button>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			@for (cat of categories; track cat.label) {
