@@ -1,0 +1,215 @@
+openapi: 3.0.3
+
+info:
+  title: Transcendence Public API
+  version: 1.0.0
+  description: |
+    Public REST API to read and manage the objects shared on the platform.
+
+    Every request must carry an API key in the `x-api-key` header.
+    Keys are created by a logged-in user through `POST /api/auth/api-keys`.
+
+    Requests are rate limited under `/api/public`.
+    The default is 60 requests per 60 seconds.
+    Current usage is reported in the `RateLimit-*` response headers,
+    and going over the limit returns `429`.
+
+servers:
+  - url: https://pep.localhost:8443
+    description: Local deployment
+
+externalDocs:
+  description: Download the Postman testing collection
+  url: /api/public/docs/postman.json
+
+tags:
+  - name: Objects
+    description: Objects that users list for lending
+
+paths:
+  /api/public/v1/objects/{objectId}:
+    get:
+      tags:
+        - Objects
+      operationId: getObject
+      summary: Get one object
+      description: Returns a single object by its id, whoever owns it.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: The requested object
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+              example:
+                id: 42
+                name: Cordless drill
+                ownerId: 7
+                type: Tools
+                description: 18V drill with two batteries
+                condition: good
+                isAvailable: true
+                createdAt: '2026-09-30T14:21:07.512Z'
+                updatedAt: '2026-10-02T09:03:44.120Z'
+        '400':
+          description: '`objectId` is not a valid id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 400
+                message: Invalid id
+                error: Bad Request
+        '401':
+          description: API key missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing:
+                  value:
+                    statusCode: 401
+                    message: Missing API key
+                    error: Unauthorized
+                invalid:
+                  value:
+                    statusCode: 401
+                    message: Invalid API key
+                    error: Unauthorized
+        '404':
+          description: No object has this id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 404
+                message: Object 42 not found
+                error: Not Found
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Seconds to wait before sending another request
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 429
+                message: Too many requests, please try again later
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key created with `POST /api/auth/api-keys`
+
+  parameters:
+    ObjectId:
+      name: objectId
+      in: path
+      required: true
+      description: Id of the object
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2147483647
+      example: 42
+
+  headers:
+    RateLimitLimit:
+      description: Number of requests allowed in the current window
+      schema:
+        type: integer
+    RateLimitRemaining:
+      description: Number of requests left in the current window
+      schema:
+        type: integer
+    RateLimitReset:
+      description: Seconds until the current window resets
+      schema:
+        type: integer
+
+  schemas:
+    Object:
+      type: object
+      required:
+        - id
+        - name
+        - ownerId
+        - type
+        - description
+        - condition
+        - isAvailable
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          maxLength: 30
+          description: Letters, digits and spaces only
+        ownerId:
+          type: integer
+          description: Id of the user who owns the object
+        type:
+          type: string
+          nullable: true
+          enum:
+            - Tools
+            - Electronics
+            - Vehicles
+            - Outdoor & Recreation
+            - Media
+            - Events
+            - Clothing & Gear
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+        condition:
+          type: string
+          enum:
+            - new
+            - good
+            - worn
+        isAvailable:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - statusCode
+        - message
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string

@@ -6,6 +6,7 @@ import promBundle from 'express-prom-bundle'
 import { AppModule } from './app.module'
 import { ROUTES, attachUpgradeProxy, buildProxyMiddleware, createRouteProxies, matchRoute } from './proxy.middleware'
 import { buildRateLimiter, loadRateLimitConfig, RateLimitConfig } from './rate-limiter'
+import { buildDocsRouter } from './docs.router'
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false })
@@ -22,6 +23,7 @@ async function bootstrap() {
 	}))
 
 	const RLConfig = loadRateLimitConfig()
+	app.use('/api/public/docs', buildDocsRouter()) // exempt from rate limit
 	app.use(RLConfig.prefix, buildRateLimiter(RLConfig))
 	// gateway owns no routes : every request is forwarded to a domain service by path prefix
 	app.use(buildProxyMiddleware(ROUTES, proxies))

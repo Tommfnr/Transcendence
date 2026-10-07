@@ -1,0 +1,2092 @@
+{
+  "info": {
+    "name": "Transcendence Public API",
+    "description": "Demo of the public API: seeds a user and objects with JWT, creates an API key, then reads objects with X-API-Key.\n\nRun the folders in order (Collection Runner works). The stack is served by Caddy with a self-signed certificate, so turn off SSL certificate verification in Postman settings, or set base_url to your own address.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Setup (JWT, demo data)",
+      "description": "Creates a demo user and a few objects through the normal app routes (JWT). This only seeds the database so the public API has something to return.",
+      "item": [
+        {
+          "name": "Register demo user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{demo_username}}\",\n  \"email\": \"{{demo_email}}\",\n  \"h_password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created, or user already exists from a previous run', function () { pm.expect([200, 201, 409]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{demo_username}}\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Login is rate limited to 5 requests per minute."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const token = pm.response.json().access_token;",
+                  "pm.test('Access token returned', function () { pm.expect(token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('access_token', token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create object: Cordless Drill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cordless Drill\",\n  \"type\": \"Tools\",\n  \"description\": \"18V drill with two batteries\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Object created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "const created = Array.isArray(body) ? body[0] : body;",
+                  "pm.collectionVariables.set('object_id', String(created.id));",
+                  "pm.test('Object has an id', function () { pm.expect(created.id).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create object: Camping Tent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camping Tent\",\n  \"type\": \"Outdoor & Recreation\",\n  \"description\": \"Four person tent, used once\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Object created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "const created = Array.isArray(body) ? body[0] : body;",
+                  "pm.collectionVariables.set('object_id_2', String(created.id));",
+                  "pm.test('Object has an id', function () { pm.expect(created.id).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create object: Mirrorless Camera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mirrorless Camera\",\n  \"type\": \"Electronics\",\n  \"description\": \"Body and 35mm lens\",\n  \"condition\": \"worn\",\n  \"isAvailable\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Object created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "const created = Array.isArray(body) ? body[0] : body;",
+                  "pm.collectionVariables.set('object_id_3', String(created.id));",
+                  "pm.test('Object has an id', function () { pm.expect(created.id).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register second user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{demo_username_2}}\",\n  \"email\": \"{{demo_email_2}}\",\n  \"h_password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "A second user whose objects must not appear in GET /objects/my."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created, or user already exists from a previous run', function () { pm.expect([200, 201, 409]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login second user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{demo_username_2}}\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const token = pm.response.json().access_token;",
+                  "pm.test('Access token returned', function () { pm.expect(token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('access_token_2', token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create object (second user): Road Bike",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token_2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Road Bike\",\n  \"type\": \"Vehicles\",\n  \"description\": \"Belongs to the second user\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Object created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "const created = Array.isArray(body) ? body[0] : body;",
+                  "pm.collectionVariables.set('object_id_4', String(created.id));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. API key management (JWT)",
+      "description": "Keys are created and revoked by a logged in user. The full key is only returned once, at creation.",
+      "item": [
+        {
+          "name": "Create API key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/api-keys",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "api-keys"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"postman demo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Full key returned once, with pep_ prefix', function () { pm.expect(body.key).to.be.a('string').and.match(/^pep_/); });",
+                  "pm.collectionVariables.set('api_key', body.key);",
+                  "pm.collectionVariables.set('api_key_id', String(body.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List API keys",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/api-keys",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "api-keys"
+              ]
+            },
+            "description": "Only the prefix is shown. The database stores a sha256 hash, never the key itself."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const keys = pm.response.json();",
+                  "pm.test('Created key is listed', function () { pm.expect(keys.map(k => String(k.id))).to.include(pm.collectionVariables.get('api_key_id')); });",
+                  "pm.test('Listing never exposes the full key', function () { keys.forEach(k => pm.expect(k).to.not.have.property('key')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create API key (second user)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token_2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/api-keys",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "api-keys"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"postman demo second user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Used by the write tests to prove one user's key cannot modify another user's object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Full key returned once, with pep_ prefix', function () { pm.expect(body.key).to.be.a('string').and.match(/^pep_/); });",
+                  "pm.collectionVariables.set('api_key_2', body.key);",
+                  "pm.collectionVariables.set('api_key_id_2', String(body.id));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Public API (X-API-Key)",
+      "description": "Routes under /api/public/v1 are authenticated with the X-API-Key header only.",
+      "item": [
+        {
+          "name": "GET /objects (list)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const objects = pm.response.json();",
+                  "pm.test('Returns every user objects, demo and second user', function () {",
+                  "  const names = objects.map(o => o.name);",
+                  "  pm.expect(names).to.include.members(['Cordless Drill', 'Camping Tent', 'Mirrorless Camera', 'Road Bike']);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects/my (only the key owner objects)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects/my",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects",
+                "my"
+              ]
+            },
+            "description": "Scoped to the user the API key belongs to. Compare with GET /objects, which returns everyone's objects."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const objects = pm.response.json();",
+                  "const names = objects.map(o => o.name);",
+                  "pm.test('Contains the three demo user objects', function () {",
+                  "  pm.expect(names).to.include.members(['Cordless Drill', 'Camping Tent', 'Mirrorless Camera']);",
+                  "});",
+                  "pm.test(\"Does not contain the second user's object\", function () { pm.expect(names).to.not.include('Road Bike'); });",
+                  "pm.test('Every object has the same owner', function () {",
+                  "  pm.expect(new Set(objects.map(o => o.ownerId)).size).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects/:objectId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects/{{object_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects",
+                "{{object_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const object = pm.response.json();",
+                  "pm.test('Returns the requested object', function () {",
+                  "  pm.expect(String(object.id)).to.eql(pm.collectionVariables.get('object_id'));",
+                  "  pm.expect(object.name).to.eql('Cordless Drill');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects/:objectId (unknown id, 404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects without a key (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Message says the key is missing', function () { pm.expect(pm.response.json().message).to.match(/missing api key/i); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects/my without a key (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects/my",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects",
+                "my"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects with an invalid key (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "pep_not_a_real_key"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Message says the key is invalid', function () { pm.expect(pm.response.json().message).to.match(/invalid api key/i); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects with a JWT instead of a key (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            },
+            "description": "The public API does not accept login tokens."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/objects (app route) with an API key (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            },
+            "description": "An API key only opens the public routes, not the normal app routes."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Write endpoints (owner only)",
+          "description": "POST, PUT and DELETE through the API key. Updating or deleting needs the key of the object's owner, so the second user's key must get 403.",
+          "item": [
+            {
+              "name": "POST /objects (create)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"Tools\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "The owner is taken from the API key, never from the request body."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                      "const body = pm.response.json();",
+                      "const object = Array.isArray(body) ? body[0] : body;",
+                      "pm.test('Object is created with the submitted data', function () {",
+                      "  pm.expect(object.name).to.eql('Public Hammer');",
+                      "  pm.expect(object.type).to.eql('Tools');",
+                      "  pm.expect(object.condition).to.eql('new');",
+                      "});",
+                      "pm.test('Owner is the user the key belongs to', function () { pm.expect(object.ownerId).to.be.a('number'); });",
+                      "pm.collectionVariables.set('public_object_id', String(object.id));",
+                      "pm.collectionVariables.set('demo_user_id', String(object.ownerId));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /objects/my (includes the created object)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/my",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "my"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                      "const objects = pm.response.json();",
+                      "pm.test('Created object is now returned', function () {",
+                      "  pm.expect(objects.map(o => String(o.id))).to.include(pm.collectionVariables.get('public_object_id'));",
+                      "});",
+                      "pm.test('All returned objects belong to the key owner', function () {",
+                      "  objects.forEach(o => pm.expect(String(o.ownerId)).to.eql(pm.collectionVariables.get('demo_user_id')));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /objects with an invalid body (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"\",\n  \"type\": \"Nope\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /objects without a key (401)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"Tools\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /objects/:objectId (update)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Public Hammer XL\",\n  \"condition\": \"good\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                      "const body = pm.response.json();",
+                      "const object = Array.isArray(body) ? body[0] : body;",
+                      "pm.test('Fields are updated', function () {",
+                      "  pm.expect(object.name).to.eql('Public Hammer XL');",
+                      "  pm.expect(object.condition).to.eql('good');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /objects/:objectId (shows the update)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                      "pm.test('Update was persisted', function () { pm.expect(pm.response.json().name).to.eql('Public Hammer XL'); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /objects/:objectId with an empty body (400)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /objects/:objectId with another user's key (403)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key_2}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Stolen Hammer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /objects/:objectId without a key (401)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"No Key\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /objects/:objectId unknown id (404)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/999999",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "999999"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Ghost\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /objects/:objectId with another user's key (403)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key_2}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /objects/:objectId without a key (401)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /objects/:objectId (owner)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /objects/:objectId after delete (404)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Rate limiting (per IP)",
+      "description": "Checks the gateway rate limiter on /api/public. The last request waits for the window to reset so the collection can be re-run right away. Keep PUBLIC_API_RATE_LIMIT at its default when running the whole collection.",
+      "item": [
+        {
+          "name": "GET /objects: rate limit headers are sent",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Standard rate limit headers are present', function () {",
+                  "  ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'].forEach(function (h) {",
+                  "    pm.expect(pm.response.headers.has(h), h).to.be.true;",
+                  "  });",
+                  "});",
+                  "pm.test('Limit is a positive integer and remaining is below it', function () {",
+                  "  const limit = Number(pm.response.headers.get('RateLimit-Limit'));",
+                  "  const remaining = Number(pm.response.headers.get('RateLimit-Remaining'));",
+                  "  pm.expect(Number.isInteger(limit) && limit > 0).to.be.true;",
+                  "  pm.expect(remaining).to.be.below(limit);",
+                  "});",
+                  "pm.test('Legacy X-RateLimit headers are not sent', function () {",
+                  "  pm.expect(pm.response.headers.has('X-RateLimit-Limit')).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects: exceeding the limit gives 429",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const limit = Number(pm.response.headers.get('RateLimit-Limit'));",
+                  "const maxAttempts = limit + 5;",
+                  "const url = pm.variables.replaceIn('{{base_url}}/api/public/v1/objects');",
+                  "const key = pm.collectionVariables.get('api_key');",
+                  "let last = pm.response;",
+                  "let attempts = 1;",
+                  "",
+                  "function next(done) {",
+                  "  if (last.code === 429 || attempts >= maxAttempts) { return done(); }",
+                  "  attempts++;",
+                  "  pm.sendRequest({ url: url, method: 'GET', header: { 'X-API-Key': key } }, function (err, res) {",
+                  "    if (err) { return done(err); }",
+                  "    last = res;",
+                  "    next(done);",
+                  "  });",
+                  "}",
+                  "",
+                  "next(function (err) {",
+                  "  pm.test('No transport error while sending requests', function () { pm.expect(err).to.be.undefined; });",
+                  "  pm.test('429 is returned within limit + 5 requests', function () { pm.expect(last.code).to.equal(429); });",
+                  "  if (!last || last.code !== 429) { return; }",
+                  "  const retryAfter = Number(last.headers.get('Retry-After'));",
+                  "  pm.test('Retry-After is a positive number of seconds', function () {",
+                  "    pm.expect(Number.isInteger(retryAfter) && retryAfter >= 1).to.be.true;",
+                  "  });",
+                  "  pm.test('RateLimit-Remaining is 0', function () { pm.expect(Number(last.headers.get('RateLimit-Remaining'))).to.equal(0); });",
+                  "  pm.test('RateLimit-Limit is the same limit', function () { pm.expect(Number(last.headers.get('RateLimit-Limit'))).to.equal(limit); });",
+                  "  pm.test('Body uses the gateway error shape', function () {",
+                  "    const body = last.json();",
+                  "    pm.expect(body.statusCode).to.equal(429);",
+                  "    pm.expect(body.message).to.be.a('string').and.not.empty;",
+                  "  });",
+                  "  pm.collectionVariables.set('rate_limit_wait', String(retryAfter));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/objects (app route) is not rate limited",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is not 429 while the public API is blocked', function () { pm.expect(pm.response.code).to.not.equal(429); });",
+                  "pm.test('No rate limit headers on app routes', function () { pm.expect(pm.response.headers.has('RateLimit-Limit')).to.be.false; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /objects: access is back after the window (waits up to the window length)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/public/v1/objects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "v1",
+                "objects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const waitSeconds = Number(pm.collectionVariables.get('rate_limit_wait') || 60) + 1;",
+                  "console.log('Waiting ' + waitSeconds + 's for the rate limit window to reset');",
+                  "setTimeout(function () {}, waitSeconds * 1000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 again after the window reset', function () { pm.response.to.have.status(200); });",
+                  "pm.test('A fresh window is counting from the start', function () {",
+                  "  const limit = Number(pm.response.headers.get('RateLimit-Limit'));",
+                  "  const remaining = Number(pm.response.headers.get('RateLimit-Remaining'));",
+                  "  pm.expect(remaining).to.be.at.least(limit - 2);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Cleanup",
+      "description": "Revokes the key and removes the demo objects. Run the folder again from the top for a fresh demo. A revoked key can keep working for up to 30 seconds, because the objects service caches successful checks.",
+      "item": [
+        {
+          "name": "Re-login (access token expires after 60s)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{demo_username}}\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const token = pm.response.json().access_token;",
+                  "pm.test('Access token returned', function () { pm.expect(token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('access_token', token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Re-login second user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{demo_username_2}}\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const token = pm.response.json().access_token;",
+                  "pm.test('Access token returned', function () { pm.expect(token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('access_token_2', token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          
+          "name": "Revoke API key",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/api-keys/{{api_key_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "api-keys",
+                "{{api_key_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke API key (second user)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token_2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/api-keys/{{api_key_id_2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "api-keys",
+                "{{api_key_id_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete object: Cordless Drill",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects/{{object_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects",
+                "{{object_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete object: Camping Tent",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects/{{object_id_2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects",
+                "{{object_id_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete object: Mirrorless Camera",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects/{{object_id_3}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects",
+                "{{object_id_3}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete object (second user): Road Bike",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token_2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/objects/{{object_id_4}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "objects",
+                "{{object_id_4}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://pep.localhost:8443"
+    },
+    {
+      "key": "demo_username",
+      "value": "postmandemo"
+    },
+    {
+      "key": "demo_email",
+      "value": "postmandemo@example.com"
+    },
+    {
+      "key": "demo_password",
+      "value": "Demo-Pass1!"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "api_key_id",
+      "value": ""
+    },
+    {
+      "key": "object_id",
+      "value": ""
+    },
+    {
+      "key": "object_id_2",
+      "value": ""
+    },
+    {
+      "key": "object_id_3",
+      "value": ""
+    },
+    {
+      "key": "demo_username_2",
+      "value": "postmandemo2"
+    },
+    {
+      "key": "demo_email_2",
+      "value": "postmandemo2@example.com"
+    },
+    {
+      "key": "access_token_2",
+      "value": ""
+    },
+    {
+      "key": "object_id_4",
+      "value": ""
+    },
+    {
+      "key": "api_key_2",
+      "value": ""
+    },
+    {
+      "key": "api_key_id_2",
+      "value": ""
+    },
+    {
+      "key": "public_object_id",
+      "value": ""
+    },
+    {
+      "key": "demo_user_id",
+      "value": ""
+    },
+    {
+      "key": "rate_limit_wait",
+      "value": ""
+    }
+  ]
+}
