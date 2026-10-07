@@ -70,6 +70,8 @@ services:
         condition: service_started
       chats:
         condition: service_started
+    volumes:
+      - ../docs:/app/docs:ro
 
   auth:
     build:
@@ -113,9 +115,13 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      AUTH_INTERNAL_URL: http://auth:3000
     depends_on:
       postgres:
         condition: service_healthy
+      auth:
+        condition: service_started
 
   groups:
     build:

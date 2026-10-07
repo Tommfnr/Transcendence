@@ -132,6 +132,17 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	updated_at	TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS api_keys (
+	id					SERIAL PRIMARY KEY,
+	user_id			INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	name				VARCHAR(50) NOT NULL,
+	prefix			VARCHAR(16) NOT NULL,
+	key_hash		VARCHAR(64) NOT NULL UNIQUE,
+	last_used_at	TIMESTAMPTZ,
+	revoked_at	TIMESTAMPTZ,
+	created_at	TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 DO $$
 BEGIN
 	CREATE TYPE lending_status as ENUM (

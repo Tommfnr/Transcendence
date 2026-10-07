@@ -25,6 +25,12 @@ export class PostsController {
 		return (this.postsService.findFromMyGroups(userId))
 	}
 
+	// Declared before ':postId' so "stats" is not parsed as an id
+	@Get('stats')
+	stats(@CurrentUser('sub') userId: number) {
+		return (this.postsService.stats(userId))
+	}
+
 	@Get(':postId')
 	findOne(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.findOne(postId))

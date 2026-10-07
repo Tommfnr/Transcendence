@@ -18,6 +18,7 @@ export const ROUTES: RouteEntry[] = [
 	{ prefix: '/api/auth', target: optionalEnv('AUTH_SERVICE_URL', 'http://auth:3000') },
 	{ prefix: '/api/users', target: optionalEnv('USERS_SERVICE_URL', 'http://users:3000') },
 	{ prefix: '/api/objects', target: optionalEnv('OBJECTS_SERVICE_URL', 'http://objects:3000') },
+	{ prefix: '/api/public/v1/objects', target: optionalEnv('OBJECTS_SERVICE_URL', 'http://objects:3000') },
 	{ prefix: '/api/groups', target: optionalEnv('GROUPS_SERVICE_URL', 'http://groups:3000') },
 	{ prefix: '/api/lending', target: optionalEnv('LENDING_SERVICE_URL', 'http://lending:3000') },
 	{ prefix: '/api/posts', target: optionalEnv('POSTS_SERVICE_URL', 'http://posts:3000') },

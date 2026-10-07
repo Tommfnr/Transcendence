@@ -23,3 +23,14 @@ export const refreshTokens = pgTable('refresh_tokens', {
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+
+export const apiKeys = pgTable('api_keys', {
+	id: serial('id').primaryKey(),
+	userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	name: varchar('name', { length: 50 }).notNull(),
+	prefix: varchar('prefix', { length: 16 }).notNull(),
+	keyHash: varchar('key_hash', { length: 64 }).notNull().unique(),
+	lastUsedAt: timestamp('last_used_at'),
+	revokedAt: timestamp('revoked_at'),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+})
