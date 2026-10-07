@@ -70,6 +70,27 @@ export class GroupsService {
 		return membership
 	}
 
+	async stats(userId: number) {
+		const myMemberships = await this.db
+			.select({ groupId: groupMembers.groupId })
+			.from(groupMembers)
+			.where(eq(groupMembers.userId, userId))
+
+		const myGroupIds = myMemberships.map((membership) => membership.groupId)
+		const total = myGroupIds.length
+
+		if (total === 0)
+			return ({ total: 0, neighbours: 0 })
+
+		const neighboursOfMine = await this.db
+			.selectDistinct({ userId: groupMembers.userId })
+			.from(groupMembers)
+			.where(and(inArray(groupMembers.groupId, myGroupIds), ne(groupMembers.userId, userId),
+			))
+
+		return ({ total, neighbours: neighboursOfMine.length })
+	}
+
 	findMy(userId: number) {
 		return this.db
 			.select({
