@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -23,14 +23,22 @@ interface Category {
 })
 
 
-export class Catalog implements OnInit {
+export class Catalog {
   private objectService = inject(ObjectService);
   readonly modalService = inject(ModalService);
   readonly objectData = signal<ObjectEntity[]>([]);
   private location = inject(Location);
   private router = inject(Router);
 
-	ngOnInit(): void {
+	constructor() {
+		// runs on init, then again whenever an object is created/updated
+		effect(() => {
+			this.objectService.changes();
+			this.loadObjects();
+		});
+	}
+
+	private loadObjects(): void {
 		this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
 	}
 
