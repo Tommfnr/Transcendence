@@ -9,7 +9,7 @@ import { ObjectCard } from '../../components/object-card/object-card';
 import { normalizeForSearch } from '../../shared/normalize-text';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
-import { Location, provideCloudflareLoader } from '@angular/common';
+import { Location } from '@angular/common';
 
 interface Category {
 	label: string;
