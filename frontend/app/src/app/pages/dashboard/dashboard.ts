@@ -1,11 +1,11 @@
 import { Component, OnInit, computed, inject, signal, effect, untracked } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { ModalService } from '../../services/modal.service';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
 import { Exchange, ExchangeTone, OFFER_STATUS, TONE_ORDER } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
+import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
 import { GroupEntity } from '../../models/group.model';
 import { PostsService } from '../../services/posts.service';
