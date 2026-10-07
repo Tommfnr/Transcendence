@@ -10,7 +10,7 @@ info:
     Keys are created by a logged-in user through `POST /api/auth/api-keys`.
 
     Requests are rate limited under `/api/public`.
-    The default is 60 requests per 60 seconds.
+    The default is 60 requests per minute.
     Current usage is reported in the `RateLimit-*` response headers,
     and going over the limit returns `429`.
 
