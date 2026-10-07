@@ -77,7 +77,20 @@ export class Catalog {
 		);
 	});
 
+	readonly sortAsc = signal(true);
+
+	readonly sortedObjects = computed(() => {
+		const direction = this.sortAsc() ? 1 : -1;
+		return [...this.searchObjects()].sort(
+			(a, b) => direction * a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		);
+	});
+
 	readonly objectsCount = computed(() => this.searchObjects().length);
+
+	toggleSort(): void {
+		this.sortAsc.update((asc) => !asc);
+	}
 
 	readonly fabOpen = signal(false);
 
