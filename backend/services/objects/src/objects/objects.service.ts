@@ -14,6 +14,13 @@ import { UpdateObjectDto } from './dto/update-object.dto'
 export class ObjectsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
 
+	findAll() {
+		return (this.db
+				.select()
+				.from(objects)
+				.orderBy(objects.id))
+	}
+
 	async stats(userId: number) {
 		const rows = await this.findByUserId(userId)
 

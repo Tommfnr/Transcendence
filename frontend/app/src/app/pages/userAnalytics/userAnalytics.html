@@ -1,27 +1,26 @@
 <app-title-bar title="User analytics" leading="back"></app-title-bar>
-<h1 class="hidden text-lg font-bold lg:block">User analystics</h1>
+<h1 class="hidden text-lg font-bold lg:block">User analytics</h1>
 <div class="flex flex-col gap-6 pt-12 lg:pt-8 lg:gap-8">
     <section
-        class="flex flex-col gap-1 rounded-card border border-primary-border bg-primary-surface p-4"
-    >
-        <p class="truncate text-3xl font-bold text-text">NB OF NEIGHBOURS</p>
-        <p class="truncate text-sm text-text font-bold">neighbours share a group with you</p>
-        <p class="text-xs text-text-secondary mt-2">accros 3 groups</p>
+        class="flex flex-col gap-1 rounded-card border border-primary-border bg-primary-surface p-4">
+        <p class="truncate text-3xl font-bold text-text">{{ groupStats().neighbours }}</p>
+        <p class="truncate text-sm text-text font-bold">Neighbours share a group with you</p>
+        <p class="text-xs text-text-secondary mt-2">Across {{ groupStats().total }} {{ groupStats().total === 1 ? 'group' : 'groups' }}</p>
     </section>
     <section class="flex flex-col gap-2">
-        <h2 class="text-text-secondary">SHARING</h2>
+        <h2 class="text-text-secondary">OBJECTS</h2>
         <div class="grid grid-cols-3">
             <div>
-                <p class="font-bold text-xl">X</p>
+                <p class="font-bold text-xl">{{ objectStats().total }}</p>
                 <p>items</p>
             </div>
             <div>
-                <p class="font-bold text-xl">X</p>
-                <p>avaible</p>
+                <p class="font-bold text-xl">{{ objectStats().available }}</p>
+                <p>available</p>
             </div>
             <div>
-                <p class="font-bold text-xl">X</p>
-                <p>lent out</p>
+                <p class="font-bold text-xl">{{ lendingStats().lent }}</p>
+                <p>lent</p>
             </div>
         </div>
     </section>
@@ -29,36 +28,48 @@
         <h2 class="text-text-secondary">REQUESTS</h2>
         <div class="grid grid-cols-3">
             <div>
-                <p class="font-bold text-xl">X</p>
+                <p class="font-bold text-xl">{{ postStats().total }}</p>
                 <p>posted</p>
             </div>
             <div>
-                <p class="font-bold text-xl">X</p>
+                <p class="font-bold text-xl">{{ postStats().open }}</p>
                 <p>open</p>
             </div>
             <div>
-                <p class="font-bold text-xl">X</p>
+                <p class="font-bold text-xl">{{ postStats().closed }}</p>
                 <p>helped</p>
             </div>
         </div>
-        <p class="text-sm text-text-secondary">Most asked: CATEGORY</p>
+        <p class="text-sm text-text-secondary">Most asked: {{ postStats().topCategory ?? '—' }}</p>
+    </section>
+
+    <section class="flex flex-col gap-2">
+        <h2 class="text-text-secondary">CHATS</h2>
+        <div class="grid grid-cols-3">
+            <div>
+                <p class="font-bold text-xl">{{ chatStats().conversations }}</p>
+                <p>conversations</p>
+            </div>
+            <p class="text-sm text-text-secondary">Most active day: {{ chatStats().topDay ?? '—' }}</p>
+        </div>
     </section>
 
     <section class="flex flex-col gap-2">
         <h2 class="text-text-secondary">EXCHANGES</h2>
         <div class="relative size-36 shrink-0 gap-4">
             <!-- style="background: conic-gradient(color x% y%)"-->
-            <div class="size-full rounded-full" [style.background]="donutGradient"></div>
+            <div class="size-full rounded-full" [style.background]="donutGradient()"></div>
             <div
                 class="absolute inset-4 flex flex-col items-center justify-center rounded-full bg-background"
             >
-			<h3 class="truncate w-28">PUT whatever you want here</h3>
+			<p class="text-2xl font-bold">{{ totalExchanges() }}</p>
+			<p class="text-xs text-text-secondary">exchanges</p>
 			</div>
             <div class="flex flex-col gap-2 mt-2">
-                @for (seg of donutSegments; track seg.label) {
+                @for (seg of donutSegments(); track seg.label) {
                     <div class="flex items-center gap-2">
                         <span
-                            class="size-2.5 shring-0 rounded-full"
+                            class="size-2.5 shrink-0 rounded-full"
                             [style.background]="seg.color"
                         ></span>
                         <p class="text-sm font-bold">

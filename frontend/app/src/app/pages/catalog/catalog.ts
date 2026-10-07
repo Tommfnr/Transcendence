@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -23,21 +23,35 @@ interface Category {
 })
 
 
-export class Catalog implements OnInit {
+export class Catalog {
   private objectService = inject(ObjectService);
   readonly modalService = inject(ModalService);
   readonly objectData = signal<ObjectEntity[]>([]);
   private location = inject(Location);
   private router = inject(Router);
 
-	ngOnInit(): void {
+	constructor() {
+		// runs on init, then again whenever an object is created/updated
+		effect(() => {
+			this.objectService.changes();
+			this.loadObjects();
+		});
+	}
+
+	private loadObjects(): void {
 		this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
 	}
 
 	deleteObject(id: number): void {
-		this.objectService.remove(id).subscribe(() => {
-			this.objectData.update((objects) => objects.filter((object) => object.id !== id));
-		});
+		const name = this.objectData().find((object) => object.id === id)?.name;
+		if (confirm(`Delete "${name}"? This cannot be undone.`)) {
+			this.objectService.remove(id).subscribe(() => {
+				this.objectData.update((objects) => objects.filter((object) => object.id !== id));
+				if (this.currentPage() > this.totalPages()) {
+					this.currentPage.set(this.totalPages());
+				}
+			});
+		}
 	}
 
 	categories: Category[] = [
@@ -69,7 +83,50 @@ export class Catalog implements OnInit {
 		);
 	});
 
+	readonly sortAsc = signal(true);
+
+	readonly sortedObjects = computed(() => {
+		const direction = this.sortAsc() ? 1 : -1;
+		return [...this.searchObjects()].sort(
+			(a, b) => direction * a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		);
+	});
+
 	readonly objectsCount = computed(() => this.searchObjects().length);
+
+	toggleSort(): void {
+		this.sortAsc.update((asc) => !asc);
+	}
+
+	readonly pageSize = 8;
+
+	// back to page 1 whenever search, category or sort changes
+	readonly currentPage = linkedSignal({
+		source: () => [this.searchTerm(), this.activeCategory(), this.sortAsc()],
+		computation: () => 1,
+	});
+
+	readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sortedObjects().length / this.pageSize)));
+
+	readonly pagedObjects = computed(() => {
+		const start = (this.currentPage() - 1) * this.pageSize;
+		return this.sortedObjects().slice(start, start + this.pageSize);
+	});
+
+	readonly hasPrev = computed(() => this.currentPage() > 1);
+	readonly hasNext = computed(() => this.currentPage() < this.totalPages());
+
+	prevPage(): void {
+		if (this.hasPrev()) {
+			this.currentPage.update((page) => page - 1);
+		}
+	}
+
+	nextPage(): void {
+		if (this.hasNext()) {
+			this.currentPage.update((page) => page + 1);
+		}
+	}
 
 	readonly fabOpen = signal(false);
 

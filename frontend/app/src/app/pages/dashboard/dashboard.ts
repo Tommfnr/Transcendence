@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, effect, untracked } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
@@ -67,13 +67,19 @@ export class Dashboard implements OnInit {
 		if (groupId === null) {
 			return (this.posts());
 		}
-		return (this.posts()).filter((post) =>
-			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false);
+		return (this.posts().filter((post) =>
+			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false));
 	});
 
 	readonly displayedRequests = computed<HelpRequest[]>(() =>
 		this.otherPosts().map((post) => this.toHelpRequest(post))
 	);
+
+	readonly pendingReceivedOffers = computed(() => {
+		const myPostIds = new Set(this.myPosts().map((post) => post.id));
+		return (this.lendings().filter((l) =>
+			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'));
+	});
 
 	readonly myExchanges = computed<Exchange[]>(() =>
 		[...this.myRequestExchanges(), ...this.myOfferExchanges()]
@@ -81,23 +87,23 @@ export class Dashboard implements OnInit {
 	);
 
 	readonly requestCount = computed(() => this.displayedRequests().length);
-	// TODO: count from my exchanges
-	readonly offerCount = 2;
 
+	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
-	onExchangePress(exchange: Exchange): void {
-		if (exchange.kind === 'request')
-			this.modalService.openOffers(exchange.postId);
-		else
-			this.router.navigate(['/app/iCanHelp', exchange.postId]);
-		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
+	
+	// Reload what a modal may have changed (an accepted offer, a new request...) once it closes
+	constructor() {
+		effect(() => {
+			if (this.modalService.activeModal() === null)
+				untracked(() => {
+					this.loadPosts();
+					this.loadLendings();
+				});
+		});
 	}
-
 
 	ngOnInit(): void {
 		this.loadGroups();
-		this.loadPosts();
-		this.loadLendings();
 		this.loadMyObjects();
 	}
 
@@ -158,6 +164,14 @@ export class Dashboard implements OnInit {
 
 	selectTab(tab: DashboardTab): void {
 		this.activeTab.set(tab);
+	}
+
+	onExchangePress(exchange: Exchange): void {
+		if (exchange.kind === 'request')
+			this.modalService.openOffers(exchange.postId);
+		else
+			this.router.navigate(['/app/chatPreview']);
+		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
 	}
 
 	onGroupFilterChange(event: Event): void {
@@ -226,13 +240,14 @@ export class Dashboard implements OnInit {
 				tone = 'attention';
 			}
 
-			return { id: `post-${post.id}`,
+			return {
+				id: `post-${post.id}`,
 				kind: 'request',
 				postId: post.id,
 				title: post.title,
 				subtitle: `my request · ${formatTimeAgo(post.createdAt)}`,
 				statusLabel,
-				tone 
+				tone
 			};
 		});
 	}

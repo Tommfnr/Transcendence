@@ -18,7 +18,7 @@
 			[(value)]="searchTerm"
 			class="w-80"
 		></app-text-field>
-		<button class="cursor-pointer"><img src="/icons/sort-by-alpha-rounded.svg"></button>
+		<button class="cursor-pointer" (click)="toggleSort()" [title]="sortAsc() ? 'Sort Z→A' : 'Sort A→Z'"><img [src]="sortAsc() ? '/icons/sort-by-alpha-rounded.svg' : '/icons/sort-by-alpha-desc-rounded.svg'"></button>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			@for (cat of categories; track cat.label) {
@@ -33,7 +33,7 @@
 		</div>
 	</div>
     <div class="relative grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
-        @for (object of searchObjects(); track object.id) {
+        @for (object of pagedObjects(); track object.id) {
             <app-object-card
                 [name]="object.name"
                 [status]="object.isAvailable ? 'available' : 'lent'"
@@ -47,13 +47,19 @@
 
     </div>
 	<div class="flex flex-row justify-around mt-6">
-		<svg class="cursor-pointer" width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-		<path d="M0.0826879 6.93333C0.138688 6.77778 0.233355 6.63333 0.366688 6.5L6.50002 0.366666C6.74447 0.122222 7.05558 0 7.43336 0C7.81113 0 8.12224 0.122222 8.36669 0.366666C8.61113 0.611111 8.73335 0.922222 8.73335 1.3C8.73335 1.67778 8.61113 1.98889 8.36669 2.23333L3.16669 7.43333L8.36669 12.6333C8.61113 12.8778 8.73335 13.1889 8.73335 13.5667C8.73335 13.9444 8.61113 14.2556 8.36669 14.5C8.12224 14.7444 7.81113 14.8667 7.43336 14.8667C7.05558 14.8667 6.74447 14.7444 6.50002 14.5L0.366688 8.36667C0.233355 8.23333 0.138688 8.08889 0.0826879 7.93333C0.0266879 7.77778 -0.000868056 7.61111 2.08331e-05 7.43333C0.000909722 7.25556 0.0284656 7.08889 0.0826879 6.93333Z" fill="black"/>
+		<button class="cursor-pointer text-strong enabled:hover:text-primary disabled:cursor-default disabled:text-muted" (click)="prevPage()" [disabled]="!hasPrev()" aria-label="Previous page">
+		<svg width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M0.0826879 6.93333C0.138688 6.77778 0.233355 6.63333 0.366688 6.5L6.50002 0.366666C6.74447 0.122222 7.05558 0 7.43336 0C7.81113 0 8.12224 0.122222 8.36669 0.366666C8.61113 0.611111 8.73335 0.922222 8.73335 1.3C8.73335 1.67778 8.61113 1.98889 8.36669 2.23333L3.16669 7.43333L8.36669 12.6333C8.61113 12.8778 8.73335 13.1889 8.73335 13.5667C8.73335 13.9444 8.61113 14.2556 8.36669 14.5C8.12224 14.7444 7.81113 14.8667 7.43336 14.8667C7.05558 14.8667 6.74447 14.7444 6.50002 14.5L0.366688 8.36667C0.233355 8.23333 0.138688 8.08889 0.0826879 7.93333C0.0266879 7.77778 -0.000868056 7.61111 2.08331e-05 7.43333C0.000909722 7.25556 0.0284656 7.08889 0.0826879 6.93333Z" fill="currentColor"/>
 		</svg>
+		</button>
 
-		<svg class="cursor-pointer" width="9" height="15" viewBox="0 0 9 15" fill="" xmlns="http://www.w3.org/2000/svg">
-			<path d="M8.65067 7.93333C8.59467 8.08889 8.5 8.23333 8.36667 8.36667L2.23333 14.5C1.98889 14.7444 1.67778 14.8667 1.3 14.8667C0.922221 14.8667 0.611111 14.7444 0.366666 14.5C0.122222 14.2556 0 13.9444 0 13.5667C0 13.1889 0.122222 12.8778 0.366666 12.6333L5.56667 7.43333L0.366666 2.23334C0.122222 1.98889 0 1.67778 0 1.3C0 0.922223 0.122222 0.611113 0.366666 0.366669C0.611111 0.122224 0.922221 0 1.3 0C1.67778 0 1.98889 0.122224 2.23333 0.366669L8.36667 6.5C8.5 6.63333 8.59467 6.77778 8.65067 6.93333C8.70667 7.08889 8.73422 7.25556 8.73333 7.43333C8.73244 7.61111 8.70489 7.77778 8.65067 7.93333Z" fill=""/>
+		<span class="text-text">{{ currentPage() }} / {{ totalPages() }}</span>
+
+		<button class="cursor-pointer text-strong enabled:hover:text-primary disabled:cursor-default disabled:text-muted" (click)="nextPage()" [disabled]="!hasNext()" aria-label="Next page">
+		<svg width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M8.65067 7.93333C8.59467 8.08889 8.5 8.23333 8.36667 8.36667L2.23333 14.5C1.98889 14.7444 1.67778 14.8667 1.3 14.8667C0.922221 14.8667 0.611111 14.7444 0.366666 14.5C0.122222 14.2556 0 13.9444 0 13.5667C0 13.1889 0.122222 12.8778 0.366666 12.6333L5.56667 7.43333L0.366666 2.23334C0.122222 1.98889 0 1.67778 0 1.3C0 0.922223 0.122222 0.611113 0.366666 0.366669C0.611111 0.122224 0.922221 0 1.3 0C1.67778 0 1.98889 0.122224 2.23333 0.366669L8.36667 6.5C8.5 6.63333 8.59467 6.77778 8.65067 6.93333C8.70667 7.08889 8.73422 7.25556 8.73333 7.43333C8.73244 7.61111 8.70489 7.77778 8.65067 7.93333Z" fill="currentColor"/>
 		</svg>
+		</button>
 	</div>
 		        <div
             class="fixed bottom-6 inset-x-0 z-10 mx-auto max-w-app px-4 flex items-center justify-end"
