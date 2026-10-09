@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, finalize, shareReplay, tap } from 'rxjs';
+import { Observable, defer, finalize, firstValueFrom, shareReplay, tap } from 'rxjs';
 import { LoginResponse, RefreshResponse } from '../models/refresh.types';
 import { User } from '../models/user.model';
 
@@ -47,7 +47,12 @@ export class RefreshService {
             return this.refreshInFlight$;
         }
 
-        this.refreshInFlight$ = this.http.post<RefreshResponse>('/api/auth/refresh', {}).pipe(
+        const request = () =>
+            firstValueFrom(this.http.post<RefreshResponse>('/api/auth/refresh', {}));
+
+        this.refreshInFlight$ = defer(() =>
+            navigator.locks ? navigator.locks.request('pep-auth-refresh', request) : request(),
+        ).pipe(
             tap(({ access_token }) => {
                 this.accessToken.set(access_token);
             }),

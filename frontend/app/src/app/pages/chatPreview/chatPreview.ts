@@ -11,6 +11,7 @@ import { UsersService } from '../../services/users.service';
 import { RefreshService } from '../../services/refresh.service';
 import { ConversationWithMembers } from '../../models/chat.model';
 import { User } from '../../models/user.model';
+import { TitleBarComponent } from '../../components/title-bar/title-bar';
 
 // Same limit as messageContentSchema in the backend
 const MESSAGE_MAX_LENGTH = 2000;
@@ -25,7 +26,7 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
 // Preview of the chat component on the conversations of the user
 @Component({
     selector: 'app-chatPreview',
-    imports: [ChatComponent, ButtonDirective, DatePipe],
+    imports: [ChatComponent, ButtonDirective, DatePipe, TitleBarComponent],
     templateUrl: './chatPreview.html',
 })
 export class ChatPreview implements OnInit {

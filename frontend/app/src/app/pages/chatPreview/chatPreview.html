@@ -1,7 +1,8 @@
-<section class="flex flex-1 flex-col gap-4 px-3">
-    <h1 class="text-lg font-bold text-strong">Aperçu du chat</h1>
+<section class="flex flex-1 flex-col gap-4 px-3 pt-14">
+	<app-title-bar [title]="'USERNAME'" leading="back" meta="GROUP NAME"></app-title-bar>
 
-    <form
+	<!-- LEAVE THIS COMMENT FOR TESTS -->
+    <!-- <form
         class="flex flex-col gap-2 rounded-card bg-card p-3 shadow-card"
         (submit)="$event.preventDefault(); createConversation()"
     >
@@ -44,19 +45,21 @@
         @if (createError(); as message) {
             <p class="text-xs text-error">{{ message }}</p>
         }
-    </form>
+    </form> -->
+	<!-- LEAVE THIS COMMENT FOR TESTS -->
 
-    <div class="flex min-h-0 flex-col gap-4 md:flex-row">
+    <div class="flex min-h-0 flex-col gap-4 lg:flex-row">
         <!-- Live list: reordered by ChatSocketService on every new message -->
         <nav
             aria-label="Mes conversations"
-            class="flex max-h-60 min-h-0 flex-col overflow-y-auto rounded-card bg-card shadow-card md:max-h-[70dvh] md:w-64 md:shrink-0"
+            class="flex max-h-30 lg:max-h-[70dvh] lg:w-80 min-h-0 flex-col overflow-y-auto rounded-card bg-card shadow-card"
         >
             <h2 class="border-b border-muted px-3 py-2 text-sm font-bold text-strong">
-                Mes conversations ({{ conversations().length }})
+                My exchanges ({{ conversations().length }})
             </h2>
 
             <ul class="flex flex-col p-1">
+				<!-- REPLACE THIS BY MY EXCHANGES REQUESTS ACCEPTED / OPEN I DONT KNOW -->
                 @for (conversation of conversations(); track conversation.id) {
                     @let selected = conversation.id === conversationId();
                     <li>
@@ -84,13 +87,16 @@
         </nav>
 
         @if (conversationId(); as conversationId) {
-            <app-chat [conversationId]="conversationId" class="h-[70dvh] min-w-0 flex-1">
-                <h2 class="border-b border-muted px-3 py-2 text-sm font-bold text-strong">
-                    Conversation #{{ conversationId }}
-                    @if (selected(); as conversation) {
-                        · {{ peers(conversation) }}
-                    }
-                </h2>
+            <app-chat [conversationId]="conversationId" class="h-[60dvh] min-w-0 lg:w-full">
+				<div class="flex justify-between items-center px-3 py-2 border-b border-muted">
+
+					<h2 class="text-sm font-bold text-strong">
+						@if (selected(); as conversation) {
+							{{ peers(conversation) }}
+						}
+					</h2>
+					<p class="text-sm text-text-secondary">GROUP NAME</p>
+				</div>
             </app-chat>
         } @else if (loaded()) {
             <p class="text-sm text-text-secondary">
