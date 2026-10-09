@@ -6,6 +6,10 @@
 
 		<p>How to use api: <a href="https://pep.localhost:8443/api/public/docs/#/" class="text-complementary font-bold"> api doc</a></p>
 		<div class="w-fit">
-			<button appButton block href="https://pep.localhost:8443/api/public/docs/#/" class="">Get api key</button>
+			<button appButton block class="" (click)="generate()">Get api key</button>
 		</div>
+		@if (newKey(); as key)
+		{
+			<code>{{ key }} </code>
+		}
 	</div>
