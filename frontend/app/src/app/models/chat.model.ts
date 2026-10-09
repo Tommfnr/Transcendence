@@ -12,6 +12,7 @@ export interface ConversationMember {
 // What findMy and a freshly created conversation return: the plain row plus who is in it
 export interface ConversationWithMembers extends ConversationEntity {
     members: ConversationMember[];
+    exchangeTitle?: string;
 }
 
 export interface MessageEntity {

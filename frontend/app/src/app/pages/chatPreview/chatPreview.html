@@ -70,8 +70,17 @@
                             class="flex w-full cursor-pointer flex-col items-start gap-0.5 rounded-card px-3 py-2 text-left transition-colors duration-150"
                             [class]="selected ? 'bg-primary-surface-solid' : 'hover:bg-background'"
                         >
-                            <span class="text-sm font-bold text-strong">
+                            <!-- Mobile: compact label -->
+                            <span class="text-sm font-bold text-strong lg:hidden">
                                 #{{ conversation.id }} · {{ peers(conversation) }}
+                            </span>
+                            <!-- Desktop: exchange → person -->
+                            <span class="hidden w-full min-w-0 items-center gap-1.5 text-sm lg:flex">
+                                <span class="truncate font-bold text-strong">
+                                    {{ conversation.exchangeTitle ?? 'Exchange #' + conversation.id }}
+                                </span>
+                                <span aria-hidden="true" class="shrink-0 text-text-secondary">→</span>
+                                <span class="truncate text-strong">{{ peers(conversation) }}</span>
                             </span>
                             <span class="text-2xs text-text-secondary">
                                 {{ conversation.updatedAt | date: 'dd/MM HH:mm' }}
