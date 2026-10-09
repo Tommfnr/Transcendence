@@ -4,6 +4,7 @@ const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
 export const conversations = pgTable('conversations', {
 	id:				serial('id').primaryKey(),
+	postId:			integer('post_id'),
 	createdAt:		timestamptz('created_at').notNull().defaultNow(),
 	updatedAt:		timestamptz('updated_at').notNull().defaultNow(),
 })
