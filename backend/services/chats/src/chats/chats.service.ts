@@ -144,7 +144,7 @@ export class ChatsService {
 			created = await this.db.transaction(async (t) => {
 				const [conversation] = await t
 						.insert(conversations)
-						.values({})
+						.values({ postId: dto.postId })
 						.returning()
 
 				await t
