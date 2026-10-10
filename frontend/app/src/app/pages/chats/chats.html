@@ -61,31 +61,29 @@
         <!-- Live list: reordered by ChatSocketService on every new message -->
         <nav
             aria-label="Mes conversations"
-            class="flex max-h-30 lg:max-h-[70dvh] lg:w-80 min-h-0 flex-col overflow-y-auto rounded-card bg-card shadow-card"
+            class="flex max-h-36 lg:max-h-[70dvh] lg:w-80 min-h-0 flex-col gap-3 overflow-y-auto p-1"
         >
-            <h2 class="border-b border-muted px-3 py-2 text-sm font-bold text-strong">
-                My exchanges ({{ conversations().length }})
-            </h2>
+            <div class="flex items-baseline justify-between">
+                <h2 class="text-lg font-bold">My exchanges</h2>
+                <span class="text-sm text-text-secondary">{{ conversations().length }}</span>
+            </div>
 
-            <ul class="flex flex-col p-1">
-				<!-- REPLACE THIS BY MY EXCHANGES REQUESTS ACCEPTED / OPEN I DONT KNOW -->
+            <!-- Same rows as My exchanges in the dashboard -->
+            <ul class="flex flex-col gap-3">
                 @for (conversation of conversations(); track conversation.id) {
                     @let selected = conversation.id === conversationId();
-                    <li>
-                        <button
-                            type="button"
-                            [attr.aria-current]="selected ? 'true' : null"
-                            (click)="select(conversation.id)"
-                            class="flex w-full cursor-pointer flex-col items-start gap-0.5 rounded-card px-3 py-2 text-left transition-colors duration-150"
-                            [class]="selected ? 'bg-primary-surface-solid' : 'hover:bg-background'"
-                        >
-                            <span class="text-sm font-bold text-strong">
-                                {{ conversation.post.title }} · {{ peers(conversation) }}
-                            </span>
-                            <span class="text-2xs text-text-secondary">
-                                {{ conversation.updatedAt | date: 'dd/MM HH:mm' }}
-                            </span>
-                        </button>
+                    @let row = exchangeRow(conversation);
+                    <li [attr.aria-current]="selected ? 'true' : null">
+                        <app-exchange-row
+                            [title]="row.title"
+                            [subtitle]="row.subtitle"
+                            [statusLabel]="row.statusLabel"
+                            [status]="row.tone"
+                            (press)="select(conversation.id)"
+                            class="block rounded-card"
+                            [class.ring-2]="selected"
+                            [class.ring-primary]="selected"
+                        />
                     </li>
                 } @empty {
                     <li class="px-3 py-2 text-xs text-text-secondary">

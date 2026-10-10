@@ -1,5 +1,4 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
@@ -9,7 +8,12 @@ import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
 import { UsersService } from '../../services/users.service';
 import { RefreshService } from '../../services/refresh.service';
+import { LendingService } from '../../services/lending.service';
 import { ConversationWithMembers } from '../../models/chat.model';
+import { LendingEntity } from '../../models/lending.model';
+import { ExchangeTone, OFFER_STATUS } from '../../models/exchange.model';
+import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
+import { formatTimeAgo } from '../../shared/date-format';
 import { User } from '../../models/user.model';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 
@@ -26,7 +30,7 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
 // Conversations page of the user
 @Component({
     selector: 'app-chats',
-    imports: [ChatComponent, ButtonDirective, DatePipe, TitleBarComponent],
+    imports: [ChatComponent, ButtonDirective, TitleBarComponent, ExchangeRowComponent],
     templateUrl: './chats.html',
 })
 export class Chats implements OnInit {
@@ -34,10 +38,13 @@ export class Chats implements OnInit {
     private chatSocket = inject(ChatSocketService);
     private usersService = inject(UsersService);
     private refreshService = inject(RefreshService);
+    private lendingService = inject(LendingService);
 
     readonly conversationId = signal<number | null>(null);
     readonly loaded = signal(false);
     protected readonly conversations = signal<ConversationWithMembers[]>([]);
+    // Each conversation comes from an offer on a post; its status is shown like in My exchanges
+    private readonly lendings = signal<LendingEntity[]>([]);
 
     protected readonly selected = computed(
         () => this.conversations().find(({ id }) => id === this.conversationId()) ?? null,
@@ -96,6 +103,11 @@ export class Chats implements OnInit {
         });
 
         this.usersService.findAll().subscribe((users) => this.users.set(users));
+
+        this.lendingService.listAll().subscribe({
+            next: (lendings) => this.lendings.set(lendings),
+            error: (err) => console.error('Failed to load lendings', err),
+        });
     }
 
     // Who we are talking to: everyone in the conversation but us
@@ -107,6 +119,37 @@ export class Chats implements OnInit {
 
         // A conversation whose other member deleted their account keeps a usable label
         return names.length > 0 ? names.join(', ') : 'Utilisateur supprimé';
+    }
+
+    // The offer behind a conversation: same post, between the same two people (listAll is newest first)
+    private offerOf(conversation: ConversationWithMembers): LendingEntity | undefined {
+        const memberIds = new Set(conversation.members.map((member) => member.id));
+        return this.lendings().find((l) =>
+            l.postId === conversation.post.id && memberIds.has(l.lenderId) && memberIds.has(l.borrowerId));
+    }
+
+    // Same content as a My exchanges row in the dashboard: post → who, role and when, then the offer status
+    protected exchangeRow(conversation: ConversationWithMembers): {
+        title: string;
+        subtitle: string;
+        statusLabel: string;
+        tone: ExchangeTone;
+    } {
+        const offer = this.offerOf(conversation);
+        const title = `${conversation.post.title} → ${this.peers(conversation)}`;
+        const timeAgo = formatTimeAgo(conversation.updatedAt);
+
+        // A conversation without its offer (deleted, or still loading) keeps the title and the time
+        if (!offer)
+            return { title, subtitle: timeAgo, statusLabel: '', tone: 'waiting' };
+
+        const role = offer.lenderId === this.refreshService.user()?.id ? 'my offer' : 'my request';
+        return {
+            title,
+            subtitle: `${role} · ${timeAgo}`,
+            statusLabel: OFFER_STATUS[offer.status].label,
+            tone: OFFER_STATUS[offer.status].tone,
+        };
     }
 
     protected select(conversationId: number): void {
