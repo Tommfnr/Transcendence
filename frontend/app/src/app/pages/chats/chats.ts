@@ -1,8 +1,8 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { ChatComponent } from '../../components/chats/chats';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { ChatsService } from '../../services/chats.service';
@@ -10,6 +10,8 @@ import { ChatSocketService } from '../../services/chat-socket.service';
 import { UsersService } from '../../services/users.service';
 import { RefreshService } from '../../services/refresh.service';
 import { LendingService } from '../../services/lending.service';
+import { PostsService } from '../../services/posts.service';
+import { GroupsService } from '../../services/groups.service';
 import { ConversationWithMembers } from '../../models/chat.model';
 import { LendingEntity } from '../../models/lending.model';
 import { ExchangeTone, OFFER_STATUS } from '../../models/exchange.model';
@@ -41,6 +43,8 @@ export class Chats implements OnInit {
     private refreshService = inject(RefreshService);
     private lendingService = inject(LendingService);
     private route = inject(ActivatedRoute);
+    private postsService = inject(PostsService);
+    private groupsService = inject(GroupsService);
 
     readonly conversationId = signal<number | null>(null);
     readonly loaded = signal(false);
@@ -51,6 +55,13 @@ export class Chats implements OnInit {
     protected readonly selected = computed(
         () => this.conversations().find(({ id }) => id === this.conversationId()) ?? null,
     );
+
+    // Name of a group of the post that both members are in, loaded once per conversation
+    private readonly groupNameByConversation = signal<Map<number, string>>(new Map());
+    protected readonly groupName = computed(() => {
+        const conversation = this.selected();
+        return conversation ? (this.groupNameByConversation().get(conversation.id) ?? '') : '';
+    });
 
     protected readonly maxLength = MESSAGE_MAX_LENGTH;
     protected readonly recipientId = signal<number | null>(null);
@@ -77,6 +88,13 @@ export class Chats implements OnInit {
     );
 
     constructor() {
+        // The header shows the shared group of the open conversation
+        effect(() => {
+            const conversation = this.selected();
+            if (conversation && !untracked(this.groupNameByConversation).has(conversation.id))
+                untracked(() => this.loadSharedGroup(conversation));
+        });
+
         // A conversation someone else started with us shows up without a reload
         this.chatSocket.conversationNew$
             .pipe(takeUntilDestroyed())
@@ -160,6 +178,26 @@ export class Chats implements OnInit {
             statusLabel: OFFER_STATUS[offer.status].label,
             tone: OFFER_STATUS[offer.status].tone,
         };
+    }
+
+    // Same rule as the Offers modal: among the groups of the post, the first one every member belongs to
+    private loadSharedGroup(conversation: ConversationWithMembers): void {
+        const memberIds = conversation.members.map((member) => member.id);
+
+        this.postsService.findGroups(conversation.post.id).pipe(
+            switchMap((groups) => groups.length === 0 ? of([]) : forkJoin(groups.map((group) =>
+                this.groupsService.findMembers(group.id).pipe(
+                    map((members) => ({ group, userIds: members.map((member) => member.userId) })),
+                    // A group we are not in refuses its member list: it can't be the shared one
+                    catchError(() => of({ group, userIds: [] as number[] })),
+                ),
+            ))),
+            catchError(() => of([])),
+        ).subscribe((results) => {
+            const shared = results.find(({ userIds }) => memberIds.every((id) => userIds.includes(id)));
+            this.groupNameByConversation.update((names) =>
+                new Map(names).set(conversation.id, shared?.group.name ?? ''));
+        });
     }
 
     protected select(conversationId: number): void {
