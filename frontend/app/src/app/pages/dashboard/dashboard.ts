@@ -170,7 +170,7 @@ export class Dashboard implements OnInit {
 		if (exchange.kind === 'request')
 			this.modalService.openOffers(exchange.postId);
 		else
-			this.router.navigate(['/app/chatPreview']);
+			this.router.navigate(['/app/chats']);
 		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
 	}
 

@@ -23,13 +23,13 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
     );
 }
 
-// Preview of the chat component on the conversations of the user
+// Conversations page of the user
 @Component({
-    selector: 'app-chatPreview',
+    selector: 'app-chats',
     imports: [ChatComponent, ButtonDirective, DatePipe, TitleBarComponent],
-    templateUrl: './chatPreview.html',
+    templateUrl: './chats.html',
 })
-export class ChatPreview implements OnInit {
+export class Chats implements OnInit {
     private chatsService = inject(ChatsService);
     private chatSocket = inject(ChatSocketService);
     private usersService = inject(UsersService);

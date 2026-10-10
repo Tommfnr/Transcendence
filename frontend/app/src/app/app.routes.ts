@@ -15,7 +15,7 @@ import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
 import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
 import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
-import { ChatPreview } from './pages/chatPreview/chatPreview';
+import { Chats } from './pages/chats/chats';
 import { authGuard } from './guards/auth.guard';
 
 import { PrivacyPolicy } from './pages/privacyPolicy/privacyPolicy';
@@ -117,8 +117,8 @@ export const routes: Routes = [
 				component: ExampleGroupList
 			},
 			{
-				path: 'chatPreview',
-				component: ChatPreview
+				path: 'chats',
+				component: Chats
 			},
 			{
 				path: 'userAnalytics',
