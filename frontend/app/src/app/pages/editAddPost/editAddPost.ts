@@ -41,7 +41,7 @@ export class EditAddPost implements OnInit {
 
 	readonly selectedGroupIds = signal<Set<number>>(new Set());
 
-	bannerErrors = signal<string[]>([]);
+	readonly bannerErrors = signal<string[]>([]);
 
 	private post = signal<PostInput>({
 		title: '',
@@ -85,19 +85,6 @@ export class EditAddPost implements OnInit {
 		}
 	}
 
-	onGroupToggle(event: Event, groupId: number): void {
-		const checked = (event.target as HTMLInputElement).checked;
-
-		this.post.update((current) => {
-			const ids = current.groupIds ?? [];
-
-			return {
-				...current,
-				groupIds: checked ? [...ids, groupId] : ids.filter((id) => id !== groupId),
-			};
-		});
-	}
-
 	onSubmit(event: Event) {
 		event.preventDefault();
 
@@ -107,7 +94,7 @@ export class EditAddPost implements OnInit {
 
 				const response = this.postId
 					? await firstValueFrom(this.postsService.update(Number(this.postId), this.post()))
-					: await firstValueFrom(this.postsService.create(this.post()));
+					: await firstValueFrom(this.postsService.create({ ...this.post(), groupIds: Array.from(this.selectedGroupIds()) }));
 
 				this.modalService.close();
 				return (undefined)

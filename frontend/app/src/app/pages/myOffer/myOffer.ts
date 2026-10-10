@@ -1,18 +1,18 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
 import { Modal } from '../../components/modal/modal';
-import { ButtonDirective } from '../../components/button/button.directive';
 import { ModalService } from '../../services/modal.service';
-import { LendingService } from '../../services/lending.service';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { PostsService } from '../../services/posts.service';
-import { ObjectService } from '../../services/object.service';
-import { UsersService } from '../../services/users.service';
-import { LendingEntity } from '../../models/lending.model';
 import { PostEntity } from '../../models/post.model';
+import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
+import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
+import { LendingService } from '../../services/lending.service';
+import { LendingEntity } from '../../models/lending.model';
 import { OFFER_STATUS } from '../../models/exchange.model';
+import { finalize } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
@@ -22,18 +22,17 @@ import { formatTimeAgo } from '../../shared/date-format';
 	templateUrl: './myOffer.html',
 })
 export class MyOffer implements OnInit {
-
 	readonly modalService = inject(ModalService);
 	private router = inject(Router);
-	private lendingService = inject(LendingService);
 	private postsService = inject(PostsService);
 	private objectService = inject(ObjectService);
 	private usersService = inject(UsersService);
+	private lendingService = inject(LendingService);
 
-	readonly lending = signal<LendingEntity | null>(null);
 	readonly post = signal<PostEntity | null>(null);
 	readonly object = signal<ObjectEntity | null>(null);
 	readonly requester = signal<User | null>(null);
+	readonly lending = signal<LendingEntity | null>(null);
 	readonly cancelling = signal(false);
 	readonly errorMessage = signal<string | null>(null);
 

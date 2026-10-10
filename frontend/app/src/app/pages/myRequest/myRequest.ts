@@ -26,17 +26,17 @@ export class MyRequest implements OnInit {
 	readonly modalService = inject(ModalService);
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
-	private lendingService = inject(LendingService);
-	private usersService = inject(UsersService);
 	private objectService = inject(ObjectService);
+	private usersService = inject(UsersService);
+	private lendingService = inject(LendingService);
 
 
 	private readonly groupsPost = signal<PostGroupData[]>([]);
 	private readonly memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
 	readonly post = signal<PostEntity | null>(null);
+	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private readonly lendings = signal<LendingEntity[]>([]);
 	private readonly lendersById = signal<Map<number, User>>(new Map());
-	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	readonly errorMessage = signal<string | null>(null);
 
 
