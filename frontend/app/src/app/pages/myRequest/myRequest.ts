@@ -17,12 +17,12 @@ import { Observable } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
-	selector: 'app-offers',
+	selector: 'app-myRequest',
 	standalone: true,
 	imports: [Modal, OfferCardComponent, TagComponent],
-	templateUrl: './offers.html',
+	templateUrl: './myRequest.html',
 })
-export class Offers implements OnInit {
+export class MyRequest implements OnInit {
 	readonly modalService = inject(ModalService);
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
@@ -59,7 +59,7 @@ export class Offers implements OnInit {
 
 
 	ngOnInit(): void {
-		const postId = this.modalService.offersPostId();
+		const postId = this.modalService.myRequestPostId();
 		if (postId === null)
 			return;
 
@@ -144,7 +144,7 @@ export class Offers implements OnInit {
 
 
 	private decideOffer(decision: Observable<LendingEntity>): void {
-		const postId = this.modalService.offersPostId();
+		const postId = this.modalService.myRequestPostId();
 		if (postId === null)
 			return;
 

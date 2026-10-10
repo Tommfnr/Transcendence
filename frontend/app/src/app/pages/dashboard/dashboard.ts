@@ -90,7 +90,7 @@ export class Dashboard implements OnInit {
 
 	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
-	
+
 	// Reload what a modal may have changed (an accepted offer, a new request...) once it closes
 	constructor() {
 		effect(() => {
@@ -168,10 +168,9 @@ export class Dashboard implements OnInit {
 
 	onExchangePress(exchange: Exchange): void {
 		if (exchange.kind === 'request')
-			this.modalService.openOffers(exchange.postId);
-		else
-			this.router.navigate(['/app/chatPreview']);
-		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
+			this.modalService.openMyRequest(exchange.postId);
+		else if (exchange.lendingId !== null)
+			this.modalService.openMyOffer(exchange.lendingId);
 	}
 
 	onGroupFilterChange(event: Event): void {
@@ -247,7 +246,8 @@ export class Dashboard implements OnInit {
 				title: post.title,
 				subtitle: `my request · ${formatTimeAgo(post.createdAt)}`,
 				statusLabel,
-				tone
+				tone,
+				lendingId: null
 			};
 		});
 	}
@@ -265,6 +265,7 @@ export class Dashboard implements OnInit {
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: OFFER_STATUS[l.status].label,
 				tone: OFFER_STATUS[l.status].tone,
+				lendingId: l.id
 			}));
 	}
 

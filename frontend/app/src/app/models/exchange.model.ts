@@ -12,6 +12,7 @@ export interface Exchange {
 	subtitle: string;
 	statusLabel: string;
 	tone: ExchangeTone;
+	lendingId: number | null;
 }
 
 export const TONE_ORDER: Record<ExchangeTone, number> = { attention: 0, waiting: 1, done: 2 };
