@@ -11,6 +11,7 @@ import { PostsService } from '../../services/posts.service';
 import { ObjectService } from '../../services/object.service';
 import { LendingService } from '../../services/lending.service';
 import { UsersService } from '../../services/users.service';
+import { ChatsService } from '../../services/chats.service';
 import { PostEntity } from '../../models/post.model';
 import { ObjectEntity } from '../../models/object.model';
 import { User } from '../../models/user.model';
@@ -19,6 +20,9 @@ import { ModalService } from '../../services/modal.service';
 import { normalizeForSearch } from '../../shared/normalize-text';
 
 const MESSAGE_MAX_LENGTH = 250;
+
+// First message of the chat when the helper leaves the offer message empty
+const DEFAULT_CHAT_MESSAGE = 'Hi! I just offered to help with your request.';
 
 interface Category {
     label: string;
@@ -39,6 +43,7 @@ export class OfferHelp implements OnInit {
     private objectService = inject(ObjectService);
     private lendingService = inject(LendingService);
     private usersService = inject(UsersService);
+    private chatsService = inject(ChatsService);
 
     private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 
@@ -104,6 +109,12 @@ export class OfferHelp implements OnInit {
         if (this.submitting()) return;
 
         const objectId = this.selectedObjectId();
+        const post = this.post();
+
+        if (!post) {
+            this.bannerErrors.set(['This request no longer exists']);
+            return;
+        }
 
         if (!objectId) {
             this.bannerErrors.set(['Please select an object to offer']);
@@ -127,6 +138,9 @@ export class OfferHelp implements OnInit {
                     lendedTo: this.lendedTo(),
                     message: this.message() || undefined,
                 }),
+            );
+            await firstValueFrom(
+                this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE),
             );
             this.router.navigate(['/app/dashboard']);
         }

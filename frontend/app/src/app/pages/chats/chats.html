@@ -22,6 +22,15 @@
             </select>
 
             <input
+                type="number"
+                aria-label="Post"
+                placeholder="Post id"
+                [value]="postId() ?? ''"
+                (input)="onPostIdInput($event)"
+                class="h-10 w-24 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+            />
+
+            <input
                 type="text"
                 aria-label="Premier message"
                 placeholder="Premier message…"
@@ -71,7 +80,7 @@
                             [class]="selected ? 'bg-primary-surface-solid' : 'hover:bg-background'"
                         >
                             <span class="text-sm font-bold text-strong">
-                                #{{ conversation.id }} · {{ peers(conversation) }}
+                                {{ conversation.post.title }} · {{ peers(conversation) }}
                             </span>
                             <span class="text-2xs text-text-secondary">
                                 {{ conversation.updatedAt | date: 'dd/MM HH:mm' }}

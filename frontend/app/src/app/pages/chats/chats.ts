@@ -45,6 +45,8 @@ export class Chats implements OnInit {
 
     protected readonly maxLength = MESSAGE_MAX_LENGTH;
     protected readonly recipientId = signal<number | null>(null);
+    // The post the conversation is about; the backend requires it
+    protected readonly postId = signal<number | null>(null);
     protected readonly firstMessage = signal('');
     protected readonly creating = signal(false);
     protected readonly createError = signal<string | null>(null);
@@ -59,6 +61,7 @@ export class Chats implements OnInit {
     protected readonly canCreate = computed(
         () =>
             this.recipientId() !== null &&
+            this.postId() !== null &&
             this.firstMessage().trim().length > 0 &&
             this.firstMessage().length <= MESSAGE_MAX_LENGTH &&
             !this.creating(),
@@ -115,6 +118,11 @@ export class Chats implements OnInit {
         this.recipientId.set(value ? Number(value) : null);
     }
 
+    protected onPostIdInput(event: Event): void {
+        const value = (event.target as HTMLInputElement).value;
+        this.postId.set(value ? Number(value) : null);
+    }
+
     protected onFirstMessageInput(event: Event): void {
         this.firstMessage.set((event.target as HTMLInputElement).value);
     }
@@ -122,17 +130,19 @@ export class Chats implements OnInit {
     // A conversation needs its first message: the backend creates both in one call
     protected createConversation(): void {
         const recipientId = this.recipientId();
-        if (!this.canCreate() || recipientId === null) return;
+        const postId = this.postId();
+        if (!this.canCreate() || recipientId === null || postId === null) return;
 
         this.creating.set(true);
         this.createError.set(null);
         this.chatsService
-            .create(recipientId, this.firstMessage().trim())
+            .create(recipientId, postId, this.firstMessage().trim())
             .pipe(finalize(() => this.creating.set(false)))
             .subscribe({
                 next: ({ conversation }) => {
                     this.firstMessage.set('');
                     this.recipientId.set(null);
+                    this.postId.set(null);
                     this.upsertConversation(conversation);
                     // Show the fresh conversation right away
                     this.conversationId.set(conversation.id);

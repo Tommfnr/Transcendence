@@ -23,8 +23,8 @@ export class ChatsService {
         return this.http.get<MessageEntity[]>(`/api/chats/${conversationId}/messages`);
     }
 
-    create(recipientId: number, content: string) {
-        return this.http.post<ConversationCreated>('/api/chats', { recipientId, content });
+    create(recipientId: number, postId: number, content: string) {
+        return this.http.post<ConversationCreated>('/api/chats', { recipientId, postId, content });
     }
 
     sendMessage(conversationId: number, content: string) {
