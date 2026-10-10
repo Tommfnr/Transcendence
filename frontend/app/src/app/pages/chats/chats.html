@@ -1,5 +1,6 @@
 <section class="flex flex-1 flex-col gap-4 px-3 pt-14">
-	<app-title-bar [title]="'USERNAME'" leading="back" meta="GROUP NAME"></app-title-bar>
+	<!-- Mobile only: the list is hidden there, so the bar names the open conversation -->
+	<app-title-bar [title]="selected() ? peers(selected()!) : 'Chats'" leading="back" [meta]="selected()?.post?.title ?? null"></app-title-bar>
 
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
     <!-- <form
@@ -58,10 +59,10 @@
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
 
     <div class="flex min-h-0 flex-col gap-4 lg:flex-row">
-        <!-- Live list: reordered by ChatSocketService on every new message -->
+        <!-- Live list: reordered by ChatSocketService on every new message. Desktop only: on mobile the chat is opened from My exchanges -->
         <nav
             aria-label="Mes conversations"
-            class="flex max-h-36 lg:max-h-[70dvh] lg:w-md lg:shrink-0 min-h-0 flex-col gap-3 overflow-y-auto p-1"
+            class="hidden lg:flex lg:max-h-[70dvh] lg:w-md lg:shrink-0 min-h-0 flex-col gap-3 overflow-y-auto p-1"
         >
             <div class="flex items-baseline justify-between">
                 <h2 class="text-lg font-bold">My exchanges</h2>
@@ -94,8 +95,8 @@
         </nav>
 
         @if (conversationId(); as conversationId) {
-            <app-chat [conversationId]="conversationId" class="h-[60dvh] min-w-0 lg:w-full">
-				<div class="flex justify-between items-center px-3 py-2 border-b border-muted">
+            <app-chat [conversationId]="conversationId" class="h-[calc(100dvh-7rem)] min-w-0 lg:h-[60dvh] lg:w-full">
+				<div class="hidden lg:flex justify-between items-center px-3 py-2 border-b border-muted">
 
 					<h2 class="text-sm font-bold text-strong">
 						@if (selected(); as conversation) {

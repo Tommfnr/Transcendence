@@ -170,8 +170,8 @@ export class Dashboard implements OnInit {
 		if (exchange.kind === 'request')
 			this.modalService.openOffers(exchange.postId);
 		else
-			this.router.navigate(['/app/chats']);
-		// TODO(chat): an "offer" row opens its conversation once the chat view lands.
+			// An offer row opens the chat about its post
+			this.router.navigate(['/app/chats'], { queryParams: { post: exchange.postId } });
 	}
 
 	onGroupFilterChange(event: Event): void {

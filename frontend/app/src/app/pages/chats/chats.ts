@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ChatComponent } from '../../components/chats/chats';
 import { ButtonDirective } from '../../components/button/button.directive';
@@ -39,6 +40,7 @@ export class Chats implements OnInit {
     private usersService = inject(UsersService);
     private refreshService = inject(RefreshService);
     private lendingService = inject(LendingService);
+    private route = inject(ActivatedRoute);
 
     readonly conversationId = signal<number | null>(null);
     readonly loaded = signal(false);
@@ -97,8 +99,16 @@ export class Chats implements OnInit {
     ngOnInit(): void {
         this.chatsService.findMy().subscribe((conversations) => {
             this.conversations.set(sortByActivity(conversations));
-            // The most recent one opens by default
-            this.conversationId.set(this.conversations()[0]?.id ?? null);
+            // My exchanges links here with ?post=<id>, the Offers modal adds &with=<offerer id>;
+            // otherwise the most recent one opens
+            const params = this.route.snapshot.queryParamMap;
+            const postId = Number(params.get('post'));
+            const withId = params.has('with') ? Number(params.get('with')) : null;
+            const opened = this.conversations().find((conversation) =>
+                conversation.post.id === postId
+                && (withId === null || conversation.members.some((member) => member.id === withId)))
+                ?? this.conversations()[0];
+            this.conversationId.set(opened?.id ?? null);
             this.loaded.set(true);
         });
 
