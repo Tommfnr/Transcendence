@@ -1,6 +1,6 @@
 <section class="flex flex-1 flex-col gap-4 px-3 pt-14">
-	<!-- Mobile only: the list is hidden there, so the bar names the open conversation -->
-	<app-title-bar [title]="selected() ? peers(selected()!) : 'Chats'" leading="back" [meta]="selected()?.post?.title ?? null"></app-title-bar>
+	<!-- Mobile only: the list is hidden there, so the bar shows the open conversation like the desktop chat header -->
+	<app-title-bar [title]="selected() ? peers(selected()!) : 'Chats'" leading="back" [meta]="groupName() || null"></app-title-bar>
 
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
     <!-- <form
