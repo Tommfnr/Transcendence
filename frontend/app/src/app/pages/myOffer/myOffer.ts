@@ -11,7 +11,7 @@ import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
 import { LendingEntity, LendingStatus } from '../../models/lending.model';
-import { OFFER_STATUS } from '../../models/exchange.model';
+import { LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { finalize } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
@@ -43,7 +43,7 @@ export class MyOffer implements OnInit {
 
 	readonly statusLabel = computed(() => {
 		const lending = this.lending();
-		return (lending ? OFFER_STATUS[lending.status].label : '');
+		return (lending ? LENDING_STATUS_DISPLAY[lending.status].label : '');
 	});
 
 	readonly sentAgo = computed(() => {

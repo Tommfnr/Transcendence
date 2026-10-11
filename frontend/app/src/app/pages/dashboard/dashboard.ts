@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
-import { Exchange, ExchangeTone, OFFER_STATUS, TONE_ORDER, CHOSEN_STATUSES } from '../../models/exchange.model';
+import { Exchange, ExchangeTone, TONE_ORDER, LENDING_STATUS_DISPLAY, CHOSEN_STATUSES } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
@@ -235,8 +235,8 @@ export class Dashboard implements OnInit {
 				l.postId === post.id && l.borrowerId === me && CHOSEN_STATUSES.includes(l.status));
 
 			if (chosen) {
-				statusLabel = chosen.status === 'accepted' ? 'helper chosen' : OFFER_STATUS[chosen.status].label;
-				tone = OFFER_STATUS[chosen.status].tone;
+				statusLabel = chosen.status === 'accepted' ? 'helper chosen' : LENDING_STATUS_DISPLAY[chosen.status].label;
+				tone = LENDING_STATUS_DISPLAY[chosen.status].tone;
 			}
 			else if (post.status === 'closed') {
 				statusLabel = 'closed';
@@ -271,8 +271,8 @@ export class Dashboard implements OnInit {
 				postId: l.postId!,
 				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
-				statusLabel: OFFER_STATUS[l.status].label,
-				tone: OFFER_STATUS[l.status].tone,
+				statusLabel: LENDING_STATUS_DISPLAY[l.status].label,
+				tone: LENDING_STATUS_DISPLAY[l.status].tone,
 				lendingId: l.id
 			}));
 	}

@@ -17,7 +17,7 @@ export interface Exchange {
 
 export const TONE_ORDER: Record<ExchangeTone, number> = { attention: 0, waiting: 1, done: 2 };
 
-export const OFFER_STATUS: Record<LendingStatus, { label: string; tone: ExchangeTone }> = {
+export const LENDING_STATUS_DISPLAY: Record<LendingStatus, { label: string; tone: ExchangeTone }> = {
 	// offer
 	created: { label: 'pending', tone: 'waiting' },
 	pending: { label: 'pending', tone: 'waiting' },
