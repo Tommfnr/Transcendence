@@ -10,10 +10,12 @@ import { ObjectEntity } from '../../models/object.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
-import { LendingEntity } from '../../models/lending.model';
+import { LendingEntity, LendingStatus } from '../../models/lending.model';
 import { OFFER_STATUS } from '../../models/exchange.model';
 import { finalize } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
+
+const LOAN_IN_PROGRESS: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue'];
 
 @Component({
 	selector: 'app-myOffer',
@@ -29,12 +31,15 @@ export class MyOffer implements OnInit {
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 
+
 	readonly post = signal<PostEntity | null>(null);
 	readonly object = signal<ObjectEntity | null>(null);
 	readonly requester = signal<User | null>(null);
 	readonly lending = signal<LendingEntity | null>(null);
 	readonly cancelling = signal(false);
+	readonly returned = signal(false);
 	readonly errorMessage = signal<string | null>(null);
+
 
 	readonly statusLabel = computed(() => {
 		const lending = this.lending();
@@ -47,6 +52,12 @@ export class MyOffer implements OnInit {
 	});
 
 	readonly canCancel = computed(() => this.lending()?.status === 'pending');
+
+	readonly canReturn = computed(() => {
+		const lending = this.lending();
+		return (lending !== null && LOAN_IN_PROGRESS.includes(lending.status));
+	});
+
 
 	ngOnInit(): void {
 		const lendingId = this.modalService.myOfferLendingId();
@@ -90,6 +101,7 @@ export class MyOffer implements OnInit {
 		});
 	}
 
+
 	onCancel(): void {
 		const lending = this.lending();
 		if (!lending || this.cancelling())
@@ -104,6 +116,22 @@ export class MyOffer implements OnInit {
 				error: () => this.errorMessage.set('Could not cancel this offer, please try again'),
 			});
 	}
+
+	onReturn(): void {
+		const lending = this.lending();
+		if (!lending || this.returned())
+			return;
+
+		this.errorMessage.set(null);
+		this.returned.set(true);
+		this.lendingService.returned(lending.id)
+			.pipe(finalize(() => this.returned.set(false)))
+			.subscribe({
+				next: () => this.modalService.close(),
+				error: () => this.errorMessage.set('Could not confirm the return, please try again'),
+			});
+	}
+
 
 	// TODO(chat): open the conversation with the requester once the chat page exists.
 	onOpenConversation(): void {

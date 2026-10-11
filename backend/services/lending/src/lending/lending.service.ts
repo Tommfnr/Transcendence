@@ -19,7 +19,7 @@ export class LendingService {
 		private readonly objectsProxy: ObjectsProxyService,
 		private readonly postsProxy: PostsProxyService,
 		private readonly groupsProxy: GroupsProxyService,
-	) {}
+	) { }
 
 	async stats(userId: number) {
 		const myLendings = await this.db
@@ -264,6 +264,26 @@ export class LendingService {
 
 		if (!updated)
 			throw new NotFoundException()
+		return (updated)
+	}
+
+	async returnLend(id: number, userId: number) {
+		const [t] = await this.db.select().from(lending).where(eq(lending.id, id))
+
+		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
+			throw new NotFoundException()
+
+		if (t.lenderId !== userId)
+			throw new ForbiddenException('Only the lender can confirm the item is back')
+
+		const [updated] = await this.db
+			.update(lending)
+			.set({ status: 'returned', lenderConfirmedReturnedAt: new Date(), updatedAt: new Date() })
+			.where(and(eq(lending.id, id), inArray(lending.status, [...BOOKED_STATUSES])))
+			.returning()
+
+		if (!updated)
+			throw new ConflictException('This loan is not in progress')
 		return (updated)
 	}
 

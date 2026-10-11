@@ -27,6 +27,12 @@
 				Cancel my offer
 			</button>
 			}
+			@if (canReturn()) {
+			<button appButton size="small" variant="primary" type="button" [disabled]="returned()"
+				(click)="onReturn()">
+				Item returned
+			</button>
+			}
 			<button appButton size="small" variant="primary" type="button" (click)="onOpenConversation()">
 				Open conversation
 			</button>
