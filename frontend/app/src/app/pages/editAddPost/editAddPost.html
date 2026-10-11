@@ -59,22 +59,22 @@
         <section class="flex gap-4">
             <div class="flex flex-1 flex-col gap-1">
                 <label for="post-from" class="text-2xs font-bold text-text-secondary">From</label>
-                <input
-                    id="post-from"
-                    type="date"
-                    [formField]="postForm.fromDate"
-                    class="w-full rounded-card border border-text-secondary bg-card px-4 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
+                <app-date-picker [formField]="postForm.fromDate" />
+                @if (postForm.fromDate().touched() && postForm.fromDate().errors().length > 0) {
+                    @for (error of postForm.fromDate().errors(); track error.kind) {
+                        <span class="text-xs text-error">{{ error.message }}</span>
+                    }
+                }
             </div>
 
             <div class="flex flex-1 flex-col gap-1">
                 <label for="post-to" class="text-2xs font-bold text-text-secondary">To</label>
-                <input
-                    id="post-to"
-                    type="date"
-                    [formField]="postForm.toDate"
-                    class="w-full rounded-card border border-text-secondary bg-card px-4 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
+                <app-date-picker [formField]="postForm.toDate" [minDate]="postForm.fromDate().value()" />
+                @if (postForm.toDate().touched() && postForm.toDate().errors().length > 0) {
+                    @for (error of postForm.toDate().errors(); track error.kind) {
+                        <span class="text-xs text-error">{{ error.message }}</span>
+                    }
+                }  
             </div>
         </section>
 
