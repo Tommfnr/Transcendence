@@ -4,9 +4,10 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { users, refreshTokens, apiKeys } from '../database/schema'
 import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 import * as argon2 from 'argon2'
 import { EventPublisherService } from '../events/event-publisher.service'
-import { EVENT, makeEvent, UserView } from '@pep/shared'
+import { EVENT, makeEvent, pgErrorCode, UserView } from '@pep/shared'
 
 @Injectable()
 export class UsersService {
@@ -76,6 +77,24 @@ export class UsersService {
 			email: safeUser.email,
 		}))
 		return (safeUser)
+	}
+
+	async update(id: number, dto: UpdateUserDto): Promise<UserView | undefined> {
+		let user: UserView | undefined
+		try {
+			;[user] = await this.db
+				.update(users)
+				.set({ username: dto.username, updatedAt: new Date() })
+				.where(and(eq(users.id, id), isNull(users.deletedAt)))
+				.returning({ id: users.id, username: users.username, email: users.email, deletedAt: users.deletedAt })
+		}
+		catch (err) {
+			if (pgErrorCode(err) === '23505') {
+				throw new ConflictException('Username already taken')
+			}
+			throw err
+		}
+		return (user)
 	}
 
 	async remove(id: number): Promise<boolean> {

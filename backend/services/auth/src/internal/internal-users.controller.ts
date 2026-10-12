@@ -1,6 +1,7 @@
-import { Controller, Get, Delete, HttpCode, NotFoundException, Param, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Delete, HttpCode, NotFoundException, Param, Put, UseGuards } from '@nestjs/common'
 import { InternalAuthGuard, UserView, ParseIdPipe } from '@pep/shared'
 import { UsersService } from '../users/users.service'
+import { UpdateUserDto } from '../users/dto/update-user.dto'
 
 @UseGuards(InternalAuthGuard)
 @Controller('internal/users')
@@ -20,6 +21,15 @@ export class InternalUsersController {
 	@Get(':id')
 	async findOne(@Param('id', ParseIdPipe) id: number): Promise<UserView> {
 		const user = await this.usersService.findById(id)
+		if (!user) {
+			throw new NotFoundException()
+		}
+		return (user)
+	}
+
+	@Put(':id')
+	async update(@Param('id', ParseIdPipe) id: number, @Body() dto: UpdateUserDto): Promise<UserView> {
+		const user = await this.usersService.update(id, dto)
 		if (!user) {
 			throw new NotFoundException()
 		}

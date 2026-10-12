@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { InternalServiceClient, InternalServiceError, UserView } from '@pep/shared'
 import { AUTH_INTERNAL_CLIENT } from './users.tokens'
 
@@ -26,6 +26,29 @@ export class UsersProxyService {
 
 	async findByUsername(username: string): Promise<UserView> {
 		const user = await this.call(() => this.client.get<UserView>(`/internal/users/username/${encodeURIComponent(username)}`))
+		if (!user) {
+			throw new NotFoundException('User not found')
+		}
+		return (user)
+	}
+
+	async update(id: number, body: unknown): Promise<UserView> {
+		let user: UserView | null
+		try {
+			user = await this.client.put<UserView>(`/internal/users/${id}`, body)
+		} catch (err) {
+			if (!(err instanceof InternalServiceError)) {
+				throw err
+			}
+			if (err.status === 400) {
+				throw new BadRequestException('Invalid username')
+			}
+			if (err.status === 409) {
+				throw new ConflictException('Username already taken')
+			}
+			this.logger.error(`internal call to auth failed (status ${err.status}): ${err.message}`)
+			throw new ServiceUnavailableException('auth service unavailable', { cause: err })
+		}
 		if (!user) {
 			throw new NotFoundException('User not found')
 		}
