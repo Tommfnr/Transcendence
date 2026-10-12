@@ -12,6 +12,7 @@ export const users = pgTable('users', {
 	email: citext('email').notNull(),
 	h_password: varchar('h_password', { length: 255 }).notNull(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
+	deletedAt: timestamp('deleted_at'),
 })
 
 export const refreshTokens = pgTable('refresh_tokens', {
