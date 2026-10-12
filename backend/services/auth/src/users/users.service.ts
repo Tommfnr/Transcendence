@@ -89,7 +89,7 @@ export class UsersService {
 		}
 		await this.db.update(refreshTokens).set({ revoked: true }).where(eq(refreshTokens.userId, id))
 		await this.db.delete(apiKeys).where(eq(apiKeys.userId, id))
-		//await this.eventPublisher.publish(makeEvent(EVENT.UserDeleted, 'auth', { userId: id }))
+		await this.eventPublisher.publish(makeEvent(EVENT.UserDeleted, 'auth', { userId: id }))
 		return (true)
 	}
 }

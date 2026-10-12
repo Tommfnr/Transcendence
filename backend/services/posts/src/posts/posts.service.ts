@@ -184,12 +184,13 @@ export class PostsService {
 		return ({ message: 'Post successfully deleted' })
 	}
 
-	async removeAllByOwner(ownerId: number): Promise<number> {
-		const deleted = await this.db
-			.delete(posts)
+	async updateAllByOwnerDeleted(ownerId: number): Promise<number> {
+		const updated = await this.db
+			.update(posts)
+			.set({ status: 'closed', updatedAt: new Date() })
 			.where(eq(posts.ownerId, ownerId))
 			.returning({ id: posts.id })
 
-		return (deleted.length)
+		return (updated.length)
 	}
 }
