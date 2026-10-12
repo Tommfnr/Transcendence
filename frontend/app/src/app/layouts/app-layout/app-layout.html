@@ -16,8 +16,12 @@
 	@if (modalService.activeModal() === 'editProfile') {
 		<app-editProfile />
 	}
-	@if (modalService.activeModal() === 'offers') {
-		<app-offers />
+	@if (modalService.activeModal() === 'myRequest') {
+		<app-myRequest />
 	}
+	@if (modalService.activeModal() === 'myOffer') {
+		<app-myOffer />
+	}
+
 	<app-footer-app></app-footer-app>
 </div>

@@ -48,4 +48,9 @@ export class LendingController {
 	cancelLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.cancelLend(id, userId))
 	}
+
+	@Patch(':id/return')
+	returnLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.returnLend(id, userId))
+	}
 }

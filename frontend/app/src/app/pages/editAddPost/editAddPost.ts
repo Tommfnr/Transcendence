@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { form, FormField, required, submit } from '@angular/forms/signals';
+import { form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { PostsService } from '../../services/posts.service';
 import { GroupsService } from '../../services/groups.service';
 import { PostInput, PostGroupData } from '../../models/post.model';
@@ -13,11 +13,11 @@ import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-
 import { SelectPillComponent } from '../../components/select-pill/select-pill';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ChipComponent } from '../../components/chip/chip';
-
+import { DatePicker } from '../../components/date-picker/date-picker';
 
 @Component({
 	selector: 'app-editAddPost',
-	imports: [FormField, ButtonDirective, SelectPillComponent, Modal, TextFieldComponent, ChipComponent],
+	imports: [FormField, ButtonDirective, SelectPillComponent, Modal, TextFieldComponent, ChipComponent, DatePicker],
 	templateUrl: './editAddPost.html',
 })
 export class EditAddPost implements OnInit {
@@ -41,7 +41,7 @@ export class EditAddPost implements OnInit {
 
 	readonly selectedGroupIds = signal<Set<number>>(new Set());
 
-	bannerErrors = signal<string[]>([]);
+	readonly bannerErrors = signal<string[]>([]);
 
 	private post = signal<PostInput>({
 		title: '',
@@ -59,6 +59,13 @@ export class EditAddPost implements OnInit {
 		required(fieldPath.title, { message: 'Title is required' });
 		required(fieldPath.fromDate, { message: 'Start date is required' });
 		required(fieldPath.toDate, { message: 'End date is required' });
+		validate(fieldPath.toDate, ({ value, valueOf }) => {
+			const from = valueOf(fieldPath.fromDate);
+			if (from && value() && value() < from)
+				return ({ kind: 'dateOrder', message: 'End date must be on or after the start date' });
+			return (undefined);
+		});
+
 	});
 
 	ngOnInit(): void {
@@ -85,19 +92,6 @@ export class EditAddPost implements OnInit {
 		}
 	}
 
-	onGroupToggle(event: Event, groupId: number): void {
-		const checked = (event.target as HTMLInputElement).checked;
-
-		this.post.update((current) => {
-			const ids = current.groupIds ?? [];
-
-			return {
-				...current,
-				groupIds: checked ? [...ids, groupId] : ids.filter((id) => id !== groupId),
-			};
-		});
-	}
-
 	onSubmit(event: Event) {
 		event.preventDefault();
 
@@ -107,7 +101,7 @@ export class EditAddPost implements OnInit {
 
 				const response = this.postId
 					? await firstValueFrom(this.postsService.update(Number(this.postId), this.post()))
-					: await firstValueFrom(this.postsService.create(this.post()));
+					: await firstValueFrom(this.postsService.create({ ...this.post(), groupIds: Array.from(this.selectedGroupIds()) }));
 
 				this.modalService.close();
 				return (undefined)
