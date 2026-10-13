@@ -9,9 +9,16 @@ export interface ConversationMember {
     username: string;
 }
 
-// What findMy and a freshly created conversation return: the plain row plus who is in it
+// The post the conversation is about; title is 'Object deleted' once the post is gone
+export interface ConversationPost {
+    id: number;
+    title: string;
+}
+
+// What findMy and a freshly created conversation return: the plain row plus who is in it and its post
 export interface ConversationWithMembers extends ConversationEntity {
     members: ConversationMember[];
+    post: ConversationPost;
 }
 
 export interface MessageEntity {
