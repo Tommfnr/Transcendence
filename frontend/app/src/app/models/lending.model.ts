@@ -5,10 +5,10 @@ export type LendingStatus =
     | 'active'
     | 'awaiting_confirmation'
     | 'returned'
+    | 'overdue'
     | 'disputed'
     | 'rejected'
-    | 'cancelled'
-    | 'overdue';
+    | 'cancelled';
 
 export interface LendingEntity {
     id: number;

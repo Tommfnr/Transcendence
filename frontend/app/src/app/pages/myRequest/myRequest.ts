@@ -18,27 +18,27 @@ import { Observable } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
-	selector: 'app-offers',
+	selector: 'app-myRequest',
 	standalone: true,
 	imports: [Modal, OfferCardComponent, TagComponent],
-	templateUrl: './offers.html',
+	templateUrl: './myRequest.html',
 })
-export class Offers implements OnInit {
+export class MyRequest implements OnInit {
 	readonly modalService = inject(ModalService);
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
-	private lendingService = inject(LendingService);
-	private usersService = inject(UsersService);
 	private objectService = inject(ObjectService);
 	private router = inject(Router);
+	private usersService = inject(UsersService);
+	private lendingService = inject(LendingService);
 
 
 	private readonly groupsPost = signal<PostGroupData[]>([]);
 	private readonly memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
 	readonly post = signal<PostEntity | null>(null);
+	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private readonly lendings = signal<LendingEntity[]>([]);
 	private readonly lendersById = signal<Map<number, User>>(new Map());
-	private readonly objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	readonly errorMessage = signal<string | null>(null);
 
 
@@ -61,7 +61,7 @@ export class Offers implements OnInit {
 
 
 	ngOnInit(): void {
-		const postId = this.modalService.offersPostId();
+		const postId = this.modalService.myRequestPostId();
 		if (postId === null)
 			return;
 
@@ -150,7 +150,7 @@ export class Offers implements OnInit {
 
 
 	private decideOffer(decision: Observable<LendingEntity>): void {
-		const postId = this.modalService.offersPostId();
+		const postId = this.modalService.myRequestPostId();
 		if (postId === null)
 			return;
 

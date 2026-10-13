@@ -1,22 +1,22 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { finalize, switchMap } from 'rxjs';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ObjectMiniComponent } from '../../components/object-mini/object-mini';
-import { ButtonDirective } from '../../components/button/button.directive';
-import { PostsService } from '../../services/posts.service';
-import { ObjectService } from '../../services/object.service';
-import { LendingService } from '../../services/lending.service';
-import { UsersService } from '../../services/users.service';
-import { ChatsService } from '../../services/chats.service';
-import { PostEntity } from '../../models/post.model';
-import { ObjectEntity } from '../../models/object.model';
-import { User } from '../../models/user.model';
 import { ChipComponent } from '../../components/chip/chip';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { ModalService } from '../../services/modal.service';
+import { PostsService } from '../../services/posts.service';
+import { PostEntity } from '../../models/post.model';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../models/user.model';
+import { LendingService } from '../../services/lending.service';
+import { ChatsService } from '../../services/chats.service';
+import { ObjectService } from '../../services/object.service';
+import { ObjectEntity } from '../../models/object.model';
 import { normalizeForSearch } from '../../shared/normalize-text';
 
 const MESSAGE_MAX_LENGTH = 250;
@@ -25,139 +25,158 @@ const MESSAGE_MAX_LENGTH = 250;
 const DEFAULT_CHAT_MESSAGE = 'Hi! I just offered to help with your request.';
 
 interface Category {
-    label: string;
-    emoji: string;
+	label: string;
+	emoji: string;
 }
+
+const CATEGORIES: Category[] = [
+	{ label: 'All', emoji: '👀' },
+	{ label: 'DIY', emoji: '🛠️' },
+	{ label: 'Electronics', emoji: '💻' },
+	{ label: 'Leisure', emoji: '🎾' },
+	{ label: 'Other', emoji: '📦' },
+];
 
 @Component({
 	selector: 'app-offerHelp',
-	imports: [ TitleBarComponent, AvatarComponent, TextFieldComponent, ObjectMiniComponent, ChipComponent, ButtonDirective],
+	imports: [TitleBarComponent, AvatarComponent, TextFieldComponent, ObjectMiniComponent, ChipComponent, ButtonDirective],
 	host: { class: 'flex flex-col flex-1' },
 	templateUrl: './offerHelp.html',
 })
 export class OfferHelp implements OnInit {
-    readonly modalService = inject(ModalService);
-    private route = inject(ActivatedRoute);
-    private router = inject(Router);
-    private postsService = inject(PostsService);
-    private objectService = inject(ObjectService);
-    private lendingService = inject(LendingService);
-    private usersService = inject(UsersService);
-    private chatsService = inject(ChatsService);
 
-    private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
+	readonly modalService = inject(ModalService);
+	private route = inject(ActivatedRoute);
+	private router = inject(Router);
+	private postsService = inject(PostsService);
+	private objectService = inject(ObjectService);
+	private lendingService = inject(LendingService);
+	private usersService = inject(UsersService);
+	private chatsService = inject(ChatsService);
 
-    readonly post = signal<PostEntity | null>(null);
-    readonly author = signal<User | null>(null);
-    readonly authorName = computed(() => this.author()?.username ?? '');
-    readonly objects = signal<ObjectEntity[]>([]);
-    readonly availableObjects = computed(() =>
-        this.objects().filter((object) => object.isAvailable),
-    );
+	private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
+	readonly categories = CATEGORIES;
 
-    readonly categories: Category[] = [
-    { label: 'All', emoji: '👀' },
-    { label: 'DIY', emoji: '🛠️' },
-    { label: 'Electronics', emoji: '💻' },
-    { label: 'Leisure', emoji: '🎾' },
-    { label: 'Other', emoji: '📦' },
-];
-    readonly activeCategory = signal('All');
-    readonly searchTerm = signal('');
+	readonly post = signal<PostEntity | null>(null);
+	private author = signal<User | null>(null);
+	private objects = signal<ObjectEntity[]>([]);
+	readonly activeCategory = signal('All');
+	readonly searchTerm = signal('');
+	readonly selectedObjectId = signal<number | null>(null);
+	private lendedFrom = signal('');
+	private lendedTo = signal('');
+	readonly message = signal('');
+	readonly submitting = signal(false);
+	readonly bannerErrors = signal<string[]>([]);
 
-    readonly filteredObjects = computed(() => {
-        const category = this.activeCategory();
-        if (category === 'All')
-            return this.availableObjects();
-        return this.availableObjects().filter((object) => object.type === category);
-    });
+	readonly authorName = computed(() => this.author()?.username ?? '');
 
-    readonly searchedObjects = computed(() => {
-        const term = normalizeForSearch(this.searchTerm());
-        if (term === '')
-            return this.filteredObjects();
-        return this.filteredObjects().filter((object) => normalizeForSearch(object.name).includes(term));
-    });
+	private readonly availableObjects = computed(() =>
+		this.objects().filter((object) => object.isAvailable)
+	);
 
-    readonly selectedObjectId = signal<number | null>(null);
-    readonly lendedFrom = signal('');
-    readonly lendedTo = signal('');
-    readonly message = signal('');
+	private readonly filteredObjects = computed(() => {
+		const category = this.activeCategory();
+		if (category === 'All')
+			return (this.availableObjects());
+		return (this.availableObjects().filter((object) => object.type === category));
+	});
 
-    readonly submitting = signal(false);
-    readonly bannerErrors = signal<string[]>([]);
+	readonly searchedObjects = computed(() => {
+		const term = normalizeForSearch(this.searchTerm());
+		if (term === '')
+			return (this.filteredObjects());
+		return (this.filteredObjects().filter((object) => normalizeForSearch(object.name).includes(term)));
+	});
 
-    ngOnInit(): void {
-        this.postsService.findOne(this.postId).subscribe({
-            next: (post) => {
-                this.post.set(post);
-                this.lendedFrom.set(post.fromDate);
-                this.lendedTo.set(post.toDate);
-                this.usersService.findOne(post.ownerId).subscribe({
-                    next: (user) => this.author.set(user),
-                    error: (err) => console.error('Failed to load author', err),
-                });
-                this.activeCategory.set(post.objectType);
-            },
-            error: () => this.bannerErrors.set(['This request no longer exists']),
-        });
+	constructor() {
+		effect(() => {
+			this.objectService.changes();
+			untracked(() => this.loadMyObjects());
+		});
+	}
 
-        this.objectService.findMy().subscribe((objects) => this.objects.set(objects));
-    }
+	ngOnInit(): void {
+		this.loadPost();
+	}
 
-    async onSubmit(): Promise<void> {
-        if (this.submitting()) return;
+	private loadPost(): void {
+		this.postsService.findOne(this.postId).subscribe({
+			next: (post) => {
+				this.post.set(post);
+				this.lendedFrom.set(post.fromDate);
+				this.lendedTo.set(post.toDate);
+				this.activeCategory.set(post.objectType);
+				this.loadAuthor(post.ownerId);
+			},
+			error: () => this.bannerErrors.set(['This request no longer exists']),
+		});
+	}
 
-        const objectId = this.selectedObjectId();
-        const post = this.post();
+	private loadAuthor(ownerId: number): void {
+		this.usersService.findOne(ownerId).subscribe({
+			next: (user) => this.author.set(user),
+			error: () => this.bannerErrors.set(['Could not load who posted this request']),
+		});
+	}
 
-        if (!post) {
-            this.bannerErrors.set(['This request no longer exists']);
-            return;
-        }
+	private loadMyObjects(): void {
+		this.objectService.findMy().subscribe({
+			next: (objects) => this.objects.set(objects),
+			error: () => this.bannerErrors.set(['Could not load your items, please try again']),
+		});
+	}
 
-        if (!objectId) {
-            this.bannerErrors.set(['Please select an object to offer']);
-            return;
-        }
+	onSubmit(): void {
+		const objectId = this.selectedObjectId();
+		const post = this.post();
+		if (this.submitting() || !this.isOfferValid(objectId))
+			return;
+		if (!post) {
+			this.bannerErrors.set(['This request no longer exists']);
+			return;
+		}
 
-        if (this.message().length > MESSAGE_MAX_LENGTH) {
-            this.bannerErrors.set([`Message must be ${MESSAGE_MAX_LENGTH} characters or less`]);
-            return;
-        }
+		this.bannerErrors.set([]);
+		this.submitting.set(true);
+		this.lendingService.create({
+			objectId,
+			postId: this.postId,
+			lendedFrom: this.lendedFrom(),
+			lendedTo: this.lendedTo(),
+			message: this.message() || undefined,
+		})
+			.pipe(
+				// The offer opens a chat with the requester, about this post
+				switchMap(() => this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE)),
+				finalize(() => this.submitting.set(false)),
+			)
+			.subscribe({
+				next: () => this.router.navigate(['/app/dashboard']),
+				error: (err) => this.bannerErrors.set([this.errorMessageOf(err)]),
+			});
+	}
 
-        this.bannerErrors.set([]);
-        this.submitting.set(true);
+	openAddObjectModal(): void {
+		this.modalService.openAddObject();
+	}
 
-        try {
-            await firstValueFrom(
-                this.lendingService.create({
-                    objectId,
-                    postId: this.postId,
-                    lendedFrom: this.lendedFrom(),
-                    lendedTo: this.lendedTo(),
-                    message: this.message() || undefined,
-                }),
-            );
-            await firstValueFrom(
-                this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE),
-            );
-            this.router.navigate(['/app/dashboard']);
-        }
-        catch (err) {
-            if (err instanceof HttpErrorResponse && typeof err.error?.message === 'string')
-                this.bannerErrors.set([err.error.message]);
-            else 
-                this.bannerErrors.set(['Something went wrong, please try again']);
-        }
-        finally {
-            this.submitting.set(false);
-        }
-    }
-    
-    openAddObjectModal(): void {
-        this.modalService.openAddObject();
-    }
+	/** Shows what is wrong with the offer in the banner; returns true when it can be sent. */
+	private isOfferValid(objectId: number | null): objectId is number {
+		if (objectId === null) {
+			this.bannerErrors.set(['Please select an object to offer']);
+			return (false);
+		}
+		if (this.message().length > MESSAGE_MAX_LENGTH) {
+			this.bannerErrors.set([`Message must be ${MESSAGE_MAX_LENGTH} characters or less`]);
+			return (false);
+		}
+		return (true);
+	}
+
+	private errorMessageOf(err: unknown): string {
+		if (err instanceof HttpErrorResponse && typeof err.error?.message === 'string')
+			return (err.error.message);
+		return ('Something went wrong, please try again');
+	}
 }
-
-

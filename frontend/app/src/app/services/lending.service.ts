@@ -31,4 +31,12 @@ export class LendingService {
     reject(id: number) {
         return this.http.patch<LendingEntity>(`/api/lending/${id}/reject`, {});
     }
+
+    cancel(id: number) {
+        return this.http.patch<LendingEntity>(`/api/lending/${id}/cancel`, {});
+    }
+
+    returned(id: number) {
+        return this.http.patch<LendingEntity>(`/api/lending/${id}/return`, {});
+    }
 }

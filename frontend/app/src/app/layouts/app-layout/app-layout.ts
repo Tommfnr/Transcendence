@@ -7,12 +7,13 @@ import { ModalService } from '../../services/modal.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
 import { EditProfile } from '../../pages/editProfile/edit-profile';
 import { HeaderAppDesktopComponent } from '../../components/header-app-desktop/header-app-desktop';
-import { Offers } from '../../pages/offers/offers';
+import { MyRequest } from '../../pages/myRequest/myRequest';
+import { MyOffer } from '../../pages/myOffer/myOffer';
 import { FooterApp } from '../../components/footer-app/footer-app';
 
 @Component({
   selector: 'app-app-layout',
-  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, Offers, FooterApp],
+  imports: [RouterOutlet, EditAddObject, EditAddPost, EditAddGroup, EditProfile, HeaderAppDesktopComponent, MyRequest, MyOffer, FooterApp],
   templateUrl: './app-layout.html',
 })
 export class AppLayout implements OnInit, OnDestroy {

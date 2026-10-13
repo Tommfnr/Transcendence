@@ -14,7 +14,7 @@ import { PostsService } from '../../services/posts.service';
 import { GroupsService } from '../../services/groups.service';
 import { ConversationWithMembers } from '../../models/chat.model';
 import { LendingEntity } from '../../models/lending.model';
-import { ExchangeTone, OFFER_STATUS } from '../../models/exchange.model';
+import { ExchangeTone, LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
 import { formatTimeAgo } from '../../shared/date-format';
 import { User } from '../../models/user.model';
@@ -175,8 +175,8 @@ export class Chats implements OnInit {
         return {
             title,
             subtitle: `${role} · ${timeAgo}`,
-            statusLabel: OFFER_STATUS[offer.status].label,
-            tone: OFFER_STATUS[offer.status].tone,
+            statusLabel: LENDING_STATUS_DISPLAY[offer.status].label,
+            tone: LENDING_STATUS_DISPLAY[offer.status].tone,
         };
     }
 
