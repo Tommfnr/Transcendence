@@ -200,7 +200,7 @@ services:
     container_name: drizzle-gateway
     restart: unless-stopped
     ports:
-      - "4983:4983"
+      - "127.0.0.1:4983:4983"
     env_file:
       - ../.env
     volumes:
