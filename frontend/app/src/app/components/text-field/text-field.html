@@ -16,7 +16,7 @@
         (input)="onInput($event)"
 		[disabled]="disabled()"
 		(blur)="touch.emit()"
-		[rows]="rows()";
+		[rows]="rows()"
         [class]="classes + ' resize-none'"
     ></textarea>
 	}
@@ -35,7 +35,7 @@
 	}
 
     @if (touched() && errors().length > 0) { @for (error of errors(); track
-    error.kind) {
+    error.message) {
     <span class="text-xs text-error">{{ error.message }}</span>
     } }
 
