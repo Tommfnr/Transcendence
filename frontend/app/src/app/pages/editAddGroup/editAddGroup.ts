@@ -9,12 +9,13 @@ import { RefreshService } from '../../services/refresh.service';
 import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { AvatarComponent } from '../../components/avatar/avatar';
 
 @Component({
 	selector: 'app-editAddGroup',
-	imports: [FormField, ButtonDirective, Modal, TextFieldComponent, AvatarComponent],
+	imports: [FormField, ButtonDirective, Modal, TextFieldComponent, AvatarComponent, ErrorBannerComponent],
 	templateUrl: './editAddGroup.html',
 })
 

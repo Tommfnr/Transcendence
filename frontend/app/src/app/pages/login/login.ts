@@ -7,10 +7,11 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { firstValueFrom } from 'rxjs';
 import { isAuthError, isZodValidationError, mapAuthErrorToBanner, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink],
+  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink, ErrorBannerComponent],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -8,10 +8,11 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree, isConflictError, mapAuthErrorToBanner } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, ButtonDirective, TextFieldComponent],
+  imports: [FormField, ButtonDirective, TextFieldComponent, ErrorBannerComponent],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

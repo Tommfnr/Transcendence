@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 export type AvatarKind = 'person' | 'group' | 'mySelf';
-export type AvatarSize = 'md' | 'lg';
+export type AvatarSize = 'md' | 'lg' | 'xl';
 
 /**
  * Placeholder avatar shown before a photo loads, and when there is none.
@@ -34,6 +34,7 @@ export class AvatarComponent {
 		const sizes: Record<AvatarSize, string> = {
 			md: 'size-10',
 			lg: 'size-12',
+			xl: 'size-16'
 		};
 		return `${base} ${sizes[this.size]}`;
 	}

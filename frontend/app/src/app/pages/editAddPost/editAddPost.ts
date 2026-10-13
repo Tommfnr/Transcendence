@@ -12,12 +12,13 @@ import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { SelectPillComponent } from '../../components/select-pill/select-pill';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ChipComponent } from '../../components/chip/chip';
 import { DatePicker } from '../../components/date-picker/date-picker';
 
 @Component({
 	selector: 'app-editAddPost',
-	imports: [FormField, ButtonDirective, SelectPillComponent, Modal, TextFieldComponent, ChipComponent, DatePicker],
+	imports: [FormField, ButtonDirective, SelectPillComponent, Modal, TextFieldComponent, ChipComponent, DatePicker, ErrorBannerComponent],
 	templateUrl: './editAddPost.html',
 })
 export class EditAddPost implements OnInit {
