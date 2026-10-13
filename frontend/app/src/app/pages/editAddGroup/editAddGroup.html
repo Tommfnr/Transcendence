@@ -14,7 +14,8 @@
 
         @if (!isEditMode() || isAdmin()) {
             <div class="flex flex-wrap gap-4">
-                <div class="size-18 bg-primary rounded-full shrink-0"></div>
+                <app-avatar kind="group" size="xl"></app-avatar>
+
                 <div class="flex flex-col gap-2 min-w-40 flex-1">
                     <app-text-field
                         label="Group name"
@@ -52,7 +53,7 @@
                 <h2 class="text-sm font-bold">Members ({{ members().length }})</h2>
                 @for (member of members(); track member.id) {
                     <div class="flex items-center gap-3">
-                        <app-avatar></app-avatar>
+                        <app-avatar kind="group"></app-avatar>
                         <p class="font-bold">
                             {{ member.username }}
                             @if (member.userId === currentUserId()) {
