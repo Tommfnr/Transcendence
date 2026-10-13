@@ -23,6 +23,11 @@ export const refreshInterceptor: HttpInterceptorFn = (
 		catchError((err: HttpErrorResponse) => {
 			if (err.status == 401 && !req.url.includes('/auth/login') && !req.url.includes('/auth/refresh')) {
 				return (refreshService.refreshToken().pipe(
+					catchError((refreshErr) => {
+						refreshService.clearAccessToken()
+						router.navigate(['/login'])
+						return (throwError(() => refreshErr))
+					}),
 					switchMap(({ access_token }) => {
 						const retryreq = req.clone({
 							setHeaders: {
@@ -30,11 +35,6 @@ export const refreshInterceptor: HttpInterceptorFn = (
 							},
 						})
 						return (next(retryreq))
-					}),
-					catchError((refreshErr) => {
-						refreshService.clearAccessToken()
-						router.navigate(['/login'])
-						return (throwError(() => refreshErr))
 					})
 				))
 			}
