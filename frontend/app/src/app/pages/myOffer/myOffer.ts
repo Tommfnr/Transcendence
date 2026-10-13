@@ -133,9 +133,12 @@ export class MyOffer implements OnInit {
 	}
 
 
-	// TODO(chat): open the conversation with the requester once the chat page exists.
+	// The chat of an offer is the one about its post with the requester
 	onOpenConversation(): void {
+		const lending = this.lending();
 		this.modalService.close();
-		this.router.navigate(['/app/chatPreview']);
+		this.router.navigate(['/app/chats'], {
+			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
+		});
 	}
 }

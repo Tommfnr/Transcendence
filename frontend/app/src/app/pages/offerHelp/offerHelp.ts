@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { TextFieldComponent } from '../../components/text-field/text-field';
@@ -14,11 +14,15 @@ import { PostEntity } from '../../models/post.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
+import { ChatsService } from '../../services/chats.service';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { normalizeForSearch } from '../../shared/normalize-text';
 
 const MESSAGE_MAX_LENGTH = 250;
+
+// First message of the chat when the helper leaves the offer message empty
+const DEFAULT_CHAT_MESSAGE = 'Hi! I just offered to help with your request.';
 
 interface Category {
 	label: string;
@@ -48,6 +52,7 @@ export class OfferHelp implements OnInit {
 	private objectService = inject(ObjectService);
 	private lendingService = inject(LendingService);
 	private usersService = inject(UsersService);
+	private chatsService = inject(ChatsService);
 
 	private readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 	readonly categories = CATEGORIES;
@@ -124,8 +129,13 @@ export class OfferHelp implements OnInit {
 
 	onSubmit(): void {
 		const objectId = this.selectedObjectId();
+		const post = this.post();
 		if (this.submitting() || !this.isOfferValid(objectId))
 			return;
+		if (!post) {
+			this.bannerErrors.set(['This request no longer exists']);
+			return;
+		}
 
 		this.bannerErrors.set([]);
 		this.submitting.set(true);
@@ -136,7 +146,16 @@ export class OfferHelp implements OnInit {
 			lendedTo: this.lendedTo(),
 			message: this.message() || undefined,
 		})
-			.pipe(finalize(() => this.submitting.set(false)))
+			.pipe(
+				// The offer opens a chat with the requester, about this post
+				switchMap(() => this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE).pipe(
+					catchError((err) => {
+						console.error('Offer sent but its chat could not be created', err);
+						return of(null);
+					}),
+				)),
+				finalize(() => this.submitting.set(false)),
+			)
 			.subscribe({
 				next: () => this.router.navigate(['/app/dashboard']),
 				error: (err) => this.bannerErrors.set([this.errorMessageOf(err)]),

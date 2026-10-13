@@ -15,6 +15,7 @@ export class InternalPostsController {
 		return ({
 			id: post.id,
 			ownerId: post.ownerId,
+			title: post.title,
 			status: post.status,
 			groupIds,
 			fromDate: post.fromDate.toISOString(),

@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { OfferCardComponent, OfferCardState } from '../../components/offer-card/offer-card';
@@ -27,6 +28,7 @@ export class MyRequest implements OnInit {
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
 	private objectService = inject(ObjectService);
+	private router = inject(Router);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 
@@ -128,10 +130,14 @@ export class MyRequest implements OnInit {
 	}
 
 
-	// TODO(chat): open the conversation with this offerer — the chat view
-	// belongs to the chat chantier; this seam is the agreed entry point (A).
+	// The chat of an offer is the one about this post with its offerer
 	openConversation(offerId: number): void {
-		void offerId;
+		const offer = this.lendings().find((l) => l.id === offerId);
+		if (!offer)
+			return;
+
+		this.modalService.close();
+		this.router.navigate(['/app/chats'], { queryParams: { post: offer.postId, with: offer.lenderId } });
 	}
 
 	onAccept(lendingId: number): void {
