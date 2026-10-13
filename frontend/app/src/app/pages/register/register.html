@@ -14,11 +14,11 @@
 			</section>
 
 			@if (bannerErrors().length > 0) {
-				<div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+				<app-error-banner>
 					@for (msg of bannerErrors(); track msg) {
 						<p>{{ msg }}</p>
 					}
-				</div>
+				</app-error-banner>
 			}
 
 			<form (submit)="onSubmit($event)" class="flex flex-col gap-5">

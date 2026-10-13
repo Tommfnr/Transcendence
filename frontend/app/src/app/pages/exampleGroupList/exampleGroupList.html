@@ -3,7 +3,7 @@
   <a routerLink="/app/dashboard" class="text-primary underline">Dashboard</a>
 
   @if (errorMessage()) {
-    <p class="text-red-600">{{ errorMessage() }}</p>
+    <p class="text-error">{{ errorMessage() }}</p>
   } @else {
     @for (group of groups(); track group.id) {
       <p>{{ group.name }}</p>
