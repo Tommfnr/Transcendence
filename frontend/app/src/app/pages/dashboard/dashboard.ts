@@ -195,7 +195,7 @@ export class Dashboard {
 	}
 
 
-	/** Turns a raw PostEntity into the HelpRequest shape RequestCard expects. */
+	// Turns a raw PostEntity into the HelpRequest shape RequestCard expects
 	private toHelpRequest(post: PostEntity): HelpRequest {
 		const groups = this.groupsByPostId().get(post.id) ?? [];
 
@@ -214,7 +214,7 @@ export class Dashboard {
 		});
 	}
 
-	/** One row per request I posted, labelled with where it stands: no reply, N offers, helper chosen, completed... */
+	// One row per request I posted, labelled with where it stands: no reply, N offers, helper chosen, completed...
 	private myRequestExchanges(): Exchange[] {
 		const me = this.currentUserId();
 
@@ -254,7 +254,7 @@ export class Dashboard {
 		}));
 	}
 
-	/** One row per offer I made on someone else's request, labelled with the status of that loan. */
+	// One row per offer I made on someone else's request, labelled with the status of that loan
 	private myOfferExchanges(): Exchange[] {
 		const me = this.currentUserId();
 
@@ -272,7 +272,7 @@ export class Dashboard {
 			})));
 	}
 
-	/** Adds a message to the banner once, even when several requests fail the same way. */
+	// Adds a message to the banner once, even when several requests fail the same way
 	private showError(message: string): void {
 		this.bannerErrors.update((errors) => errors.includes(message) ? errors : [...errors, message]);
 	}

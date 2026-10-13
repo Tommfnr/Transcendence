@@ -2,7 +2,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { ButtonDirective } from '../../components/button/button.directive';
 import { PostsService } from '../../services/posts.service';
 import { PostEntity } from '../../models/post.model';
 import { ObjectService } from '../../services/object.service';
@@ -12,6 +11,7 @@ import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
 import { LendingEntity, LendingStatus } from '../../models/lending.model';
 import { LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { finalize } from 'rxjs';
 import { formatTimeAgo } from '../../shared/date-format';
 

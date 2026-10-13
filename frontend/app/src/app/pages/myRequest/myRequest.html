@@ -13,8 +13,12 @@
 				}
 			</div>
 		</section>
-		@if (errorMessage()) {
-			<div class="rounded-card border border-error p-3 text-sm text-error">{{ errorMessage() }}</div>
+		@if (bannerErrors().length > 0) {
+			<app-error-banner>
+				@for (msg of bannerErrors(); track msg) {
+					<p>{{ msg }}</p>
+				}
+			</app-error-banner>
 		}
 		@for (offer of offers(); track offer.id) {
 			<app-offer-card
@@ -32,6 +36,5 @@
 		@empty {
 			<p class="text-center text-sm text-text-secondary">No offers yet.</p>
 		}
-
 	</div>
 </app-modal>
