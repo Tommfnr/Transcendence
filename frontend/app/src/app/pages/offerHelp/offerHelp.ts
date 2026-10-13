@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, switchMap } from 'rxjs';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { TextFieldComponent } from '../../components/text-field/text-field';
@@ -148,7 +148,12 @@ export class OfferHelp implements OnInit {
 		})
 			.pipe(
 				// The offer opens a chat with the requester, about this post
-				switchMap(() => this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE)),
+				switchMap(() => this.chatsService.create(post.ownerId, this.postId, this.message().trim() || DEFAULT_CHAT_MESSAGE).pipe(
+					catchError((err) => {
+						console.error('Offer sent but its chat could not be created', err);
+						return of(null);
+					}),
+				)),
 				finalize(() => this.submitting.set(false)),
 			)
 			.subscribe({
