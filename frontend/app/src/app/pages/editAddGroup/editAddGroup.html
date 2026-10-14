@@ -123,15 +123,14 @@
             </button>
         }
     </form>
-    <!-- Wait for the owner to be known, or the owner would briefly see "Leave" -->
+    <!-- Wait for the owner to be known, or the owner would briefly miss "Delete" -->
     @if (isEditMode() && ownerId() !== null) {
+        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
+            Leave this group
+        </button>
         @if (isOwner()) {
             <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onDeleteGroup()">
                 Delete this group
-            </button>
-        } @else {
-            <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
-                Leave this group
             </button>
         }
     }

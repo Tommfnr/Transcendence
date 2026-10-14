@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { eq, ne, and, inArray, notInArray, count, countDistinct } from 'drizzle-orm'
+import { eq, ne, and, inArray, count, countDistinct } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -309,23 +309,16 @@ export class GroupsService {
 	}
 
 	async removeMembershipsForUser(userId: number): Promise<number> {
-		return (this.db.transaction(async (t) => {
-			await t.delete(groupMembers).where(eq(groupMembers.userId, userId))
+		const ownedGroups = await this.db
+			.select({ id: groups.id })
+			.from(groups)
+			.where(eq(groups.ownerId, userId))
 
-			const orphaned = await t
-				.delete(groups)
-				.where(
-					notInArray(
-						groups.id,
-						t
-							.selectDistinct({ id: groupMembers.groupId })
-							.from(groupMembers)
-							.where(eq(groupMembers.role, 'admin')),
-					),
-				)
-				.returning({ id: groups.id })
+		for (const group of ownedGroups)
+			await this.leaveGroup(group.id, userId)
 
-			return (orphaned.length)
-		}))
+		await this.db.delete(groupMembers).where(eq(groupMembers.userId, userId))
+
+		return (ownedGroups.length)
 	}
 }

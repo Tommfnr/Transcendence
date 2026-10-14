@@ -6,7 +6,7 @@ export function userDeletedHandler(groups: GroupsService) {
 	const logger = new Logger('UserDeletedHandler')
 
 	return async (data: UserDeletedData): Promise<void> => {
-		const orphanedGroups = await groups.removeMembershipsForUser(data.userId)
-		logger.log(`user.deleted(${data.userId}) -> dropped memberships, deleted ${orphanedGroups} admin-less group(s)`)
+		const ownedGroups = await groups.removeMembershipsForUser(data.userId)
+		logger.log(`user.deleted(${data.userId}) -> dropped memberships, left ${ownedGroups} owned group(s)`)
 	}
 }
