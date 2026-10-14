@@ -15,6 +15,7 @@ export const posts = pgTable('posts', {
 	status:				postStatusEnum('status').notNull().default('open'),
 	createdAt:		timestamptz('created_at').defaultNow(),
 	updatedAt:		timestamptz('updated_at').defaultNow(),
+	deletedAt:		timestamptz('deleted_at'),
 	fromDate:			timestamptz('from_date').notNull(),
 	toDate:				timestamptz('to_date').notNull(),
 })

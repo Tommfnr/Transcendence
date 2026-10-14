@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS objects (
 	condition			object_condition NOT NULL,
 	is_available		BOOLEAN NOT NULL DEFAULT true,
 	created_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-	updated_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL
+	updated_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+	deleted_at			TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS groups (
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS groups (
 	NAME				VARCHAR(30) NOT NULL,
 	description			VARCHAR(500),
 	created_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-	updated_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL
+	updated_at			TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+	deleted_at			TIMESTAMPTZ
 );
 
 DO $$
@@ -85,6 +87,7 @@ CREATE TABLE IF NOT EXISTS posts (
 	status				post_status NOT NULL DEFAULT 'open',
 	created_at			TIMESTAMPTZ DEFAULT NOW(),
 	updated_at			TIMESTAMPTZ DEFAULT NOW(),
+	deleted_at			TIMESTAMPTZ,
 	from_date			TIMESTAMPTZ NOT NULL,
 	to_date				TIMESTAMPTZ NOT NULL,
 	CONSTRAINT		posts_date_order CHECK (to_date >= from_date)
