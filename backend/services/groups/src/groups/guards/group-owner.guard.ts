@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groups } from '../../database/schema'
 import { DB } from '../../database/database.module'
@@ -16,7 +16,7 @@ export class GroupOwnerGuard implements CanActivate {
 		const [group] = await this.db
 			.select()
 			.from(groups)
-			.where(eq(groups.id, groupId))
+			.where(and(eq(groups.id, groupId), isNull(groups.deletedAt)))
 
 		if (!group)
 			throw new NotFoundException('Group not found')
