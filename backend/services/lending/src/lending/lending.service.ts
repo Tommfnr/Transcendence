@@ -155,6 +155,19 @@ export class LendingService {
 		return (cancelled.length)
 	}
 
+	async updateAllForPostDeleted(postId: number): Promise<number> {
+		const cancelled = await this.db
+			.update(lending)
+			.set({ status: 'cancelled', updatedAt: new Date() })
+			.where(and(
+				eq(lending.postId, postId),
+				inArray(lending.status, ['pending', 'accepted']),
+			))
+			.returning({ id: lending.id })
+
+		return (cancelled.length)
+	}
+
 	async countForPost(postId: number) {
 		const [row] = await this.db
 			.select({ count: count() })

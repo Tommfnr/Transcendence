@@ -1,28 +1,35 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { EVENT, makeEvent } from '@pep/shared'
 import { posts, postGroups, objectTypeEnum } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { GroupsProxyService } from './groups-proxy.service'
+import { EventPublisherService } from '../events/event-publisher.service'
 
 @Injectable()
 export class PostsService {
 	constructor(
 		@Inject(DB) private db: PostgresJsDatabase,
 		private readonly groupsProxy: GroupsProxyService,
+		private readonly eventPublisher: EventPublisherService,
 	) { }
 
 	findAll() {
-		return (this.db.select().from(posts).orderBy(posts.id))
+		return (this.db
+			.select()
+			.from(posts)
+			.where(isNull(posts.deletedAt))
+			.orderBy(posts.id))
 	}
 
 	findByUserId(userId: number) {
 		return (this.db
 			.select()
 			.from(posts)
-			.where(eq(posts.ownerId, userId))
+			.where(and(eq(posts.ownerId, userId), isNull(posts.deletedAt)))
 		)
 	}
 	
@@ -87,7 +94,7 @@ export class PostsService {
 		return (this.db
 			.select()
 			.from(posts)
-			.where(inArray(posts.id, postIdsInMyGroups))
+			.where(and(inArray(posts.id, postIdsInMyGroups), isNull(posts.deletedAt)))
 			.orderBy(posts.id))
 	}
 
@@ -179,7 +186,12 @@ export class PostsService {
 	}
 
 	async remove(postId: number) {
-		await this.db.delete(posts).where(eq(posts.id, postId))
+		await this.db
+			.update(posts)
+			.set({ deletedAt: new Date(), status: 'closed', updatedAt: new Date() })
+			.where(eq(posts.id, postId))
+
+		await this.eventPublisher.publish(makeEvent(EVENT.PostDeleted, 'posts', { postId }))
 
 		return ({ message: 'Post successfully deleted' })
 	}
