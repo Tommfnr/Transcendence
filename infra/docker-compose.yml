@@ -117,6 +117,7 @@ services:
       - ../.env
     environment:
       AUTH_INTERNAL_URL: http://auth:3000
+      EVENT_SUBSCRIBER_URLS: http://lending:3000
     depends_on:
       postgres:
         condition: service_healthy

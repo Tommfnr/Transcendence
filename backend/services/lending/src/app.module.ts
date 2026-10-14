@@ -8,11 +8,13 @@ import {
 	SharedEventsModule,
 	SharedZodValidationPipe,
 	userDeletedDataSchema,
+	objectDeletedDataSchema,
 } from '@pep/shared'
 import { DatabaseModule } from './database/database.module'
 import { LendingModule } from './lending/lending.module'
 import { LendingService } from './lending/lending.service'
 import { userDeletedHandler } from './lending/user-deleted.handler'
+import { objectDeletedHandler } from './lending/object-deleted.handler'
 
 @Module({
 	imports: [
@@ -26,6 +28,12 @@ import { userDeletedHandler } from './lending/user-deleted.handler'
 					schema: userDeletedDataSchema,
 					inject: [LendingService],
 					useFactory: userDeletedHandler,
+				}),
+				defineEventHandler({
+					event: EVENT.ObjectDeleted,
+					schema: objectDeletedDataSchema,
+					inject: [LendingService],
+					useFactory: objectDeletedHandler,
 				}),
 			],
 		}),

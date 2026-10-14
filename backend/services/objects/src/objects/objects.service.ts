@@ -2,22 +2,27 @@
 // See : https://docs.nestjs.com/providers#services
 
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { pgErrorCode } from '@pep/shared'
-import { eq } from 'drizzle-orm'
+import { EVENT, makeEvent, pgErrorCode } from '@pep/shared'
+import { and, eq, isNull } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../database/schema'
 import { DB } from '../database/database.module'
 import { CreateObjectDto } from './dto/create-object.dto'
 import { UpdateObjectDto } from './dto/update-object.dto'
+import { EventPublisherService } from '../events/event-publisher.service'
 
 @Injectable()
 export class ObjectsService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+	constructor(
+		@Inject(DB) private db : PostgresJsDatabase,
+		private readonly eventPublisher: EventPublisherService,
+	) {}
 
 	findAll() {
 		return (this.db
 				.select()
 				.from(objects)
+				.where(isNull(objects.deletedAt))
 				.orderBy(objects.id))
 	}
 
@@ -34,7 +39,7 @@ export class ObjectsService {
 		return (this.db
 				.select()
 				.from(objects)
-				.where(eq(objects.ownerId, userId))
+				.where(and(eq(objects.ownerId, userId), isNull(objects.deletedAt)))
 		)
 	}
 
@@ -73,8 +78,11 @@ export class ObjectsService {
 
 	async remove(objectId: number): Promise<void> {
 		await this.db
-				.delete(objects)
+				.update(objects)
+				.set({ deletedAt: new Date(), isAvailable: false, updatedAt: new Date() })
 				.where(eq(objects.id, objectId))
+
+		await this.eventPublisher.publish(makeEvent(EVENT.ObjectDeleted, 'objects', { objectId }))
 	}
 
 	async updateAllByOwnerDeleted(ownerId: number): Promise<number> {
