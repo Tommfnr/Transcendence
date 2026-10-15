@@ -7,6 +7,6 @@ export function userDeletedHandler(posts: PostsService) {
 
 	return async (data: UserDeletedData): Promise<void> => {
 		const closed = await posts.updateAllByOwnerDeleted(data.userId)
-		logger.log(`user.deleted(${data.userId}) -> closed ${closed} posts`)
+		logger.log(`user.deleted(${data.userId}) -> deleted ${closed} posts`)
 	}
 }
