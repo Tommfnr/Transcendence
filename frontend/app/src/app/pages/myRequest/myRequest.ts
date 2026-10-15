@@ -28,9 +28,9 @@ export class MyRequest implements OnInit {
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
 	private objectService = inject(ObjectService);
-	private router = inject(Router);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
+	private router = inject(Router);
 
 	private groupsPost = signal<PostGroupData[]>([]);
 	private memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
@@ -55,7 +55,7 @@ export class MyRequest implements OnInit {
 
 	readonly requestTags = computed<HelpRequestTag[]>(() => {
 		const post = this.post();
-		return post ? [{ label: post.objectType, icon: 'tag' }] : [];
+		return (post ? [{ label: post.objectType, icon: 'tag' }] : []);
 	});
 
 

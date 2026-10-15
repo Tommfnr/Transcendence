@@ -13,32 +13,32 @@ import { LendingEntity, LendingStatus } from '../../models/lending.model';
 import { LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { finalize } from 'rxjs';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
 
+// Loan states where the lender can confirm the item came back
 const LOAN_IN_PROGRESS: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue'];
 
 @Component({
 	selector: 'app-myOffer',
-	standalone: true,
-	imports: [Modal, ButtonDirective],
+	imports: [Modal, ButtonDirective, ErrorBannerComponent],
 	templateUrl: './myOffer.html',
 })
 export class MyOffer implements OnInit {
 	readonly modalService = inject(ModalService);
-	private router = inject(Router);
 	private postsService = inject(PostsService);
 	private objectService = inject(ObjectService);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
-
+	private router = inject(Router);
 
 	readonly post = signal<PostEntity | null>(null);
 	readonly object = signal<ObjectEntity | null>(null);
 	readonly requester = signal<User | null>(null);
 	readonly lending = signal<LendingEntity | null>(null);
 	readonly cancelling = signal(false);
-	readonly returned = signal(false);
-	readonly errorMessage = signal<string | null>(null);
+	readonly returning = signal(false);
+	readonly bannerErrors = signal<string[]>([]);
 
 
 	readonly statusLabel = computed(() => {
@@ -76,28 +76,28 @@ export class MyOffer implements OnInit {
 				if (lending.postId !== null)
 					this.loadPost(lending.postId);
 			},
-			error: () => this.errorMessage.set('This offer no longer exists'),
+			error: () => this.showError('This offer no longer exists'),
 		});
 	}
 
 	private loadPost(postId: number): void {
 		this.postsService.findOne(postId).subscribe({
 			next: (post) => this.post.set(post),
-			error: () => this.errorMessage.set('Could not load the request'),
+			error: () => this.showError('Could not load the request'),
 		});
 	}
 
 	private loadObject(objectId: number): void {
 		this.objectService.findOne(objectId).subscribe({
 			next: (object) => this.object.set(object),
-			error: () => this.errorMessage.set('Could not load the offered item'),
+			error: () => this.showError('Could not load the offered item'),
 		});
 	}
 
 	private loadRequester(userId: number): void {
 		this.usersService.findOne(userId).subscribe({
 			next: (user) => this.requester.set(user),
-			error: () => this.errorMessage.set('Could not load who posted the request'),
+			error: () => this.showError('Could not load who posted the request'),
 		});
 	}
 
@@ -107,28 +107,28 @@ export class MyOffer implements OnInit {
 		if (!lending || this.cancelling())
 			return;
 
-		this.errorMessage.set(null);
+		this.bannerErrors.set([]);
 		this.cancelling.set(true);
 		this.lendingService.cancel(lending.id)
 			.pipe(finalize(() => this.cancelling.set(false)))
 			.subscribe({
 				next: () => this.modalService.close(),
-				error: () => this.errorMessage.set('Could not cancel this offer, please try again'),
+				error: () => this.showError('Could not cancel this offer, please try again'),
 			});
 	}
 
 	onReturn(): void {
 		const lending = this.lending();
-		if (!lending || this.returned())
+		if (!lending || this.returning())
 			return;
 
-		this.errorMessage.set(null);
-		this.returned.set(true);
+		this.bannerErrors.set([]);
+		this.returning.set(true);
 		this.lendingService.returned(lending.id)
-			.pipe(finalize(() => this.returned.set(false)))
+			.pipe(finalize(() => this.returning.set(false)))
 			.subscribe({
 				next: () => this.modalService.close(),
-				error: () => this.errorMessage.set('Could not confirm the return, please try again'),
+				error: () => this.showError('Could not confirm the return, please try again'),
 			});
 	}
 
@@ -140,5 +140,10 @@ export class MyOffer implements OnInit {
 		this.router.navigate(['/app/chats'], {
 			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
 		});
+	}
+
+	// Adds a message to the banner once, even when several requests fail the same way
+	private showError(message: string): void {
+		this.bannerErrors.update((errors) => errors.includes(message) ? errors : [...errors, message]);
 	}
 }
