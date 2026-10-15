@@ -52,7 +52,7 @@ export class AuthService {
 			throw new UnauthorizedException('Invalid refresh token')
 		}
 		const user = await this.usersService.findById(payload.sub)
-		if (!user) {
+		if (!user || user.deletedAt) {
 			throw new UnauthorizedException('Invalid refresh token')
 		}
 		await this.refreshTokensServices.revoke(payload.jti)

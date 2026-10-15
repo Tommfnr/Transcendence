@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, HttpCode, Param, UseGuards, ForbiddenException } from '@nestjs/common'
+import { Body, Controller, Get, Delete, HttpCode, Param, Patch, UseGuards, ForbiddenException } from '@nestjs/common'
 import { SharedAuthGuard, CurrentUser, ParseIdPipe } from '@pep/shared'
 import { UsersProxyService } from './users-proxy.service'
 
@@ -15,6 +15,11 @@ export class UsersController {
 	@Get('me')
 	getMe(@CurrentUser('sub') userId: number) {
 		return (this.usersProxy.findById(userId))
+	}
+
+	@Patch('me')
+	updateMe(@CurrentUser('sub') userId: number, @Body() body: unknown) {
+		return (this.usersProxy.update(userId, body))
 	}
 
 	@Get('username/:username')

@@ -148,7 +148,12 @@ export class EditAddGroup implements OnInit {
 	}
 
 	onLeaveGroup(): void {
-		if (!confirm(`Leave "${this.group().name}"?`))
+		let question = `Leave "${this.group().name}"?`;
+
+		if (this.isOwner())
+			question += ' You are the owner: the longest-standing member will take over the group. If you are the only member, the group will be deleted.';
+
+		if (!confirm(question))
 			return;
 
 		this.errorMessage.set(null);

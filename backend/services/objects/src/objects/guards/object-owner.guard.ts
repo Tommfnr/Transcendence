@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { objects } from '../../database/schema'
 import { DB } from '../../database/database.module'
@@ -16,7 +16,7 @@ export class ObjectOwnerGuard implements CanActivate {
 		const [object] = await this.db
 			.select()
 			.from(objects)
-			.where(eq(objects.id, objectId))
+			.where(and(eq(objects.id, objectId), isNull(objects.deletedAt)))
 
 		if (!object)
 			throw new NotFoundException(`Object ${objectId} not found`)
