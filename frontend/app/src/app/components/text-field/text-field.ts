@@ -36,7 +36,7 @@ export class TextFieldComponent implements FormValueControl<string> {
 
 	// if typefield is password & revealed is activated -> show text
 	readonly inputType = computed(() =>
-		this.typeField() === 'password' && this.revealed() ? 'text' : this.typeField())
+		this.typeField() === 'password' && this.revealed() ? 'text' : this.typeField());
 
 	private static count = 0;
 	id = `text-field-${TextFieldComponent.count++}`;
