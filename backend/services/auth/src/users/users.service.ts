@@ -1,12 +1,13 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { users } from '../database/schema'
+import { users, refreshTokens, apiKeys } from '../database/schema'
 import { DB } from '../database/database.module'
 import { RegisterDto } from './dto/register.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 import * as argon2 from 'argon2'
 import { EventPublisherService } from '../events/event-publisher.service'
-import { EVENT, makeEvent, UserView } from '@pep/shared'
+import { EVENT, makeEvent, pgErrorCode, UserView } from '@pep/shared'
 
 @Injectable()
 export class UsersService {
@@ -16,19 +17,29 @@ export class UsersService {
 	) {}
 
 	findAll(): Promise<UserView[]> {
-		return (this.db.select({ id: users.id, username: users.username, email: users.email }).from(users).orderBy(users.id))
+		return (this.db
+			.select({ id: users.id, username: users.username, email: users.email, deletedAt: users.deletedAt })
+			.from(users)
+			.where(isNull(users.deletedAt))
+			.orderBy(users.id))
 	}
 
 	findOne(loginIdentifier: string) {
 		if (loginIdentifier.includes('@'))
-			return (this.db.select().from(users).where(eq(users.email, loginIdentifier.toLowerCase())))
+			return (this.db
+				.select()
+				.from(users)
+				.where(and(eq(users.email, loginIdentifier.toLowerCase()), isNull(users.deletedAt))))
 		else
-			return (this.db.select().from(users).where(eq(users.username, loginIdentifier)))
+			return (this.db
+				.select()
+				.from(users)
+				.where(and(eq(users.username, loginIdentifier), isNull(users.deletedAt))))
 	}
 
 	async findById(id: number): Promise<UserView | undefined> {
 		const [user] = await this.db
-			.select({ id: users.id, username: users.username, email: users.email })
+			.select({ id: users.id, username: users.username, email: users.email, deletedAt: users.deletedAt })
 			.from(users)
 			.where(eq(users.id, id))
 		return (user)
@@ -36,9 +47,9 @@ export class UsersService {
 
 	async findByUsername(username: string): Promise<UserView> {
 		const [user] = await this.db
-			.select({ id: users.id, username: users.username, email: users.email })
+			.select({ id: users.id, username: users.username, email: users.email, deletedAt: users.deletedAt })
 			.from(users)
-			.where(eq(users.username, username))
+			.where(and(eq(users.username, username), isNull(users.deletedAt)))
 
 		if (!user) {
 			throw new NotFoundException('User not found')
@@ -68,11 +79,35 @@ export class UsersService {
 		return (safeUser)
 	}
 
+	async update(id: number, dto: UpdateUserDto): Promise<UserView | undefined> {
+		let user: UserView | undefined
+		try {
+			;[user] = await this.db
+				.update(users)
+				.set({ username: dto.username, updatedAt: new Date() })
+				.where(and(eq(users.id, id), isNull(users.deletedAt)))
+				.returning({ id: users.id, username: users.username, email: users.email, deletedAt: users.deletedAt })
+		}
+		catch (err) {
+			if (pgErrorCode(err) === '23505') {
+				throw new ConflictException('Username already taken')
+			}
+			throw err
+		}
+		return (user)
+	}
+
 	async remove(id: number): Promise<boolean> {
-		const deleted = await this.db.delete(users).where(eq(users.id, id)).returning({ id: users.id })
+		const deleted = await this.db
+			.update(users)
+			.set({ deletedAt: new Date(), h_password: '!deleted', updatedAt: new Date() })
+			.where(and(eq(users.id, id), isNull(users.deletedAt)))
+			.returning({ id: users.id })
 		if (deleted.length === 0) {
 			return (false)
 		}
+		await this.db.update(refreshTokens).set({ revoked: true }).where(eq(refreshTokens.userId, id))
+		await this.db.delete(apiKeys).where(eq(apiKeys.userId, id))
 		await this.eventPublisher.publish(makeEvent(EVENT.UserDeleted, 'auth', { userId: id }))
 		return (true)
 	}
