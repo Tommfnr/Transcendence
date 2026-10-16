@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { pgErrorCode } from '@pep/shared'
 import { eq, desc, inArray, notInArray } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
@@ -167,7 +167,7 @@ export class ChatsService {
 			})
 		} catch (err: unknown) {
 			if (pgErrorCode(err) === '23503')
-				throw new UnauthorizedException('User no longer exists')
+				throw new NotFoundException('User not found')
 			throw err
 		}
 
