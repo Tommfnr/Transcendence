@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { DB } from '../database/database.module'
 import { and, count, desc, eq, gt, inArray, lt, or, sql } from 'drizzle-orm'
@@ -14,6 +14,8 @@ const OBJECT_LOCK_NAMESPACE = 1
 
 @Injectable()
 export class LendingService {
+	private readonly logger = new Logger(LendingService.name)
+
 	constructor(
 		@Inject(DB) private db: PostgresJsDatabase,
 		private readonly objectsProxy: ObjectsProxyService,
@@ -168,6 +170,8 @@ export class LendingService {
 		const postId = t.postId
 		const objectId = t.objectId
 
+		await this.assertStillAcceptable(t)
+
 		const updated = await this.db.transaction(async (t) => {
 			await this.lockObject(t, objectId)
 			await t
@@ -220,9 +224,51 @@ export class LendingService {
 			throw new NotFoundException()
 
 		if (updated.postId)
-			await this.postsProxy.close(updated.postId)
+			await this.closePost(updated.postId)
 
 		return (updated)
+	}
+
+	private async closePost(postId: number) {
+		try {
+			await this.postsProxy.close(postId)
+		} catch (err: unknown) {
+			this.logger.error(`could not close post ${postId}, loan already accepted: ${(err as Error).message}`)
+		}
+	}
+
+	private async assertStillAcceptable(request: typeof lending.$inferSelect) {
+		if (request.status !== 'pending')
+			throw new ConflictException('Request is no longer pending')
+		if (request.lendedTo <= new Date())
+			throw new ConflictException('Requested period is already over')
+
+		let object
+		try {
+			object = await this.objectsProxy.findById(request.objectId)
+		} catch (err: unknown) {
+			if (err instanceof NotFoundException)
+				throw new ConflictException('Object no longer exists')
+			throw err
+		}
+		if (!object.isAvailable)
+			throw new ConflictException('Object not available')
+
+		if (!request.postId)
+			return
+
+		let post
+		try {
+			post = await this.postsProxy.findById(request.postId)
+		} catch (err: unknown) {
+			if (err instanceof NotFoundException)
+				throw new ConflictException('Post no longer exists')
+			throw err
+		}
+		if (post.status !== 'open')
+			throw new ConflictException('Post is no longer open')
+		if (request.lendedFrom < new Date(post.fromDate) || request.lendedTo > new Date(post.toDate))
+			throw new ConflictException('Requested period no longer fits inside the post window')
 	}
 
 	async rejectLend(id: number, userId: number) {
