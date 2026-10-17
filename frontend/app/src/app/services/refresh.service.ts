@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, defer, finalize, firstValueFrom, shareReplay, tap } from 'rxjs';
 import { LoginResponse, RefreshResponse } from '../models/refresh.types';
-import { User } from '../models/user.model';
+import { User, UserInput } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class RefreshService {
@@ -29,6 +29,14 @@ export class RefreshService {
 
     getMe(): Observable<User> {
         return this.http.get<User>('/api/users/me').pipe(
+            tap((user) => {
+                this.currentUser.set(user);
+            }),
+        );
+    }
+
+    updateMe(body: UserInput): Observable<User> {
+        return this.http.patch<User>('/api/users/me', body).pipe(
             tap((user) => {
                 this.currentUser.set(user);
             }),
