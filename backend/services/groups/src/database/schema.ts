@@ -11,6 +11,7 @@ export const groups = pgTable('groups', {
 	description:	varchar('description', { length:500 }),
 	createdAt:		timestamptz('created_at').notNull().defaultNow(),
 	updatedAt:		timestamptz('updated_at').notNull().defaultNow(),
+	deletedAt:		timestamptz('deleted_at'),
 })
 
 export const groupMembers = pgTable('group_members', {

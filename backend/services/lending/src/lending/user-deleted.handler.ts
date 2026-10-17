@@ -6,7 +6,7 @@ export function userDeletedHandler(lending: LendingService) {
 	const logger = new Logger('UserDeletedHandler')
 
 	return async (data: UserDeletedData): Promise<void> => {
-		const removed = await lending.removeForUser(data.userId)
-		logger.log(`user.deleted(${data.userId}) -> removed ${removed} lending row(s)`)
+		const cancelled = await lending.updateAllForUserDeleted(data.userId)
+		logger.log(`user.deleted(${data.userId}) -> cancelled ${cancelled} lending row(s)`)
 	}
 }

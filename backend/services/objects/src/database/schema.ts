@@ -15,5 +15,6 @@ export const objects = pgTable('objects', {
 	condition:		objectConditionEnum('condition').notNull(),
 	isAvailable:	boolean('is_available').notNull().default(true),
 	createdAt:		timestamptz('created_at').notNull().defaultNow(),
-	updatedAt:		timestamptz('updated_at').notNull().defaultNow()
+	updatedAt:		timestamptz('updated_at').notNull().defaultNow(),
+	deletedAt:		timestamptz('deleted_at'),
 })
