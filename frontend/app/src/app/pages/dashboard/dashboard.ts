@@ -97,7 +97,6 @@ export class Dashboard {
 					this.bannerErrors.set([]);
 					this.loadGroups();
 					this.loadPosts();
-					this.loadMyObjects();
 					this.loadLendings();
 				});
 		});
@@ -140,20 +139,34 @@ export class Dashboard {
 		}
 	}
 
-	private loadMyObjects(): void {
-		this.objectService.findMy().subscribe({
-			next: (objects) => this.objectsById.set(new Map(objects.map((object) => [object.id, object]))),
-			error: () => this.showError('Could not load your items'),
-		});
-	}
-
 	private loadLendings(): void {
 		this.lendingService.listAll().subscribe({
-			next: (lendings) => this.lendings.set(lendings),
+			next: (lendings) => {
+				this.lendings.set(lendings);
+				this.loadObjectsById(lendings);
+				this.loadBorrowersById(lendings);
+			},
 			error: () => this.showError('Could not load your exchanges'),
 		});
 	}
 
+	private loadObjectsById(lendings: LendingEntity[]): void {
+		for (const objectId of new Set(lendings.map((l) => l.objectId))) {
+			this.objectService.findOne(objectId).subscribe({
+				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
+				error: () => this.showError('Could not load some items of your exchanges'),
+			});
+		}
+	}
+
+	private loadBorrowersById(lendings: LendingEntity[]): void {
+		for (const borrowerId of new Set(lendings.map((l) => l.borrowerId))) {
+			this.usersService.findOne(borrowerId).subscribe({
+				next: (user) => this.authorsById.update((map) => new Map(map).set(borrowerId, user)),
+				error: () => this.showError('Could not load who you offered to help'),
+			});
+		}
+	}
 
 	onGroupFilterChange(event: Event): void {
 		const value = (event.target as HTMLSelectElement).value;
