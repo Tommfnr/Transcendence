@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { GroupsService } from '../../services/groups.service';
+import { UsersService } from '../../services/users.service';
 import { ObjectEntity } from '../../models/object.model';
 import { GroupEntity } from '../../models/group.model';
 import { RefreshService } from '../../services/refresh.service';
@@ -10,22 +11,25 @@ import { ListRowComponent } from '../../components/list-row/list-row';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { ModalService } from '../../services/modal.service';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 @Component({
   selector: 'app-profile',
-  imports: [ TitleBarComponent, ListRowComponent, ButtonDirective, AvatarComponent ],
+  imports: [ TitleBarComponent, ListRowComponent, ButtonDirective, AvatarComponent, ErrorBannerComponent ],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {
   private refreshService = inject(RefreshService);
   private objectService = inject(ObjectService);
   private groupsService = inject(GroupsService);
+  private usersService = inject(UsersService);
   private router = inject(Router);
   user = this.refreshService.user;
   readonly modalService = inject(ModalService);
 
   objects = signal<ObjectEntity[] | null>(null);
   groups = signal<GroupEntity[] | null>(null);
+  bannerErrors = signal<string[]>([]);
 
   openEditProfileModal(): void {
 	this.modalService.openEditProfile();
@@ -66,7 +70,19 @@ export class Profile implements OnInit {
     });
   }
 
-//   TODO
-	onDeleteUser(): void {}
+  onDeleteUser(): void {
+    const user = this.user();
+    if (!user) return;
+    if (!confirm('Delete your account? This cannot be undone.')) return;
+
+    this.bannerErrors.set([]);
+    this.usersService.remove(user.id).subscribe({
+      // The backend already revoked the session, logout only clears the refresh cookie
+      next: () => this.onLogout(),
+      error: (err) => {
+        this.bannerErrors.set([err.error?.message ?? 'Could not delete your account']);
+      },
+    });
+  }
 
 }
