@@ -11,6 +11,7 @@ export interface PostEntity {
     status: PostStatus;
     createdAt: string;
     updatedAt: string;
+    deletedAt: string | null;
     fromDate: string;
     toDate: string;
 }

@@ -81,7 +81,7 @@
                     <span class="text-sm text-text-secondary">{{ requestCount() }} in progress</span>
                 </div>
                 <div class="flex flex-col gap-5">
-                    @for (request of displayedRequests(); track request.id) {
+                    @for (request of groupRequests(); track request.id) {
                         <app-request-card [request]="request" />
                     } @empty {
                         <p class="text-center text-sm text-text-secondary">
