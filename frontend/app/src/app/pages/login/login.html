@@ -7,7 +7,6 @@
 
 		@if (bannerErrors().length > 0) {
 			<app-error-banner>
-
 				@for (msg of bannerErrors(); track msg) {
 					<p>{{ msg }}</p>
 				}
@@ -31,7 +30,9 @@
 				Remember me
 			</label>
 
-			<button appButton block size="large" type="submit" variant="primary">Log in</button>
+			<button appButton block size="large" type="submit" variant="primary" [disabled]="loginForm().submitting()">
+				Log in
+			</button>
 		</form>
 
 		<p class="text-center text-sm text-text-secondary">
