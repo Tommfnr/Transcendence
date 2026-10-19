@@ -1,22 +1,26 @@
 <div class="flex flex-col gap-4">
     <app-header-app class="lg:hidden"></app-header-app>
+
+    @if (bannerErrors().length > 0) {
+        <app-error-banner>
+            @for (msg of bannerErrors(); track msg) {
+                <p>{{ msg }}</p>
+            }
+        </app-error-banner>
+    }
+
     <section class="flex items-center justify-between gap-2">
         <select
             (change)="onGroupFilterChange($event)"
             class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-card cursor-pointer"
         >
-            @if (errorMessage()) {
-                <option disabled selected>{{ errorMessage() }}</option>
-            } @else {
-                <option value="">All my groups</option>
-                @for (group of groups(); track group.id) {
-                    <option [value]="group.id">{{ group.name }}</option>
-                } @empty {
-                    <option disabled>No groups yet</option>
-                }
+            <option value="">All my groups</option>
+            @for (group of groups(); track group.id) {
+                <option [value]="group.id">{{ group.name }}</option>
+            } @empty {
+                <option disabled>No groups yet</option>
             }
         </select>
-
         <a
             routerLink="/app/groupParameter"
             aria-label="Settings"
@@ -60,7 +64,7 @@
             <button
                 type="button"
                 (click)="selectTab('exchanges')"
-                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight"
+                class="border-b-2 px-2 pb-1 text-xs font-bold tracking-tight cursor-pointer"
                 [ngClass]="
                     activeTab() === 'exchanges'
                         ? 'border-primary text-primary'
@@ -74,9 +78,7 @@
             <div [class.hidden]="activeTab() !== 'requests'" class="lg:block">
                 <div class="mb-4 hidden items-baseline justify-between lg:flex">
                     <h2 class="text-lg font-bold">Group requests</h2>
-                    <span class="text-sm text-text-secondary"
-                        >{{ requestCount() }} in progress</span
-                    >
+                    <span class="text-sm text-text-secondary">{{ requestCount() }} in progress</span>
                 </div>
                 <div class="flex flex-col gap-5">
                     @for (request of displayedRequests(); track request.id) {
@@ -98,17 +100,19 @@
                     <span class="text-sm text-text-secondary">{{ myExchanges().length }}</span>
                 </div>
                 <div class="flex flex-col gap-3">
-                    <div class="flex flex-col gap-3">
-                        @for (exchange of myExchanges(); track exchange.id) {
-                            <app-exchange-row
-                                [title]="exchange.title"
-                                [subtitle]="exchange.subtitle"
-                                [statusLabel]="exchange.statusLabel"
-                                [status]="exchange.tone"
-                                (press)="onExchangePress(exchange)"
-                            />
-                        }
-                    </div>
+                    @for (exchange of myExchanges(); track exchange.id) {
+                        <app-exchange-row
+                            [title]="exchange.title"
+                            [subtitle]="exchange.subtitle"
+                            [statusLabel]="exchange.statusLabel"
+                            [status]="exchange.tone"
+                            (press)="onExchangePress(exchange)"
+                        />
+                    } @empty {
+                        <p class="text-center text-sm text-text-secondary">
+                            No exchanges yet.
+                        </p>
+                    }
                 </div>
             </div>
         </div>
@@ -124,6 +128,7 @@
         <app-fab-action label="Create group" tone="group" (pick)="openAddGroupModal()" />
     </div>
 }
+
 @if (!modalService.activeModal()) {
     <button
         type="button"

@@ -13,8 +13,6 @@ import { GroupParameter } from './pages/groupParameter/groupParameter';
 import { EditAddGroup } from './pages/editAddGroup/editAddGroup';
 import { ICanHelp } from './pages/iCanHelp/iCanHelp';
 import { OfferHelp } from './pages/offerHelp/offerHelp';
-import { AssistanceOfferDetails } from './pages/assistanceOfferDetails/assistanceOfferDetails';
-import { ExampleGroupList } from './pages/exampleGroupList/exampleGroupList';
 import { Chats } from './pages/chats/chats';
 import { authGuard } from './guards/auth.guard';
 
@@ -107,14 +105,6 @@ export const routes: Routes = [
 			{
 				path: 'offerHelp/:postId',
 				component: OfferHelp
-			},
-			{
-				path: 'assistanceOfferDetails',
-				component: AssistanceOfferDetails
-			},
-			{
-				path: 'exampleGroupList',
-				component: ExampleGroupList
 			},
 			{
 				path: 'chats',

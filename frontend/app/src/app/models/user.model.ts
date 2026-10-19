@@ -3,3 +3,5 @@ export interface User {
   username: string;
   email: string;
 }
+
+export type UserInput = Pick<User, 'username'>;

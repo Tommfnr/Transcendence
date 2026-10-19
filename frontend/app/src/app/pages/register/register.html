@@ -5,7 +5,8 @@
 			<p class="text-sm text-text-secondary">Redirecting to the login page…</p>
 		</div>
 	</div>
-} @else {
+}
+@else {
 	<div class="flex flex-1 items-start justify-center pt-8 lg:items-center lg:py-8 lg:pt-0">
 		<div class="flex w-full max-w-110 flex-col gap-5 rounded-card bg-card px-5 py-6 shadow-card">
 			<section class="flex flex-col gap-1">
@@ -23,6 +24,7 @@
 
 			<form (submit)="onSubmit($event)" class="flex flex-col gap-5">
 				<app-text-field
+					typeField="email"
 					placeholder="john@example.com"
 					label="Email"
 					[formField]="registerForm.email"
@@ -50,7 +52,7 @@
 					</p>
 				</div>
 
-				<button appButton block size="large" type="submit" variant="primary">
+				<button appButton block size="large" type="submit" variant="primary" [disabled]="registerForm().submitting()">
 					Register
 				</button>
 			</form>
