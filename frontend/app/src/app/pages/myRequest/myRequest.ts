@@ -91,7 +91,7 @@ export class MyRequest implements OnInit {
 			this.groupsService.findMembers(group.id).subscribe({
 				next: (members) => this.memberIdsByGroupId.update((map) =>
 					new Map(map).set(group.id, members.map((m) => m.userId))),
-				error: () => this.showError('Could not load the members of some groups'),
+				error: () => {},
 			});
 		}
 	}
