@@ -70,6 +70,10 @@ export class ChatPreview implements OnInit {
             .pipe(takeUntilDestroyed())
             .subscribe(({ conversation }) => this.upsertConversation(conversation));
 
+        this.chatSocket.reconnected$
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.refreshConversations());
+
         // Any new message bumps its conversation back to the top of the list
         this.chatSocket.messageNew$.pipe(takeUntilDestroyed()).subscribe((message) => {
             this.conversations.update((current) =>
@@ -81,6 +85,12 @@ export class ChatPreview implements OnInit {
                     ),
                 ),
             );
+        });
+    }
+
+    private refreshConversations(): void {
+        this.chatsService.findMy().subscribe((conversations) => {
+            this.conversations.set(sortByActivity(conversations));
         });
     }
 
