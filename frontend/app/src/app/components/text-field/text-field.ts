@@ -1,4 +1,4 @@
-import { Component, input, output, model } from '@angular/core';
+import { Component, input, output, model, signal, computed } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { booleanAttribute, numberAttribute } from '@angular/core';
 
@@ -31,6 +31,13 @@ export class TextFieldComponent implements FormValueControl<string> {
 	readonly multiline = input(false, { transform: booleanAttribute});
 	readonly rows = input(3, { transform: numberAttribute });
 
+	/* Password */
+	readonly revealed = signal(false);
+
+	// if typefield is password & revealed is activated -> show text
+	readonly inputType = computed(() =>
+		this.typeField() === 'password' && this.revealed() ? 'text' : this.typeField());
+
 	private static count = 0;
 	id = `text-field-${TextFieldComponent.count++}`;
 
@@ -42,7 +49,7 @@ export class TextFieldComponent implements FormValueControl<string> {
 
 	get classes(): string {
 		const base =
-			'rounded-card px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
+			'w-full rounded-card px-4 py-2 text-sm font-medium placeholder:text-text-secondary '
 			+
 			'focus:outline-none focus:ring-1 focus:ring-offset-background ';
 
