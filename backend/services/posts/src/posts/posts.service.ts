@@ -17,14 +17,6 @@ export class PostsService {
 		private readonly eventPublisher: EventPublisherService,
 	) { }
 
-	findAll() {
-		return (this.db
-			.select()
-			.from(posts)
-			.where(isNull(posts.deletedAt))
-			.orderBy(posts.id))
-	}
-
 	findByUserId(userId: number) {
 		return (this.db
 			.select()
