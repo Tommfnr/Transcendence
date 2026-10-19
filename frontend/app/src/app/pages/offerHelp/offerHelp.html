@@ -61,11 +61,11 @@
         ></app-text-field>
     </section>
     @if (bannerErrors().length > 0) {
-        <div class="rounded-card border border-error p-3 text-sm text-error">
+        <app-error-banner>
             @for (msg of bannerErrors(); track msg) {
                 <p>{{ msg }}</p>
             }
-        </div>
+        </app-error-banner>
     }
     <button
         appButton
@@ -74,7 +74,7 @@
         type="button"
         size="large"
         class="mt-auto lg:mt-0 lg:w-auto lg:self-center"
-        [disabled]="submitting()"
+        [disabled]="submitting() || !canOffer()"
         (click)="onSubmit()"
     >
         Send my offer

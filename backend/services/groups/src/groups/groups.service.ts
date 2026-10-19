@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { eq, ne, and, inArray, notInArray, count, countDistinct } from 'drizzle-orm'
+import { eq, ne, and, inArray, isNull, count, countDistinct } from 'drizzle-orm'
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { groupMembers, groups } from '../database/schema'
 import { DB } from '../database/database.module'
@@ -39,7 +39,7 @@ export class GroupsService {
 		const [group] = await this.db
 			.select()
 			.from(groups)
-			.where(eq(groups.id, groupId))
+			.where(and(eq(groups.id, groupId), isNull(groups.deletedAt)))
 
 		if (!group)
 			throw new NotFoundException('Group not found')
@@ -51,7 +51,7 @@ export class GroupsService {
 		return this.db
 			.select({ id: groups.id, name: groups.name })
 			.from(groups)
-			.where(inArray(groups.id, groupIds))
+			.where(and(inArray(groups.id, groupIds), isNull(groups.deletedAt)))
 	}
 
 	findMembers(groupId: number) {
@@ -276,8 +276,13 @@ export class GroupsService {
 
 			if (!successor) {
 				await t
-					.delete(groups)
+					.update(groups)
+					.set({ deletedAt: new Date(), updatedAt: new Date() })
 					.where(eq(groups.id, groupId))
+
+				await t
+					.delete(groupMembers)
+					.where(eq(groupMembers.groupId, groupId))
 
 				return { message: 'Group deleted, you were the last member' }
 			}
@@ -300,32 +305,34 @@ export class GroupsService {
 		})
 	}
 
+	// Soft delete: the group row stays, but its memberships are removed,
+	// so every read that goes through group_members stops seeing it
 	async deleteGroup(groupId: number) {
-		await this.db
-			.delete(groups)
-			.where(eq(groups.id, groupId))
+		await this.db.transaction(async (t) => {
+			await t
+				.update(groups)
+				.set({ deletedAt: new Date(), updatedAt: new Date() })
+				.where(eq(groups.id, groupId))
+
+			await t
+				.delete(groupMembers)
+				.where(eq(groupMembers.groupId, groupId))
+		})
 
 		return { message: 'Group successfully deleted' }
 	}
 
 	async removeMembershipsForUser(userId: number): Promise<number> {
-		return (this.db.transaction(async (t) => {
-			await t.delete(groupMembers).where(eq(groupMembers.userId, userId))
+		const ownedGroups = await this.db
+			.select({ id: groups.id })
+			.from(groups)
+			.where(and(eq(groups.ownerId, userId), isNull(groups.deletedAt)))
 
-			const orphaned = await t
-				.delete(groups)
-				.where(
-					notInArray(
-						groups.id,
-						t
-							.selectDistinct({ id: groupMembers.groupId })
-							.from(groupMembers)
-							.where(eq(groupMembers.role, 'admin')),
-					),
-				)
-				.returning({ id: groups.id })
+		for (const group of ownedGroups)
+			await this.leaveGroup(group.id, userId)
 
-			return (orphaned.length)
-		}))
+		await this.db.delete(groupMembers).where(eq(groupMembers.userId, userId))
+
+		return (ownedGroups.length)
 	}
 }

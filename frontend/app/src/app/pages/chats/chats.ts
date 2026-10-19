@@ -1,15 +1,22 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { ChatComponent } from '../../components/chats/chats';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
 import { UsersService } from '../../services/users.service';
 import { RefreshService } from '../../services/refresh.service';
+import { LendingService } from '../../services/lending.service';
+import { PostsService } from '../../services/posts.service';
+import { GroupsService } from '../../services/groups.service';
 import { ConversationWithMembers } from '../../models/chat.model';
+import { LendingEntity } from '../../models/lending.model';
+import { ExchangeTone, LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
+import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
+import { formatTimeAgo } from '../../shared/date-format';
 import { User } from '../../models/user.model';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 
@@ -23,28 +30,43 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
     );
 }
 
-// Preview of the chat component on the conversations of the user
+// Conversations page of the user
 @Component({
-    selector: 'app-chatPreview',
-    imports: [ChatComponent, ButtonDirective, DatePipe, TitleBarComponent],
-    templateUrl: './chatPreview.html',
+    selector: 'app-chats',
+    imports: [ChatComponent, ButtonDirective, TitleBarComponent, ExchangeRowComponent],
+    templateUrl: './chats.html',
 })
-export class ChatPreview implements OnInit {
+export class Chats implements OnInit {
     private chatsService = inject(ChatsService);
     private chatSocket = inject(ChatSocketService);
     private usersService = inject(UsersService);
     private refreshService = inject(RefreshService);
+    private lendingService = inject(LendingService);
+    private route = inject(ActivatedRoute);
+    private postsService = inject(PostsService);
+    private groupsService = inject(GroupsService);
 
     readonly conversationId = signal<number | null>(null);
     readonly loaded = signal(false);
     protected readonly conversations = signal<ConversationWithMembers[]>([]);
+    // Each conversation comes from an offer on a post; its status is shown like in My exchanges
+    private readonly lendings = signal<LendingEntity[]>([]);
 
     protected readonly selected = computed(
         () => this.conversations().find(({ id }) => id === this.conversationId()) ?? null,
     );
 
+    // Name of a group of the post that both members are in, loaded once per conversation
+    private readonly groupNameByConversation = signal<Map<number, string>>(new Map());
+    protected readonly groupName = computed(() => {
+        const conversation = this.selected();
+        return conversation ? (this.groupNameByConversation().get(conversation.id) ?? '') : '';
+    });
+
     protected readonly maxLength = MESSAGE_MAX_LENGTH;
     protected readonly recipientId = signal<number | null>(null);
+    // The post the conversation is about; the backend requires it
+    protected readonly postId = signal<number | null>(null);
     protected readonly firstMessage = signal('');
     protected readonly creating = signal(false);
     protected readonly createError = signal<string | null>(null);
@@ -59,12 +81,20 @@ export class ChatPreview implements OnInit {
     protected readonly canCreate = computed(
         () =>
             this.recipientId() !== null &&
+            this.postId() !== null &&
             this.firstMessage().trim().length > 0 &&
             this.firstMessage().length <= MESSAGE_MAX_LENGTH &&
             !this.creating(),
     );
 
     constructor() {
+        // The header shows the shared group of the open conversation
+        effect(() => {
+            const conversation = this.selected();
+            if (conversation && !untracked(this.groupNameByConversation).has(conversation.id))
+                untracked(() => this.loadSharedGroup(conversation));
+        });
+
         // A conversation someone else started with us shows up without a reload
         this.chatSocket.conversationNew$
             .pipe(takeUntilDestroyed())
@@ -97,12 +127,25 @@ export class ChatPreview implements OnInit {
     ngOnInit(): void {
         this.chatsService.findMy().subscribe((conversations) => {
             this.conversations.set(sortByActivity(conversations));
-            // The most recent one opens by default
-            this.conversationId.set(this.conversations()[0]?.id ?? null);
+            // My exchanges links here with ?post=<id>, the Offers modal adds &with=<offerer id>;
+            // otherwise the most recent one opens
+            const params = this.route.snapshot.queryParamMap;
+            const postId = Number(params.get('post'));
+            const withId = params.has('with') ? Number(params.get('with')) : null;
+            const opened = this.conversations().find((conversation) =>
+                conversation.post.id === postId
+                && (withId === null || conversation.members.some((member) => member.id === withId)))
+                ?? this.conversations()[0];
+            this.conversationId.set(opened?.id ?? null);
             this.loaded.set(true);
         });
 
         this.usersService.findAll().subscribe((users) => this.users.set(users));
+
+        this.lendingService.listAll().subscribe({
+            next: (lendings) => this.lendings.set(lendings),
+            error: (err) => console.error('Failed to load lendings', err),
+        });
     }
 
     // Who we are talking to: everyone in the conversation but us
@@ -116,6 +159,57 @@ export class ChatPreview implements OnInit {
         return names.length > 0 ? names.join(', ') : 'Utilisateur supprimé';
     }
 
+    // The offer behind a conversation: same post, between the same two people (listAll is newest first)
+    private offerOf(conversation: ConversationWithMembers): LendingEntity | undefined {
+        const memberIds = new Set(conversation.members.map((member) => member.id));
+        return this.lendings().find((l) =>
+            l.postId === conversation.post.id && memberIds.has(l.lenderId) && memberIds.has(l.borrowerId));
+    }
+
+    // Same content as a My exchanges row in the dashboard: post → who, role and when, then the offer status
+    protected exchangeRow(conversation: ConversationWithMembers): {
+        title: string;
+        subtitle: string;
+        statusLabel: string;
+        tone: ExchangeTone;
+    } {
+        const offer = this.offerOf(conversation);
+        const title = `${conversation.post.title} → ${this.peers(conversation)}`;
+        const timeAgo = formatTimeAgo(conversation.updatedAt);
+
+        // A conversation without its offer (deleted, or still loading) keeps the title and the time
+        if (!offer)
+            return { title, subtitle: timeAgo, statusLabel: '', tone: 'waiting' };
+
+        const role = offer.lenderId === this.refreshService.user()?.id ? 'my offer' : 'my request';
+        return {
+            title,
+            subtitle: `${role} · ${timeAgo}`,
+            statusLabel: LENDING_STATUS_DISPLAY[offer.status].label,
+            tone: LENDING_STATUS_DISPLAY[offer.status].tone,
+        };
+    }
+
+    // Same rule as the Offers modal: among the groups of the post, the first one every member belongs to
+    private loadSharedGroup(conversation: ConversationWithMembers): void {
+        const memberIds = conversation.members.map((member) => member.id);
+
+        this.postsService.findGroups(conversation.post.id).pipe(
+            switchMap((groups) => groups.length === 0 ? of([]) : forkJoin(groups.map((group) =>
+                this.groupsService.findMembers(group.id).pipe(
+                    map((members) => ({ group, userIds: members.map((member) => member.userId) })),
+                    // A group we are not in refuses its member list: it can't be the shared one
+                    catchError(() => of({ group, userIds: [] as number[] })),
+                ),
+            ))),
+            catchError(() => of([])),
+        ).subscribe((results) => {
+            const shared = results.find(({ userIds }) => memberIds.every((id) => userIds.includes(id)));
+            this.groupNameByConversation.update((names) =>
+                new Map(names).set(conversation.id, shared?.group.name ?? ''));
+        });
+    }
+
     protected select(conversationId: number): void {
         this.conversationId.set(conversationId);
     }
@@ -125,6 +219,11 @@ export class ChatPreview implements OnInit {
         this.recipientId.set(value ? Number(value) : null);
     }
 
+    protected onPostIdInput(event: Event): void {
+        const value = (event.target as HTMLInputElement).value;
+        this.postId.set(value ? Number(value) : null);
+    }
+
     protected onFirstMessageInput(event: Event): void {
         this.firstMessage.set((event.target as HTMLInputElement).value);
     }
@@ -132,17 +231,19 @@ export class ChatPreview implements OnInit {
     // A conversation needs its first message: the backend creates both in one call
     protected createConversation(): void {
         const recipientId = this.recipientId();
-        if (!this.canCreate() || recipientId === null) return;
+        const postId = this.postId();
+        if (!this.canCreate() || recipientId === null || postId === null) return;
 
         this.creating.set(true);
         this.createError.set(null);
         this.chatsService
-            .create(recipientId, this.firstMessage().trim())
+            .create(recipientId, postId, this.firstMessage().trim())
             .pipe(finalize(() => this.creating.set(false)))
             .subscribe({
                 next: ({ conversation }) => {
                     this.firstMessage.set('');
                     this.recipientId.set(null);
+                    this.postId.set(null);
                     this.upsertConversation(conversation);
                     // Show the fresh conversation right away
                     this.conversationId.set(conversation.id);

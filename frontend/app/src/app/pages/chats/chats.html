@@ -1,5 +1,6 @@
 <section class="flex flex-1 flex-col gap-4 px-3 pt-14">
-	<app-title-bar [title]="'USERNAME'" leading="back" meta="GROUP NAME"></app-title-bar>
+	<!-- Mobile only: the list is hidden there, so the bar shows the open conversation like the desktop chat header -->
+	<app-title-bar [title]="selected() ? peers(selected()!) : 'Chats'" leading="back" [meta]="groupName() || null"></app-title-bar>
 
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
     <!-- <form
@@ -20,6 +21,15 @@
                     <option [value]="user.id">{{ user.username }}</option>
                 }
             </select>
+
+            <input
+                type="number"
+                aria-label="Post"
+                placeholder="Post id"
+                [value]="postId() ?? ''"
+                (input)="onPostIdInput($event)"
+                class="h-10 w-24 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+            />
 
             <input
                 type="text"
@@ -49,34 +59,32 @@
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
 
     <div class="flex min-h-0 flex-col gap-4 lg:flex-row">
-        <!-- Live list: reordered by ChatSocketService on every new message -->
+        <!-- Live list: reordered by ChatSocketService on every new message. Desktop only: on mobile the chat is opened from My exchanges -->
         <nav
             aria-label="Mes conversations"
-            class="flex max-h-30 lg:max-h-[70dvh] lg:w-80 min-h-0 flex-col overflow-y-auto rounded-card bg-card shadow-card"
+            class="hidden lg:flex lg:max-h-[70dvh] lg:w-md lg:shrink-0 min-h-0 flex-col gap-3 overflow-y-auto p-1"
         >
-            <h2 class="border-b border-muted px-3 py-2 text-sm font-bold text-strong">
-                My exchanges ({{ conversations().length }})
-            </h2>
+            <div class="flex items-baseline justify-between">
+                <h2 class="text-lg font-bold">My exchanges</h2>
+                <span class="text-sm text-text-secondary">{{ conversations().length }}</span>
+            </div>
 
-            <ul class="flex flex-col p-1">
-				<!-- REPLACE THIS BY MY EXCHANGES REQUESTS ACCEPTED / OPEN I DONT KNOW -->
+            <!-- Same rows as My exchanges in the dashboard -->
+            <ul class="flex flex-col gap-3">
                 @for (conversation of conversations(); track conversation.id) {
                     @let selected = conversation.id === conversationId();
-                    <li>
-                        <button
-                            type="button"
-                            [attr.aria-current]="selected ? 'true' : null"
-                            (click)="select(conversation.id)"
-                            class="flex w-full cursor-pointer flex-col items-start gap-0.5 rounded-card px-3 py-2 text-left transition-colors duration-150"
-                            [class]="selected ? 'bg-primary-surface-solid' : 'hover:bg-background'"
-                        >
-                            <span class="text-sm font-bold text-strong">
-                                #{{ conversation.id }} · {{ peers(conversation) }}
-                            </span>
-                            <span class="text-2xs text-text-secondary">
-                                {{ conversation.updatedAt | date: 'dd/MM HH:mm' }}
-                            </span>
-                        </button>
+                    @let row = exchangeRow(conversation);
+                    <li [attr.aria-current]="selected ? 'true' : null">
+                        <app-exchange-row
+                            [title]="row.title"
+                            [subtitle]="row.subtitle"
+                            [statusLabel]="row.statusLabel"
+                            [status]="row.tone"
+                            (press)="select(conversation.id)"
+                            class="block rounded-card"
+                            [class.ring-2]="selected"
+                            [class.ring-primary]="selected"
+                        />
                     </li>
                 } @empty {
                     <li class="px-3 py-2 text-xs text-text-secondary">
@@ -87,15 +95,15 @@
         </nav>
 
         @if (conversationId(); as conversationId) {
-            <app-chat [conversationId]="conversationId" class="h-[60dvh] min-w-0 lg:w-full">
-				<div class="flex justify-between items-center px-3 py-2 border-b border-muted">
+            <app-chat [conversationId]="conversationId" class="h-[calc(100dvh-7rem)] min-w-0 lg:h-[60dvh] lg:w-full">
+				<div class="hidden lg:flex justify-between items-center px-3 py-2 border-b border-muted">
 
 					<h2 class="text-sm font-bold text-strong">
 						@if (selected(); as conversation) {
 							{{ peers(conversation) }}
 						}
 					</h2>
-					<p class="text-sm text-text-secondary">GROUP NAME</p>
+					<p class="text-sm text-text-secondary">{{ groupName() }}</p>
 				</div>
             </app-chat>
         } @else if (loaded()) {

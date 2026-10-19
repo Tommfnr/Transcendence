@@ -9,12 +9,13 @@ import { RefreshService } from '../../services/refresh.service';
 import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { AvatarComponent } from '../../components/avatar/avatar';
 
 @Component({
 	selector: 'app-editAddGroup',
-	imports: [FormField, ButtonDirective, Modal, TextFieldComponent, AvatarComponent],
+	imports: [FormField, ButtonDirective, Modal, TextFieldComponent, AvatarComponent, ErrorBannerComponent],
 	templateUrl: './editAddGroup.html',
 })
 
@@ -147,7 +148,12 @@ export class EditAddGroup implements OnInit {
 	}
 
 	onLeaveGroup(): void {
-		if (!confirm(`Leave "${this.group().name}"?`))
+		let question = `Leave "${this.group().name}"?`;
+
+		if (this.isOwner())
+			question += ' You are the owner: the longest-standing member will take over the group. If you are the only member, the group will be deleted.';
+
+		if (!confirm(question))
 			return;
 
 		this.errorMessage.set(null);

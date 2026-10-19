@@ -5,16 +5,17 @@
 >
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
         @if (bannerErrors().length > 0) {
-            <div class="rounded border border-red-500 bg-red-50 p-3 text-red-700">
+            <app-error-banner>
                 @for (msg of bannerErrors(); track msg) {
                     <p>{{ msg }}</p>
                 }
-            </div>
+            </app-error-banner>
         }
 
         @if (!isEditMode() || isAdmin()) {
             <div class="flex flex-wrap gap-4">
-                <div class="size-18 bg-primary rounded-full shrink-0"></div>
+                <app-avatar kind="group" size="xl"></app-avatar>
+
                 <div class="flex flex-col gap-2 min-w-40 flex-1">
                     <app-text-field
                         label="Group name"
@@ -52,7 +53,7 @@
                 <h2 class="text-sm font-bold">Members ({{ members().length }})</h2>
                 @for (member of members(); track member.id) {
                     <div class="flex items-center gap-3">
-                        <app-avatar></app-avatar>
+                        <app-avatar kind="group"></app-avatar>
                         <p class="font-bold">
                             {{ member.username }}
                             @if (member.userId === currentUserId()) {
@@ -123,15 +124,14 @@
             </button>
         }
     </form>
-    <!-- Wait for the owner to be known, or the owner would briefly see "Leave" -->
+    <!-- Wait for the owner to be known, or the owner would briefly miss "Delete" -->
     @if (isEditMode() && ownerId() !== null) {
+        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
+            Leave this group
+        </button>
         @if (isOwner()) {
             <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onDeleteGroup()">
                 Delete this group
-            </button>
-        } @else {
-            <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
-                Leave this group
             </button>
         }
     }

@@ -4,34 +4,38 @@
 			<p class="text-2xs font-bold uppercase tracking-wide text-text-secondary">Their request</p>
 			<h3 class="text-base font-bold text-text">{{ post()?.title }}</h3>
 			@if (requester()) {
-			<p class="text-xs text-text-secondary">by {{ requester()?.username }}</p>
+				<p class="text-xs text-text-secondary">by {{ requester()?.username }}</p>
 			}
 		</section>
 
-		@if (errorMessage()) {
-		<div class="rounded-card border border-error p-3 text-sm text-error">{{ errorMessage() }}</div>
+		@if (bannerErrors().length > 0) {
+			<app-error-banner>
+				@for (msg of bannerErrors(); track msg) {
+					<p>{{ msg }}</p>
+				}
+			</app-error-banner>
 		}
 
 		<section class="flex flex-col gap-1 rounded-card bg-card p-3 shadow-card">
 			<p class="text-2xs font-bold uppercase tracking-wide text-text-secondary">Your offer · {{ sentAgo() }}</p>
 			<p class="text-sm font-bold text-text">{{ object()?.name }}</p>
 			@if (lending()?.message) {
-			<p class="text-xs text-text-secondary">{{ lending()?.message }}</p>
+				<p class="text-xs text-text-secondary">{{ lending()?.message }}</p>
 			}
 		</section>
 
 		<div class="flex justify-end gap-2">
 			@if (canCancel()) {
-			<button appButton size="small" variant="secondary" type="button" [disabled]="cancelling()"
-				(click)="onCancel()">
-				Cancel my offer
-			</button>
+				<button appButton size="small" variant="secondary" type="button" [disabled]="cancelling()"
+					(click)="onCancel()">
+					Cancel my offer
+				</button>
 			}
 			@if (canReturn()) {
-			<button appButton size="small" variant="primary" type="button" [disabled]="returned()"
-				(click)="onReturn()">
-				Item returned
-			</button>
+				<button appButton size="small" variant="primary" type="button" [disabled]="returning()"
+					(click)="onReturn()">
+					Item returned
+				</button>
 			}
 			<button appButton size="small" variant="primary" type="button" (click)="onOpenConversation()">
 				Open conversation

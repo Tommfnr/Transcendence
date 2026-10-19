@@ -6,9 +6,10 @@ import { ApiKeyAuthModule } from '@pep/shared'
 import { ObjectsController } from './objects.controller'
 import { PublicObjectsController } from './public-objects.controller'
 import { ObjectsService } from './objects.service'
+import { EventsModule } from '../events/events.module'
 
 @Module({
-	imports: [ApiKeyAuthModule],
+	imports: [ApiKeyAuthModule, EventsModule],
 	controllers: [ObjectsController, PublicObjectsController],
 	providers: [ObjectsService],
 	exports: [ObjectsService],

@@ -6,13 +6,14 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ChipComponent } from "../../components/chip/chip";
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
 
 @Component({
   selector: 'app-editAddObject',
-  imports: [FormField, ButtonDirective, Modal, TextFieldComponent, ChipComponent],
+  imports: [FormField, ButtonDirective, Modal, TextFieldComponent, ChipComponent, ErrorBannerComponent],
   templateUrl: './editAddObject.html',
 })
 export class EditAddObject implements OnInit {

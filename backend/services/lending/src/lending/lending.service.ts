@@ -131,13 +131,43 @@ export class LendingService {
 		}
 	}
 
-	async removeForUser(userId: number): Promise<number> {
-		const deleted = await this.db
-			.delete(lending)
-			.where(or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)))
+	async updateAllForUserDeleted(userId: number): Promise<number> {
+		const cancelled = await this.db
+			.update(lending)
+			.set({ status: 'cancelled', updatedAt: new Date() })
+			.where(and(
+				or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)),
+				inArray(lending.status, ['pending', 'accepted']),
+			))
 			.returning({ id: lending.id })
 
-		return (deleted.length)
+		return (cancelled.length)
+	}
+
+	async updateAllForObjectDeleted(objectId: number): Promise<number> {
+		const cancelled = await this.db
+			.update(lending)
+			.set({ status: 'cancelled', updatedAt: new Date() })
+			.where(and(
+				eq(lending.objectId, objectId),
+				inArray(lending.status, ['pending', 'accepted']),
+			))
+			.returning({ id: lending.id })
+
+		return (cancelled.length)
+	}
+
+	async updateAllForPostDeleted(postId: number): Promise<number> {
+		const cancelled = await this.db
+			.update(lending)
+			.set({ status: 'cancelled', updatedAt: new Date() })
+			.where(and(
+				eq(lending.postId, postId),
+				inArray(lending.status, ['pending', 'accepted']),
+			))
+			.returning({ id: lending.id })
+
+		return (cancelled.length)
 	}
 
 	async countForPost(postId: number) {

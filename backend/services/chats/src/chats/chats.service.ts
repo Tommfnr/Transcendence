@@ -5,11 +5,14 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { conversations, conversationMembers, messages } from '../database/schema'
 import { DB } from '../database/database.module'
 import { UsersProxyService } from './users-proxy.service'
+import { PostsProxyService } from './posts-proxy.service'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { ChatsGateway, CHAT_EVENTS } from './chats.gateway'
 
 type ConversationMember = { id: number, username: string }
+
+const DELETED_POST_TITLE = 'Object deleted'
 
 @Injectable()
 export class ChatsService {
@@ -17,7 +20,17 @@ export class ChatsService {
 		@Inject(DB) private db : PostgresJsDatabase,
 		private readonly chatsGateway: ChatsGateway,
 		private readonly usersProxy: UsersProxyService,
+		private readonly postsProxy: PostsProxyService,
 	) {}
+
+	// Titles live in the posts service. A post that no longer exists keeps its conversation, titled as deleted.
+	private async findPostTitles(postIds: number[]) {
+		if (postIds.length === 0)
+			return new Map<number, string>()
+
+		const posts = await this.postsProxy.findManyByIds(postIds)
+		return new Map(posts.map((post) => [post.id, post.title]))
+	}
 
 	private async findMemberIds(conversationId: number) {
 		const members = await this.db
@@ -90,6 +103,7 @@ export class ChatsService {
 		const rows = await this.db
 				.select({
 					id: conversations.id,
+					postId: conversations.postId,
 					createdAt: conversations.createdAt,
 					updatedAt: conversations.updatedAt,
 				})
@@ -101,9 +115,13 @@ export class ChatsService {
 		// The client names a conversation after the people in it, not its id
 		const membersByConversation = await this.findMembersByConversation(rows.map((row) => row.id))
 
-		return rows.map((conversation) => ({
+		// The header shows the post the chat is about; the client only gets { id, title }, never the raw postId
+		const titleByPostId = await this.findPostTitles(rows.map((row) => row.postId))
+
+		return rows.map(({ postId, ...conversation }) => ({
 			...conversation,
 			members: membersByConversation.get(conversation.id) ?? [],
+			post: { id: postId, title: titleByPostId.get(postId) ?? DELETED_POST_TITLE },
 		}))
 	}
 
@@ -139,12 +157,15 @@ export class ChatsService {
 			throw err
 		}
 
+		// post_id has no foreign key (posts live in another service), so existence is checked here before anything is written
+		const post = await this.postsProxy.findById(dto.postId)
+
 		let created
 		try {
 			created = await this.db.transaction(async (t) => {
 				const [conversation] = await t
 						.insert(conversations)
-						.values({})
+						.values({ postId: dto.postId })
 						.returning()
 
 				await t
@@ -173,10 +194,13 @@ export class ChatsService {
 
 		// Carries its members like findMy does, so a brand new conversation is named right away
 		const membersByConversation = await this.findMembersByConversation([created.conversation.id])
+		// Same shape as findMy: the post title is resolved from the check above, no second call to posts
+		const { postId, ...conversation } = created.conversation
 		const payload = {
 			conversation: {
-				...created.conversation,
-				members: membersByConversation.get(created.conversation.id) ?? [],
+				...conversation,
+				members: membersByConversation.get(conversation.id) ?? [],
+				post: { id: postId, title: post.title },
 			},
 			message: created.message,
 		}

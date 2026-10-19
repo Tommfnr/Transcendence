@@ -1,75 +1,72 @@
 import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
-import { form, FormField, required, email, submit } from '@angular/forms/signals';
-import { LoginData } from '../../models/login-data.model';
-import { Router, RouterLink } from '@angular/router'
-import { RefreshService } from '../../services/refresh.service';
-import { ButtonDirective } from '../../components/button/button.directive';
+import { form, FormField, required, validate, submit } from '@angular/forms/signals';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { isAuthError, isZodValidationError, mapAuthErrorToBanner, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { RefreshService } from '../../services/refresh.service';
+import { LoginData } from '../../models/login-data.model';
+import { ButtonDirective } from '../../components/button/button.directive';
 import { TextFieldComponent } from '../../components/text-field/text-field';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
+import { isAuthError, isZodValidationError, mapAuthErrorToBanner, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { EMAIL_PATTERN, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_PATTERN } from '../../shared/field-rules';
 
 @Component({
-  selector: 'app-login',
-  imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink],
-  templateUrl: './login.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-login',
+	imports: [FormField, ButtonDirective, TextFieldComponent, RouterLink, ErrorBannerComponent],
+	templateUrl: './login.html',
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class Login {
-  private refreshService = inject(RefreshService)
-  private router = inject(Router)
+	private refreshService = inject(RefreshService);
+	private router = inject(Router);
 
-  bannerErrors = signal<string[]>([]);
+	readonly bannerErrors = signal<string[]>([]);
+	private loginModel = signal<LoginData>({
+		identifier: '',
+		password: '',
+		rememberMe: false,
+	});
 
-  loginModel = signal<LoginData>({
-    identifier: '',
-    password: '',
-    rememberMe: false,
-  });
+	readonly loginForm = form(this.loginModel, (fieldPath) => {
+		required(fieldPath.identifier, { message: 'Username or email is required' });
+		validate(fieldPath.identifier, ({ value }) => {
+			const identifier = value().trim();
+			if (identifier === '')
+				return (undefined);
+			const isValid = identifier.includes('@')
+				? EMAIL_PATTERN.test(identifier)
+				: identifier.length >= USERNAME_MIN_LENGTH && identifier.length <= USERNAME_MAX_LENGTH && USERNAME_PATTERN.test(identifier);
+			return (isValid ? undefined : ({ kind: 'identifier', message: 'Invalid username or email' }));
+		});
 
-  loginForm = form(this.loginModel, (fieldPath) => {
-    required(fieldPath.identifier, { message: 'Username or email is required' });
+		required(fieldPath.password, { message: 'Password is required' });
+	});
 
-    const currentIdentifier = this.loginModel().identifier;
-    if (currentIdentifier.includes('@')) {
-      email(fieldPath.identifier, { message: 'Enter a valid email address' });
-    }
 
-    required(fieldPath.password, { message: 'Password is required' });
-  });
+	onSubmit(event: Event): void {
+		event.preventDefault();
 
-  onSubmit(event: Event) {
-    event.preventDefault();
+		submit(this.loginForm, async (field) => {
+			const { identifier, password, rememberMe } = this.loginModel();
 
-    submit(this.loginForm, async (field) => {
-      const { identifier, password, rememberMe } = this.loginModel();
-      const body = {identifier, password, rememberMe };
-
-      try {
-        this.bannerErrors.set([]);
-        await firstValueFrom(this.refreshService.login(body));
-        await firstValueFrom(this.refreshService.getMe());
-        this.router.navigate(['/app']);
-        return (undefined);
-      }
-      catch (err) {
-        if (isZodValidationError(err)) {
-          //console.log('Backend validation error:', err.error);
-          const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
-          this.bannerErrors.set(bannerErrors);
-          return (fieldErrors);
-        }
-        if (isAuthError(err)) {
-          const { fieldErrors, bannerErrors } = mapAuthErrorToBanner(err.error);
-          this.bannerErrors.set(bannerErrors);
-          return (fieldErrors);
-        }
-        console.log('Invalid creds (FRONTEND)', err);
-        this.bannerErrors.set(['Something went wrong, please try again']);
-        return (undefined);
-      }
-    })
-  };
+			this.bannerErrors.set([]);
+			try {
+				await firstValueFrom(this.refreshService.login({ identifier, password, rememberMe }));
+				await firstValueFrom(this.refreshService.getMe());
+				this.router.navigate(['/app']);
+			}
+			catch (err) {
+				if (isZodValidationError(err)) {
+					const { fieldErrors, bannerErrors } = mapZodErrorsToFieldTree(err.error, field);
+					this.bannerErrors.set(bannerErrors);
+					return (fieldErrors);
+				}
+				if (isAuthError(err))
+					this.bannerErrors.set(mapAuthErrorToBanner(err.error).bannerErrors);
+				else
+					this.bannerErrors.set(['Something went wrong, please try again']);
+			}
+			return (undefined);
+		});
+	}
 }
-
-
