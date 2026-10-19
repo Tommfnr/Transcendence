@@ -11,7 +11,8 @@ RUN npm ci
 
 RUN rm -rf /shared/node_modules/@nestjs /shared/node_modules/express /shared/node_modules/reflect-metadata /shared/node_modules/zod
 
-COPY . .
+COPY tsconfig.json ./
+COPY src ./src
 
 ENV NODE_OPTIONS=--preserve-symlinks
 
