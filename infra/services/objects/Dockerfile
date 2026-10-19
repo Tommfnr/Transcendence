@@ -11,10 +11,12 @@ RUN npm ci
 
 RUN rm -rf /shared/node_modules/@nestjs /shared/node_modules/express /shared/node_modules/reflect-metadata /shared/node_modules/zod
 
-COPY tsconfig.json ./
-COPY src ./src
+COPY --chown=node:node tsconfig.json ./
+COPY --chown=node:node src ./src
 
 ENV NODE_OPTIONS=--preserve-symlinks
+
+USER node
 
 EXPOSE 3000
 
