@@ -32,6 +32,8 @@ export class AuthController {
 		return { access_token }
 	}
 
+	@UseGuards(ThrottlerGuard)
+	@Throttle({ default: { limit: 5, ttl: 60000 } })
 	@Post('register')
 	register(@Body() dto: RegisterDto) {
 		return (this.authService.register(dto))

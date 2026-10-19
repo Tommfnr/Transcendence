@@ -22,8 +22,11 @@ export class ChatSocketService {
 
     private conversationNewSubject = new Subject<ConversationCreated>();
     private messageNewSubject = new Subject<MessageEntity>();
+    private reconnectedSubject = new Subject<void>();
+    private hasConnected = false;
 
     readonly connected = signal(false);
+    readonly reconnected$ = this.reconnectedSubject.asObservable();
     readonly conversationNew$ = this.conversationNewSubject.asObservable();
     readonly messageNew$ = this.messageNewSubject.asObservable();
 
@@ -36,7 +39,11 @@ export class ChatSocketService {
             auth: (cb) => cb({ token: this.refreshService.getAccessToken() }),
         });
 
-        this.socket.on('connect', () => this.connected.set(true));
+        this.socket.on('connect', () => {
+            this.connected.set(true);
+            if (this.hasConnected) this.reconnectedSubject.next();
+            this.hasConnected = true;
+        });
         this.socket.on('disconnect', (reason) => {
             this.connected.set(false);
             // Socket.IO does not reconnect by itself after a server-side kick
@@ -49,6 +56,7 @@ export class ChatSocketService {
     disconnect(): void {
         this.socket?.disconnect();
         this.socket = null;
+        this.hasConnected = false;
         this.connected.set(false);
     }
 

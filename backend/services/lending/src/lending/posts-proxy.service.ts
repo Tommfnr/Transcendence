@@ -2,6 +2,9 @@ import { Inject, Injectable, Logger, NotFoundException, ServiceUnavailableExcept
 import { InternalServiceClient, InternalServiceError, PostView } from '@pep/shared'
 import { POSTS_INTERNAL_CLIENT } from './lending.tokens'
 
+const CLOSE_ATTEMPTS = 3
+const CLOSE_RETRY_DELAY_MS = 200
+
 @Injectable()
 export class PostsProxyService {
 	private readonly logger = new Logger(PostsProxyService.name)
@@ -17,7 +20,16 @@ export class PostsProxyService {
 	}
 
 	async close(id: number): Promise<void> {
-		await this.call(() => this.client.put(`/internal/posts/${id}/close`, {}))
+		for (let attempt = 1; ; attempt++) {
+			try {
+				await this.call(() => this.client.put(`/internal/posts/${id}/close`, {}))
+				return
+			} catch (err) {
+				if (attempt >= CLOSE_ATTEMPTS || !(err instanceof ServiceUnavailableException))
+					throw err
+				await new Promise((resolve) => setTimeout(resolve, CLOSE_RETRY_DELAY_MS * attempt))
+			}
+		}
 	}
 
 	private async call<T>(fn: () => Promise<T>): Promise<T> {

@@ -39,10 +39,23 @@ export class ChatsGateway implements OnGatewayConnection {
 			return
 		}
 
-		client.join(userRoom(client.data.user.sub))
+		const { sub, exp } = client.data.user
+
+		if (!exp) {
+			client.disconnect()
+			return
+		}
+
+		client.join(userRoom(sub))
+
+		const expiryTimer = setTimeout(() => client.disconnect(), Math.max(exp * 1000 - Date.now(), 0))
+		client.once('disconnect', () => clearTimeout(expiryTimer))
 	}
 
 	emitToUsers(userIds: number[], event: ChatEvent, payload: unknown) {
+		if (userIds.length === 0)
+			return
+
 		this.server.to(userIds.map(userRoom)).emit(event, payload)
 	}
 }
