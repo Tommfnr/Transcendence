@@ -17,6 +17,7 @@ import { LendingEntity } from '../../models/lending.model';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { RefreshService } from '../../services/refresh.service';
+import { forkJoin } from 'rxjs';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
@@ -110,8 +111,9 @@ export class Dashboard {
 	}
 
 	private loadPosts(): void {
-		this.postsService.findFromMyGroups().subscribe({
-			next: (posts) => {
+		forkJoin([this.postsService.findFromMyGroups(), this.postsService.findMy()]).subscribe({
+			next: ([groupPosts, myPosts]) => {
+				const posts = [...new Map([...groupPosts, ...myPosts].map((post) => [post.id, post])).values()];
 				this.posts.set(posts);
 				this.loadAuthorsById(posts);
 				this.loadGroupsByPostId(posts);
