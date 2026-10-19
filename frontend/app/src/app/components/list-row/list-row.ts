@@ -42,10 +42,10 @@ export class ListRowComponent {
 
 	get rowClasses(): string {
 		const base =
-			'flex h-12 w-full items-center justify-between rounded-card bg-card py-3 pr-3 pl-4';
+			'flex h-12 w-full items-center justify-between rounded-card bg-card py-3 pr-3 pl-4 shadow-card';
 
 		if (this.link || this.editable) {
-			return `${base} cursor-pointer text-left shadow-card transition-shadow hover:shadow-raised active:bg-background`;
+			return `${base} cursor-pointer text-left transition-shadow hover:shadow-raised active:bg-background`;
 		}
 		return base;
 	}

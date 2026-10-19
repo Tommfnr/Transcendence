@@ -43,6 +43,7 @@
         <div class="flex flex-wrap gap-2">
             @for (object of searchedObjects(); track object.id) {
                 <app-object-mini
+					[type]="object.type"
                     [name]="object.name"
                     [selected]="object.id === selectedObjectId()"
                     (pick)="selectedObjectId.set(object.id)"
