@@ -101,6 +101,15 @@ export class MyOffer implements OnInit {
 	}
 
 
+	// The chat of an offer is the one about its post with the requester
+	onOpenConversation(): void {
+		const lending = this.lending();
+		this.modalService.close();
+		this.router.navigate(['/app/chats'], {
+			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
+		});
+	}
+
 	onCancel(): void {
 		const lending = this.lending();
 		if (!lending || this.cancelling())
@@ -129,16 +138,6 @@ export class MyOffer implements OnInit {
 				next: () => this.modalService.close(),
 				error: () => this.showError('Could not confirm the return, please try again'),
 			});
-	}
-
-
-	// The chat of an offer is the one about its post with the requester
-	onOpenConversation(): void {
-		const lending = this.lending();
-		this.modalService.close();
-		this.router.navigate(['/app/chats'], {
-			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
-		});
 	}
 
 	// Adds a message to the banner once, even when several requests fail the same way

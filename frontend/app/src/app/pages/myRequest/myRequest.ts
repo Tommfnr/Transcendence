@@ -11,16 +11,17 @@ import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
 import { LendingEntity } from '../../models/lending.model';
-import { OfferCardComponent, OfferCardState } from '../../components/offer-card/offer-card';
-import { TagComponent } from '../../components/tag/tag';
+import { Observable, finalize } from 'rxjs';
 import { HelpRequestTag } from '../../models/help-request.model';
-import { Observable } from 'rxjs';
+import { OfferCardComponent, OfferCardState } from '../../components/offer-card/offer-card';
+import { ButtonDirective } from '../../components/button/button.directive';
+import { TagComponent } from '../../components/tag/tag';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
 
 @Component({
 	selector: 'app-myRequest',
-	imports: [Modal, OfferCardComponent, TagComponent, ErrorBannerComponent],
+	imports: [Modal, OfferCardComponent, ButtonDirective, TagComponent, ErrorBannerComponent],
 	templateUrl: './myRequest.html',
 })
 export class MyRequest implements OnInit {
@@ -38,6 +39,7 @@ export class MyRequest implements OnInit {
 	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private lendings = signal<LendingEntity[]>([]);
 	private lendersById = signal<Map<number, User>>(new Map());
+	readonly cancelling = signal(false);
 	readonly bannerErrors = signal<string[]>([]);
 
 
@@ -57,6 +59,8 @@ export class MyRequest implements OnInit {
 		const post = this.post();
 		return (post ? [{ label: post.objectType, icon: 'tag' }] : []);
 	});
+
+	readonly canCancel = computed(() => this.post()?.status === 'open');
 
 
 	ngOnInit(): void {
@@ -91,7 +95,7 @@ export class MyRequest implements OnInit {
 			this.groupsService.findMembers(group.id).subscribe({
 				next: (members) => this.memberIdsByGroupId.update((map) =>
 					new Map(map).set(group.id, members.map((m) => m.userId))),
-				error: () => {},
+				error: () => { },
 			});
 		}
 	}
@@ -147,6 +151,20 @@ export class MyRequest implements OnInit {
 		this.decideOffer(this.lendingService.reject(lendingId));
 	}
 
+	onCancelRequest(): void {
+		const postId = this.modalService.myRequestPostId();
+		if (postId === null || this.cancelling())
+			return;
+
+		this.bannerErrors.set([]);
+		this.cancelling.set(true);
+		this.postsService.remove(postId)
+			.pipe(finalize(() => this.cancelling.set(false)))
+			.subscribe({
+				next: () => this.modalService.close(),
+				error: () => this.showError('Could not cancel this request, please try again'),
+			});
+	}
 
 	// Sends an accept or a decline, then reloads the offers to show their new state
 	private decideOffer(decision: Observable<LendingEntity>): void {

@@ -36,5 +36,13 @@
 		@empty {
 			<p class="text-center text-sm text-text-secondary">No offers yet.</p>
 		}
+		@if (canCancel()) {
+			<div class="flex justify-end">
+				<button appButton size="small" variant="secondary" type="button" [disabled]="cancelling()"
+					(click)="onCancelRequest()">
+					Cancel my request
+				</button>
+			</div>
+		}
 	</div>
 </app-modal>
