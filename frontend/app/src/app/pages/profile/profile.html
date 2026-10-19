@@ -58,8 +58,12 @@
 </div>
 
 <div class="flex flex-col lg:w-fit lg:mx-auto">
-	@if (errorMessage()) {
-		<p class="mt-6 text-error lg:self-center">{{ errorMessage() }}</p>
+	@if (bannerErrors().length > 0) {
+		<app-error-banner class="mt-6">
+			@for (msg of bannerErrors(); track msg) {
+				<p>{{ msg }}</p>
+			}
+		</app-error-banner>
 	}
 	<button appButton [block]="true" size="large" variant="secondary" type="button" class="mt-6 lg:self-center" (click)="onLogout()">Log out</button>
 	<button appButton [block]="true" size="large" variant="muted" type="button" class="mt-4 hover:bg-alert lg:w-auto lg:self-center" (click)="onDeleteUser()">

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { form, FormField, required, submit } from '@angular/forms/signals';
+import { form, FormField, required, minLength, maxLength, pattern, submit } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
@@ -9,6 +9,7 @@ import { RefreshService } from '../../services/refresh.service';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { UserInput } from '../../models/user.model';
+// import { USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from '../../shared/field-rules';
 
 @Component({
     selector: 'app-editProfile',
@@ -30,6 +31,9 @@ export class EditProfile {
 
 	profileForm = form(this.profile, (fieldPath) => {
 		required(fieldPath.username, { message: 'Username is required' });
+		// minLength(fieldPath.username, USERNAME_MIN_LENGTH, { message: `Min ${USERNAME_MIN_LENGTH} characters` });
+		// maxLength(fieldPath.username, USERNAME_MAX_LENGTH, { message: `Max ${USERNAME_MAX_LENGTH} characters` });
+		// pattern(fieldPath.username, USERNAME_PATTERN, { message: 'Only letters, digits, or _, -' });
 	});
 
 	onSubmit(event: Event): void {
