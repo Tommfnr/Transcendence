@@ -72,6 +72,8 @@ export class OfferHelp implements OnInit {
 
 	readonly authorName = computed(() => this.author()?.username ?? '');
 
+	readonly canOffer = computed(() => this.post()?.status === 'open');
+
 	private availableObjects = computed(() =>
 		this.objects().filter((object) => object.isAvailable)
 	);
@@ -106,6 +108,11 @@ export class OfferHelp implements OnInit {
 		this.postsService.findOne(this.postId).subscribe({
 			next: (post) => {
 				this.post.set(post);
+				if (post.deletedAt)
+					this.showError('This request was deleted');
+				else if (post.status !== 'open')
+					this.showError('This request is closed, the requester already chose a helper');
+
 				this.lendedFrom.set(post.fromDate);
 				this.lendedTo.set(post.toDate);
 				this.activeCategory.set(post.objectType);
