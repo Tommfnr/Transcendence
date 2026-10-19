@@ -4,6 +4,7 @@ import { DB } from '../database/database.module'
 import { and, count, desc, eq, gt, inArray, lt, or, sql } from 'drizzle-orm'
 import { pgErrorCode } from '@pep/shared'
 import { lending } from '../database/schema'
+import { assertTransition } from './lending-state-handler'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsProxyService } from './objects-proxy.service'
 import { PostsProxyService } from './posts-proxy.service'
@@ -179,9 +180,7 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = t.borrowerId
-
-		if (approverId !== userId)
+		if (t.borrowerId !== userId)
 			throw new ForbiddenException('Only the other party can accept this request')
 
 		const postId = t.postId
@@ -252,8 +251,8 @@ export class LendingService {
 	}
 
 	private async assertStillAcceptable(request: typeof lending.$inferSelect) {
-		if (request.status !== 'pending')
-			throw new ConflictException('Request is no longer pending')
+		assertTransition(request.status, 'accepted')
+
 		if (request.lendedTo <= new Date())
 			throw new ConflictException('Requested period is already over')
 
@@ -288,10 +287,10 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = t.borrowerId
-
-		if (approverId !== userId)
+		if (t.borrowerId !== userId)
 			throw new ForbiddenException('Only the other party can reject this request')
+
+		assertTransition(t.status, 'rejected')
 
 		const [updated] = await this.db
 			.update(lending)
@@ -313,6 +312,8 @@ export class LendingService {
 		if (t.borrowerId === userId)
 			throw new ForbiddenException('Only the requester can cancel this request')
 
+		assertTransition(t.status, 'cancelled')
+
 		const [updated] = await this.db
 			.update(lending)
 			.set({ status: 'cancelled', updatedAt: new Date() })
@@ -320,7 +321,7 @@ export class LendingService {
 			.returning()
 
 		if (!updated)
-			throw new NotFoundException()
+			throw new ConflictException('Only a pending offer can be cancelled')
 		return (updated)
 	}
 
@@ -332,6 +333,8 @@ export class LendingService {
 
 		if (t.lenderId !== userId)
 			throw new ForbiddenException('Only the lender can confirm the item is back')
+
+		assertTransition(t.status, 'returned')
 
 		const [updated] = await this.db
 			.update(lending)
