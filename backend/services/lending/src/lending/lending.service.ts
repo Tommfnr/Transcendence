@@ -56,34 +56,21 @@ export class LendingService {
 		if (!object.isAvailable)
 			throw new ConflictException('Object not available')
 
-		let lenderId: number
-		let borrowerId: number
+		const post = await this.postsProxy.findById(dto.postId)
 
-		if (dto.postId) {
-			const post = await this.postsProxy.findById(dto.postId)
+		if (post.status !== 'open')
+			throw new ConflictException('Post is no longer open')
+		if (object.ownerId !== userId)
+			throw new ForbiddenException('You can only offer your own objects')
+		if (post.ownerId === userId)
+			throw new BadRequestException('You cannot offer help on your own post')
+		if (new Date(dto.lendedFrom) < new Date(post.fromDate) || new Date(dto.lendedTo) > new Date(post.toDate))
+			throw new BadRequestException('Offer window must fit inside the post window')
+		if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
+			throw new ForbiddenException('You can only offer help on posts of your groups')
 
-			if (post.status !== 'open')
-				throw new ConflictException('Post is no longer open')
-			if (object.ownerId !== userId)
-				throw new ForbiddenException('You can only offer your own objects')
-			if (post.ownerId === userId)
-				throw new BadRequestException('You cannot offer help on your own post')
-			if (new Date(dto.lendedFrom) < new Date(post.fromDate) || new Date(dto.lendedTo) > new Date(post.toDate))
-				throw new BadRequestException('Offer window must fit inside the post window')
-			if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
-				throw new ForbiddenException('You can only offer help on posts of your groups')
-
-			lenderId = userId
-			borrowerId = post.ownerId
-		} else {
-			if (object.ownerId === userId)
-				throw new BadRequestException('You cannot borrow your own object')
-			if (!(await this.groupsProxy.sharesGroup([userId, object.ownerId])))
-				throw new ForbiddenException('You can only borrow from members of your groups')
-
-			lenderId = object.ownerId
-			borrowerId = userId
-		}
+		const lenderId = userId
+		const borrowerId = post.ownerId
 
 		const lendedFrom = new Date(dto.lendedFrom)
 		const lendedTo = new Date(dto.lendedTo)
@@ -192,7 +179,7 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = this.approverFor(t)
+		const approverId = t.borrowerId
 
 		if (approverId !== userId)
 			throw new ForbiddenException('Only the other party can accept this request')
@@ -207,7 +194,7 @@ export class LendingService {
 			await t
 				.select({ id: lending.id })
 				.from(lending)
-				.where(postId ? or(eq(lending.objectId, objectId), eq(lending.postId, postId)) : eq(lending.objectId, objectId))
+				.where(or(eq(lending.objectId, objectId), eq(lending.postId, postId)))
 				.orderBy(lending.id)
 				.for('update')
 
@@ -237,15 +224,13 @@ export class LendingService {
 					gt(lending.lendedTo, accepted.lendedFrom),
 				))
 
-			if (accepted.postId) {
-				await t
-					.update(lending)
-					.set({ status: 'rejected', updatedAt: new Date() })
-					.where(and(
-						eq(lending.postId, accepted.postId),
-						eq(lending.status, 'pending'),
-					))
-			}
+			await t
+				.update(lending)
+				.set({ status: 'rejected', updatedAt: new Date() })
+				.where(and(
+					eq(lending.postId, accepted.postId),
+					eq(lending.status, 'pending'),
+				))
 
 			return (accepted)
 		})
@@ -253,8 +238,7 @@ export class LendingService {
 		if (!updated)
 			throw new NotFoundException()
 
-		if (updated.postId)
-			await this.closePost(updated.postId)
+		await this.closePost(updated.postId)
 
 		return (updated)
 	}
@@ -284,9 +268,6 @@ export class LendingService {
 		if (!object.isAvailable)
 			throw new ConflictException('Object not available')
 
-		if (!request.postId)
-			return
-
 		let post
 		try {
 			post = await this.postsProxy.findById(request.postId)
@@ -307,7 +288,7 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = this.approverFor(t)
+		const approverId = t.borrowerId
 
 		if (approverId !== userId)
 			throw new ForbiddenException('Only the other party can reject this request')
@@ -329,7 +310,7 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		if (this.approverFor(t) === userId)
+		if (t.borrowerId === userId)
 			throw new ForbiddenException('Only the requester can cancel this request')
 
 		const [updated] = await this.db
@@ -365,9 +346,5 @@ export class LendingService {
 
 	private async lockObject(t: Pick<PostgresJsDatabase, 'execute'>, objectId: number) {
 		await t.execute(sql`select pg_advisory_xact_lock(${OBJECT_LOCK_NAMESPACE}::int, ${objectId}::int)`)
-	}
-
-	private approverFor(t: { postId: number | null, lenderId: number, borrowerId: number }): number {
-		return (t.postId ? t.borrowerId : t.lenderId)
 	}
 }

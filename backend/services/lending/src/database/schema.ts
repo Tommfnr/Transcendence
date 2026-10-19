@@ -14,7 +14,7 @@ export const lending = pgTable('lending', {
 	objectId: 									integer('object_id').notNull(),
 	lenderId: 									integer('lender_id').notNull(),
 	borrowerId:									integer('borrower_id').notNull(),
-	postId:											integer('post_id'),
+	postId:											integer('post_id').notNull(),
 	status:											lendingStatusEnum('status').notNull().default('created'),
 	lendedFrom: 								timestamptz('lended_from').notNull(),
 	lendedTo:										timestamptz('lended_to').notNull(),

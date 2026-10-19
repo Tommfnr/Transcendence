@@ -77,7 +77,7 @@ export class Dashboard {
 	private pendingReceivedOffers = computed(() => {
 		const myPostIds = new Set(this.myPosts().map((post) => post.id));
 		return (this.lendings().filter((l) =>
-			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'));
+			myPostIds.has(l.postId) && l.status === 'pending'));
 	});
 
 	readonly myExchanges = computed<Exchange[]>(() =>
@@ -274,11 +274,11 @@ export class Dashboard {
 		const me = this.currentUserId();
 
 		return (this.lendings()
-			.filter((l) => l.lenderId === me && l.postId !== null)
+			.filter((l) => l.lenderId === me)
 			.map((l) => ({
 				id: `lending-${l.id}`,
 				kind: 'offer',
-				postId: l.postId!,
+				postId: l.postId,
 				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: LENDING_STATUS_DISPLAY[l.status].label,

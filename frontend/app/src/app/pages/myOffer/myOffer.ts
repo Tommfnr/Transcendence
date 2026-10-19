@@ -73,8 +73,7 @@ export class MyOffer implements OnInit {
 				this.lending.set(lending);
 				this.loadObject(lending.objectId);
 				this.loadRequester(lending.borrowerId);
-				if (lending.postId !== null)
-					this.loadPost(lending.postId);
+				this.loadPost(lending.postId);
 			},
 			error: () => this.showError('This offer no longer exists'),
 		});

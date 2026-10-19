@@ -15,7 +15,7 @@ export interface LendingEntity {
     objectId: number;
     lenderId: number;
     borrowerId: number;
-    postId: number | null;
+    postId: number;
     status: LendingStatus;
     lendedFrom: string;
     lendedTo: string;
@@ -29,7 +29,7 @@ export interface LendingEntity {
 
 export interface LendingInput {
     objectId: number;
-    postId?: number;
+    postId: number;
     lendedFrom: string;
     lendedTo: string;
     message?: string;

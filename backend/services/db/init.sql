@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS lending (
 	object_id											INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
 	lender_id											INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	borrower_id										INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	post_id												INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+	post_id												INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
 	status												lending_status NOT NULL DEFAULT 'created',
 	lended_from										TIMESTAMPTZ NOT NULL,
 	lended_to											TIMESTAMPTZ NOT NULL,
