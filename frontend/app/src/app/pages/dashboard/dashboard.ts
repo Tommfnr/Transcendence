@@ -69,7 +69,7 @@ export class Dashboard {
 			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false));
 	});
 
-	readonly displayedRequests = computed<HelpRequest[]>(() =>
+	readonly groupRequests = computed<HelpRequest[]>(() =>
 		this.otherPosts().map((post) => this.toHelpRequest(post))
 	);
 
@@ -84,7 +84,7 @@ export class Dashboard {
 			.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone])
 	);
 
-	readonly requestCount = computed(() => this.displayedRequests().length);
+	readonly requestCount = computed(() => this.groupRequests().length);
 
 	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
