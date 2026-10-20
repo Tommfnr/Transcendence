@@ -20,6 +20,7 @@ import { PrivacyPolicy } from './pages/privacyPolicy/privacyPolicy';
 import { TermsOfService } from './pages/termsOfService/termsOfService';
 import { UserAnalytics } from './pages/userAnalytics/userAnalytics';
 import { HelpSupport } from './pages/helpSupport/help-support';
+import { NotFound } from './pages/notFound/notFound';
 
 export const routes: Routes = [
 	{
@@ -45,6 +46,10 @@ export const routes: Routes = [
 			{
 				path: 'termsOfService',
 				component: TermsOfService,
+			},
+			{
+				path: 'notFound',
+				component: NotFound,
 			}
 		],
 	},
@@ -125,6 +130,10 @@ export const routes: Routes = [
 			{
 				path: 'helpSupport',
 				component: HelpSupport,
+			},
+			{
+				path: 'notFound',
+				component: NotFound,
 			}
 		]
 	},
