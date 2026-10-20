@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS posts (
 	deleted_at			TIMESTAMPTZ,
 	from_date			TIMESTAMPTZ NOT NULL,
 	to_date				TIMESTAMPTZ NOT NULL,
-	CONSTRAINT		posts_date_order CHECK (to_date >= from_date)
+	CONSTRAINT			posts_date_order CHECK (to_date > from_date)
 );
 
 CREATE TABLE IF NOT EXISTS post_groups (
