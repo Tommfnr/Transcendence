@@ -19,6 +19,7 @@ import { ChatsService } from '../../services/chats.service';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { normalizeForSearch } from '../../shared/normalize-text';
+import { todayIso } from '../../components/date-picker/date-picker';
 
 const MESSAGE_MAX_LENGTH = 250;
 
@@ -112,8 +113,12 @@ export class OfferHelp implements OnInit {
 					this.showError('This request was deleted');
 				else if (post.status !== 'open')
 					this.showError('This request is closed, the requester already chose a helper');
+				else if (post.toDate.slice(0, 10) <= todayIso())
+					this.showError('This request has ended');
 
-				this.lendedFrom.set(post.fromDate);
+				const today = todayIso();
+				const postStart = post.fromDate.slice(0, 10);
+				this.lendedFrom.set(postStart > today ? post.fromDate : today);
 				this.lendedTo.set(post.toDate);
 				this.activeCategory.set(post.objectType);
 				this.loadAuthor(post.ownerId);
