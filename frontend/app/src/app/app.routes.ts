@@ -46,6 +46,10 @@ export const routes: Routes = [
 			{
 				path: 'termsOfService',
 				component: TermsOfService,
+			},
+			{
+				path: 'notFound',
+				component: NotFound,
 			}
 		],
 	},
@@ -128,7 +132,7 @@ export const routes: Routes = [
 				component: HelpSupport,
 			},
 			{
-				path: '**',
+				path: 'notFound',
 				component: NotFound,
 			}
 		]

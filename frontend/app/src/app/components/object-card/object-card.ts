@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { StatusBadgeComponent } from "../status-badge/status-badge";
+import { ObjectType, OBJECT_TYPES_EMOJI } from '../../models/object.model';
 
 export type ObjectCardStatus = 'available' | 'lent';
 
@@ -17,6 +18,7 @@ export class ObjectCard {
 	@Output() edit = new EventEmitter<void>();
 	@Output() remove = new EventEmitter<void>();
 
+	@Input() type: ObjectType | null = null;
 
 	get classes(): string {
 		const base =
@@ -25,10 +27,14 @@ export class ObjectCard {
 	}
 
 	get imageClasses(): string {
-		const base = 
+		const base =
 			'bg-muted rounded-t-card overflow-clip flex items-center justify-center h-[88px] md:h-[112px]'
-		
+
 		return `${base}`;
+	}
+
+	get emoji() {
+		return this.type ? OBJECT_TYPES_EMOJI[this.type] : '📦';
 	}
 
 }

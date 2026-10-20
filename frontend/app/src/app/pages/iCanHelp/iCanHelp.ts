@@ -56,8 +56,11 @@ export class ICanHelp implements OnInit {
 		return (post ? formatDateRange(post.fromDate, post.toDate) : '');
 	});
 
-	readonly hasChosenHelper = computed(() => this.post()?.status === 'closed');
+	readonly isDeleted = computed(() => this.post()?.deletedAt != null);
 
+	readonly canOffer = computed(() => this.post()?.status === 'open');
+
+	readonly hasChosenHelper = computed(() => this.post()?.status === 'closed' && !this.isDeleted());
 
 	ngOnInit(): void {
 		this.loadPost();
@@ -69,6 +72,8 @@ export class ICanHelp implements OnInit {
 		this.postsService.findOne(this.postId).subscribe({
 			next: (post) => {
 				this.post.set(post);
+				if (post.deletedAt)
+					this.showError('This request was deleted');
 				this.loadAuthor(post.ownerId);
 			},
 			error: (err: HttpErrorResponse) => {

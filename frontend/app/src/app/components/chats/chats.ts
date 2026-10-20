@@ -91,6 +91,12 @@ export class ChatComponent {
             if (message.conversationId === this.conversationId()) this.addMessages([message]);
         });
 
+        this.chatSocket.reconnected$.pipe(takeUntilDestroyed()).subscribe(() => {
+            this.chatsService.findMessages(this.conversationId()).subscribe({
+                next: (messages) => this.addMessages(messages),
+            });
+        });
+
         // Keep the latest message in view
         afterRenderEffect(() => {
             this.messages();

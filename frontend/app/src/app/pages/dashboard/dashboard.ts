@@ -17,6 +17,7 @@ import { LendingEntity } from '../../models/lending.model';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { RefreshService } from '../../services/refresh.service';
+import { forkJoin } from 'rxjs';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
@@ -69,7 +70,7 @@ export class Dashboard {
 			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false));
 	});
 
-	readonly displayedRequests = computed<HelpRequest[]>(() =>
+	readonly groupRequests = computed<HelpRequest[]>(() =>
 		this.otherPosts().map((post) => this.toHelpRequest(post))
 	);
 
@@ -84,7 +85,7 @@ export class Dashboard {
 			.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone])
 	);
 
-	readonly requestCount = computed(() => this.displayedRequests().length);
+	readonly requestCount = computed(() => this.groupRequests().length);
 
 	readonly offerCount = computed(() => this.pendingReceivedOffers().length);
 
@@ -97,7 +98,6 @@ export class Dashboard {
 					this.bannerErrors.set([]);
 					this.loadGroups();
 					this.loadPosts();
-					this.loadMyObjects();
 					this.loadLendings();
 				});
 		});
@@ -111,8 +111,9 @@ export class Dashboard {
 	}
 
 	private loadPosts(): void {
-		this.postsService.findFromMyGroups().subscribe({
-			next: (posts) => {
+		forkJoin([this.postsService.findFromMyGroups(), this.postsService.findMy()]).subscribe({
+			next: ([groupPosts, myPosts]) => {
+				const posts = [...new Map([...groupPosts, ...myPosts].map((post) => [post.id, post])).values()];
 				this.posts.set(posts);
 				this.loadAuthorsById(posts);
 				this.loadGroupsByPostId(posts);
@@ -140,20 +141,34 @@ export class Dashboard {
 		}
 	}
 
-	private loadMyObjects(): void {
-		this.objectService.findMy().subscribe({
-			next: (objects) => this.objectsById.set(new Map(objects.map((object) => [object.id, object]))),
-			error: () => this.showError('Could not load your items'),
-		});
-	}
-
 	private loadLendings(): void {
 		this.lendingService.listAll().subscribe({
-			next: (lendings) => this.lendings.set(lendings),
+			next: (lendings) => {
+				this.lendings.set(lendings);
+				this.loadObjectsById(lendings);
+				this.loadBorrowersById(lendings);
+			},
 			error: () => this.showError('Could not load your exchanges'),
 		});
 	}
 
+	private loadObjectsById(lendings: LendingEntity[]): void {
+		for (const objectId of new Set(lendings.map((l) => l.objectId))) {
+			this.objectService.findOne(objectId).subscribe({
+				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
+				error: () => this.showError('Could not load some items of your exchanges'),
+			});
+		}
+	}
+
+	private loadBorrowersById(lendings: LendingEntity[]): void {
+		for (const borrowerId of new Set(lendings.map((l) => l.borrowerId))) {
+			this.usersService.findOne(borrowerId).subscribe({
+				next: (user) => this.authorsById.update((map) => new Map(map).set(borrowerId, user)),
+				error: () => this.showError('Could not load who you offered to help'),
+			});
+		}
+	}
 
 	onGroupFilterChange(event: Event): void {
 		const value = (event.target as HTMLSelectElement).value;
