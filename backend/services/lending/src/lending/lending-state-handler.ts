@@ -6,8 +6,8 @@ type LendStatus = typeof lendingStatusEnum.enumValues[number]
 const ALLOWED_TRANSITIONS: Record<LendStatus, LendStatus[]> = {
 	// An offer waiting for the requester's answer
 	pending: ['accepted', 'rejected', 'cancelled'],
-	// Loan agreed, object not picked up yet ('returned' only until the two-step return exists)
-	accepted: ['active', 'cancelled', 'returned'],
+	// Loan agreed, object not picked up yet
+	accepted: ['active', 'cancelled'],
 	// Object with the borrower
 	active: ['awaiting_confirmation', 'overdue'],
 	overdue: ['awaiting_confirmation', 'disputed'],
