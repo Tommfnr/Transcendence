@@ -2,7 +2,7 @@ import { Component, OnInit, computed, effect, inject, signal, untracked } from '
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import { EMPTY, catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { ChatComponent } from '../../components/chats/chats';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { ChatsService } from '../../services/chats.service';
@@ -101,8 +101,11 @@ export class Chats implements OnInit {
             .subscribe(({ conversation }) => this.upsertConversation(conversation));
 
         this.chatSocket.reconnected$
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => this.refreshConversations());
+            .pipe(
+                switchMap(() => this.chatsService.findMy().pipe(catchError(() => EMPTY))),
+                takeUntilDestroyed(),
+            )
+            .subscribe((conversations) => this.conversations.set(sortByActivity(conversations)));
 
         // Any new message bumps its conversation back to the top of the list
         this.chatSocket.messageNew$.pipe(takeUntilDestroyed()).subscribe((message) => {
@@ -115,12 +118,6 @@ export class Chats implements OnInit {
                     ),
                 ),
             );
-        });
-    }
-
-    private refreshConversations(): void {
-        this.chatsService.findMy().subscribe((conversations) => {
-            this.conversations.set(sortByActivity(conversations));
         });
     }
 
