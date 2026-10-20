@@ -43,8 +43,24 @@
 			<button appButton size="xsmall" variant="primary" type="button" (click)="accept.emit()">
 				Accept
 			</button>
-		} @else {
+		} 
+		@else if (state() === 'accepted') {
 			<app-status-badge status="done" label="Offer accepted" />
+			<button appButton size="xsmall" variant="primary" type="button" class="ml-auto" (click)="pickUp.emit()">
+				Item received
+			</button>
+		} 
+		@else if (state() === 'borrowed' || state() === 'overdue') {
+			<app-status-badge status="done" [label]="state() === 'overdue' ? 'Return overdue' : 'Borrowed'" />
+			<button appButton size="xsmall" variant="primary" type="button" class="ml-auto" (click)="giveBack.emit()">
+				Item returned
+			</button>
+		} 
+		@else if (state() === 'returning') {
+			<app-status-badge status="done" label="Waiting for the lender" />
+		} 
+		@else {
+			<app-status-badge status="done" label="Item returned" />
 		}
 	</div>
 </article>

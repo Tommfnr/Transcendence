@@ -36,6 +36,14 @@ export class LendingService {
         return this.http.patch<LendingEntity>(`/api/lending/${id}/cancel`, {});
     }
 
+    pickUp(id: number) {
+        return this.http.patch<LendingEntity>(`/api/lending/${id}/pickup`, {});
+    }
+
+    giveBack(id: number) {
+        return this.http.patch<LendingEntity>(`/api/lending/${id}/give-back`, {});
+    }
+
     returned(id: number) {
         return this.http.patch<LendingEntity>(`/api/lending/${id}/return`, {});
     }

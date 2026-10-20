@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
@@ -10,7 +11,7 @@ import { ObjectEntity } from '../../models/object.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
-import { LendingEntity } from '../../models/lending.model';
+import { LendingEntity, LendingStatus, CHOSEN_STATUSES } from '../../models/lending.model';
 import { Observable, finalize } from 'rxjs';
 import { HelpRequestTag } from '../../models/help-request.model';
 import { OfferCardComponent, OfferCardState } from '../../components/offer-card/offer-card';
@@ -46,12 +47,12 @@ export class MyRequest implements OnInit {
 	readonly offers = computed(() =>
 		this.lendings().map((l) => ({
 			id: l.id,
-			name: this.lendersById().get(l.lenderId)?.username ?? '…',
+			name: this.lendersById().get(l.lenderId)?.username ?? '',
 			group: this.sharedGroupName(l.lenderId),
 			time: formatTimeAgo(l.createdAt),
-			objectName: this.objectsById().get(l.objectId)?.name ?? '…',
+			objectName: this.objectsById().get(l.objectId)?.name ?? '',
 			message: l.message,
-			state: (l.status === 'accepted' ? 'accepted' : 'pending') as OfferCardState,
+			state: this.cardStateOf(l.status),
 		}))
 	);
 
@@ -104,7 +105,7 @@ export class MyRequest implements OnInit {
 		this.lendingService.listAll().subscribe({
 			next: (lendings) => {
 				const offers = lendings.filter((l) =>
-					l.postId === postId && (l.status === 'pending' || l.status === 'accepted')
+					l.postId === postId && (l.status === 'pending' || CHOSEN_STATUSES.includes(l.status))
 				);
 				this.lendings.set(offers);
 				this.loadLendersById(offers);
@@ -144,11 +145,11 @@ export class MyRequest implements OnInit {
 	}
 
 	onAccept(lendingId: number): void {
-		this.decideOffer(this.lendingService.accept(lendingId));
+		this.applyAction(this.lendingService.accept(lendingId));
 	}
 
 	onDecline(lendingId: number): void {
-		this.decideOffer(this.lendingService.reject(lendingId));
+		this.applyAction(this.lendingService.reject(lendingId));
 	}
 
 	onCancelRequest(): void {
@@ -166,18 +167,42 @@ export class MyRequest implements OnInit {
 			});
 	}
 
-	// Sends an accept or a decline, then reloads the offers to show their new state
-	private decideOffer(decision: Observable<LendingEntity>): void {
+	onPickUp(lendingId: number): void {
+		this.applyAction(this.lendingService.pickUp(lendingId));
+	}
+
+	onGiveBack(lendingId: number): void {
+		this.applyAction(this.lendingService.giveBack(lendingId));
+	}
+
+	// Sends an action on an offer or on the chosen loan, then reloads them
+	private applyAction(action: Observable<LendingEntity>): void {
 		const postId = this.modalService.myRequestPostId();
 		if (postId === null)
 			return;
 
 		this.bannerErrors.set([]);
-		decision.subscribe({
+		action.subscribe({
 			next: () => this.loadReceivedOffers(postId),
-			error: () => this.showError('Could not update this offer, please try again'),
+			error: (err) => this.showError(this.errorMessageOf(err)),
 		});
 	}
+
+	// The card mode for each step of the loan
+	private cardStateOf(status: LendingStatus): OfferCardState {
+		if (status === 'pending')
+			return ('pending');
+		if (status === 'active')
+			return ('borrowed');
+		if (status === 'overdue')
+			return ('overdue');
+		if (status === 'awaiting_confirmation')
+			return ('returning');
+		if (status === 'returned')
+			return ('returned');
+		return ('accepted');
+	}
+
 
 	// The first group of this request the offerer is in, shown on their card
 	private sharedGroupName(lenderId: number): string {
@@ -185,6 +210,13 @@ export class MyRequest implements OnInit {
 			this.memberIdsByGroupId().get(g.id)?.includes(lenderId)
 		);
 		return (group?.name ?? '');
+	}
+
+	// The backend message when there is one, a generic one otherwise
+	private errorMessageOf(err: unknown): string {
+		if (err instanceof HttpErrorResponse && typeof err.error?.message === 'string')
+			return (err.error.message);
+		return ('Something went wrong, please try again');
 	}
 
 	// Adds a message to the banner once, even when several requests fail the same way

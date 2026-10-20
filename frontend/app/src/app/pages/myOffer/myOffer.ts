@@ -16,8 +16,6 @@ import { finalize } from 'rxjs';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
 
-// Loan states where the lender can confirm the item came back
-const LOAN_IN_PROGRESS: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue'];
 
 @Component({
 	selector: 'app-myOffer',
@@ -53,10 +51,7 @@ export class MyOffer implements OnInit {
 
 	readonly canCancel = computed(() => this.lending()?.status === 'pending');
 
-	readonly canReturn = computed(() => {
-		const lending = this.lending();
-		return (lending !== null && LOAN_IN_PROGRESS.includes(lending.status));
-	});
+	readonly canReturn = computed(() => this.lending()?.status === 'awaiting_confirmation');
 
 
 	ngOnInit(): void {

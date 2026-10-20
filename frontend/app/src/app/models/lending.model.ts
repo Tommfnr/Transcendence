@@ -10,6 +10,9 @@ export type LendingStatus =
     | 'rejected'
     | 'cancelled';
 
+/** A loan that went past the offer stage: the requester picked this helper. */
+export const CHOSEN_STATUSES: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'returned', 'overdue', 'disputed'];
+
 export interface LendingEntity {
     id: number;
     objectId: number;

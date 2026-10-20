@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
-import { Exchange, ExchangeTone, TONE_ORDER, LENDING_STATUS_DISPLAY, CHOSEN_STATUSES } from '../../models/exchange.model';
+import { Exchange, ExchangeTone, TONE_ORDER, LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
@@ -13,7 +13,7 @@ import { PostEntity, PostGroupData } from '../../models/post.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
-import { LendingEntity } from '../../models/lending.model';
+import { LendingEntity, CHOSEN_STATUSES } from '../../models/lending.model';
 import { ObjectService } from '../../services/object.service';
 import { ObjectEntity } from '../../models/object.model';
 import { RefreshService } from '../../services/refresh.service';
@@ -279,7 +279,7 @@ export class Dashboard {
 				id: `lending-${l.id}`,
 				kind: 'offer',
 				postId: l.postId,
-				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
+				title: `${this.objectsById().get(l.objectId)?.name ?? ''} → ${this.authorsById().get(l.borrowerId)?.username ?? ''}`,
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: LENDING_STATUS_DISPLAY[l.status].label,
 				tone: LENDING_STATUS_DISPLAY[l.status].tone,

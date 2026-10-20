@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { ButtonDirective } from '../button/button.directive';
 import { StatusBadgeComponent } from '../status-badge/status-badge';
 
-export type OfferCardState = 'pending' | 'accepted';
+export type OfferCardState = 'pending' | 'accepted' | 'borrowed' | 'overdue' | 'returning' | 'returned';
 
 /**
  * One offer received on your request.
@@ -31,6 +31,8 @@ export class OfferCardComponent {
 
 	readonly accept = output<void>();
 	readonly decline = output<void>();
+	readonly pickUp = output<void>();
+	readonly giveBack = output<void>();
 	/** Body pressed — open the conversation with the offerer. */
 	readonly press = output<void>();
 }
