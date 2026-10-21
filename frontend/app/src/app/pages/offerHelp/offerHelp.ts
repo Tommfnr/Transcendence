@@ -118,7 +118,13 @@ export class OfferHelp implements OnInit {
 				this.activeCategory.set(post.objectType);
 				this.loadAuthor(post.ownerId);
 			},
-			error: () => this.showError('This request no longer exists'),
+			error: (err: HttpErrorResponse) => {
+				if (err.status === 404) {
+					this.router.navigate(['/app/notFound'], { skipLocationChange: true });
+					return;
+				}
+				this.showError('Could not load this request, please try again');
+			},
 		});
 	}
 
