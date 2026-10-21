@@ -4,6 +4,9 @@ import { Component, input, output } from '@angular/core';
   selector: 'app-modal',
   imports: [],
   templateUrl: './modal.html',
+  host: {
+	'(document:keydown.escape)': 'onClose()',
+  },
 })
 export class Modal {
   title = input.required<string>();
