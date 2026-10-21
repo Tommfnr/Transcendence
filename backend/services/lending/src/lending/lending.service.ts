@@ -32,7 +32,7 @@ export class LendingService {
 			.from(lending)
 			.where(or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)))
 
-		const happenedStatuses: string[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue', 'returned', 'disputed']
+		const happenedStatuses: string[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue', 'returned']
 
 		const lent = myLendings.filter((loan) =>
 			loan.lenderId === userId && happenedStatuses.includes(loan.status)).length

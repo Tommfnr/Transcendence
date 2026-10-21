@@ -19,16 +19,14 @@ export const TONE_ORDER: Record<ExchangeTone, number> = { attention: 0, waiting:
 
 export const LENDING_STATUS_DISPLAY: Record<LendingStatus, { label: string; tone: ExchangeTone }> = {
 	// offer
-	created: { label: 'pending', tone: 'waiting' },
 	pending: { label: 'pending', tone: 'waiting' },
 	// loan
 	accepted: { label: 'accepted', tone: 'attention' },
 	active: { label: 'borrowed', tone: 'attention' },
 	awaiting_confirmation: { label: 'awaiting confirmation', tone: 'attention' },
 	returned: { label: 'completed', tone: 'done' },
-	// problems
+	// late
 	overdue: { label: 'overdue', tone: 'attention' },
-	disputed: { label: 'disputed', tone: 'attention' },
 	// no loan
 	rejected: { label: 'declined', tone: 'waiting' },
 	cancelled: { label: 'cancelled', tone: 'waiting' },

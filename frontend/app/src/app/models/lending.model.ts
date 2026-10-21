@@ -1,17 +1,15 @@
 export type LendingStatus =
-    | 'created'
     | 'pending'
     | 'accepted'
     | 'active'
     | 'awaiting_confirmation'
     | 'returned'
-    | 'overdue'
-    | 'disputed'
     | 'rejected'
-    | 'cancelled';
+    | 'cancelled'
+    | 'overdue';
 
 /** A loan that went past the offer stage: the requester picked this helper. */
-export const CHOSEN_STATUSES: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'returned', 'overdue', 'disputed'];
+export const CHOSEN_STATUSES: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'returned', 'overdue'];
 
 export interface LendingEntity {
     id: number;

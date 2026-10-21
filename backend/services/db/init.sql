@@ -151,13 +151,11 @@ CREATE TABLE IF NOT EXISTS api_keys (
 DO $$
 BEGIN
 	CREATE TYPE lending_status as ENUM (
-		'created',
 		'pending',
 		'accepted',
 		'active',
 		'awaiting_confirmation',
 		'returned',
-		'disputed',
 		'rejected',
 		'cancelled',
 		'overdue'
@@ -172,7 +170,7 @@ CREATE TABLE IF NOT EXISTS lending (
 	lender_id											INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	borrower_id										INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	post_id												INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-	status												lending_status NOT NULL DEFAULT 'created',
+	status												lending_status NOT NULL DEFAULT 'pending',
 	lended_from										TIMESTAMPTZ NOT NULL,
 	lended_to											TIMESTAMPTZ NOT NULL,
 	message												VARCHAR(250),

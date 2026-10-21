@@ -4,8 +4,7 @@ const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
 export const lendingStatusEnum = pgEnum('lending_status',
 	['pending', 'accepted', 'active', 'awaiting_confirmation',
-		'returned', 'disputed', 'rejected', 'cancelled', 'overdue',
-		'created'
+		'returned', 'rejected', 'cancelled', 'overdue'
 	],
 )
 
@@ -15,7 +14,7 @@ export const lending = pgTable('lending', {
 	lenderId: 									integer('lender_id').notNull(),
 	borrowerId:									integer('borrower_id').notNull(),
 	postId:											integer('post_id').notNull(),
-	status:											lendingStatusEnum('status').notNull().default('created'),
+	status:											lendingStatusEnum('status').notNull().default('pending'),
 	lendedFrom: 								timestamptz('lended_from').notNull(),
 	lendedTo:										timestamptz('lended_to').notNull(),
 	message:										varchar('message', { length: 250 }),

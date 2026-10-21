@@ -10,15 +10,13 @@ const ALLOWED_TRANSITIONS: Record<LendStatus, LendStatus[]> = {
 	accepted: ['active', 'cancelled'],
 	// Object with the borrower
 	active: ['awaiting_confirmation', 'overdue'],
-	overdue: ['awaiting_confirmation', 'disputed'],
+	overdue: ['awaiting_confirmation'],
 	// The borrower says it is back, the lender checks it
-	awaiting_confirmation: ['returned', 'disputed'],
+	awaiting_confirmation: ['returned'],
 	// Final states
 	returned: [],
 	rejected: [],
 	cancelled: [],
-	disputed: [],
-	created: [],
 }
 
 export function canTransition(from: LendStatus, to: LendStatus): boolean {
