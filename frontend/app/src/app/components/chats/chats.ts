@@ -7,12 +7,13 @@ import {
     inject,
     input,
     signal,
+    untracked,
     viewChild,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { EMPTY, catchError, finalize, switchMap } from 'rxjs';
 import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
 import { RefreshService } from '../../services/refresh.service';
@@ -75,13 +76,15 @@ export class ChatComponent {
             this.error.set(null);
             this.loading.set(true);
 
-            const request = this.chatsService
-                .findMessages(conversationId)
-                .pipe(finalize(() => this.loading.set(false)))
-                .subscribe({
-                    next: (messages) => this.addMessages(messages),
-                    error: (err: HttpErrorResponse) => this.showError(err),
-                });
+            const request = untracked(() =>
+                this.chatsService
+                    .findMessages(conversationId)
+                    .pipe(finalize(() => this.loading.set(false)))
+                    .subscribe({
+                        next: (messages) => this.addMessages(messages),
+                        error: (err: HttpErrorResponse) => this.showError(err),
+                    }),
+            );
 
             // Drops a slow response if the conversation changed meanwhile
             onCleanup(() => request.unsubscribe());
@@ -89,6 +92,25 @@ export class ChatComponent {
 
         this.chatSocket.messageNew$.pipe(takeUntilDestroyed()).subscribe((message) => {
             if (message.conversationId === this.conversationId()) this.addMessages([message]);
+        });
+
+        effect((onCleanup) => {
+            const conversationId = this.conversationId();
+
+            const resync = this.chatSocket.reconnected$
+                .pipe(
+                    switchMap(() =>
+                        this.chatsService.findMessages(conversationId).pipe(
+                            catchError((err: HttpErrorResponse) => {
+                                this.showError(err);
+                                return EMPTY;
+                            }),
+                        ),
+                    ),
+                )
+                .subscribe((messages) => this.addMessages(messages));
+
+            onCleanup(() => resync.unsubscribe());
         });
 
         // Keep the latest message in view

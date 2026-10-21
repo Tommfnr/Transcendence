@@ -14,7 +14,7 @@ import { SelectPillComponent } from '../../components/select-pill/select-pill';
 import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ChipComponent } from '../../components/chip/chip';
-import { DatePicker } from '../../components/date-picker/date-picker';
+import { DatePicker, todayIso } from '../../components/date-picker/date-picker';
 
 @Component({
 	selector: 'app-editAddPost',
@@ -44,6 +44,16 @@ export class EditAddPost implements OnInit {
 
 	readonly bannerErrors = signal<string[]>([]);
 
+	readonly today = todayIso();
+
+	readonly minToDate = computed(() => {
+		const from = this.postForm.fromDate().value() || this.today;
+
+		const nextDay = new Date(from);
+		nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+		return (nextDay.toISOString().slice(0, 10));
+	});
+
 	private post = signal<PostInput>({
 		title: '',
 		objectType: OBJECT_TYPES[0],
@@ -62,8 +72,8 @@ export class EditAddPost implements OnInit {
 		required(fieldPath.toDate, { message: 'End date is required' });
 		validate(fieldPath.toDate, ({ value, valueOf }) => {
 			const from = valueOf(fieldPath.fromDate);
-			if (from && value() && value() < from)
-				return ({ kind: 'dateOrder', message: 'End date must be on or after the start date' });
+			if (from && value() && value() <= from)
+				return ({ kind: 'dateOrder', message: 'End date must be after the start date' });
 			return (undefined);
 		});
 

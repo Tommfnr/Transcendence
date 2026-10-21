@@ -26,7 +26,7 @@ export class ObjectsController {
 
 	@Get(':objectId')
 	findOne(@Param('objectId', ParseIdPipe) objectId: number) {
-		return (this.objectsService.findByIdOrThrow(objectId))
+		return (this.objectsService.findLiveByIdOrThrow(objectId))
 	}
 
 	@Post()
