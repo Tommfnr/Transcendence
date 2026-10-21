@@ -1,6 +1,7 @@
 // Defines the root module AppModule that will be instantiated in main.ts
 
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 import { APP_PIPE } from '@nestjs/core'
 import {
 	EVENT,
@@ -21,6 +22,7 @@ import { postDeletedHandler } from './lending/post-deleted.handler'
 @Module({
 	imports: [
 		DatabaseModule,
+		ScheduleModule.forRoot(),
 		LendingModule,
 		SharedEventsModule.register({
 			imports: [LendingModule],

@@ -362,6 +362,17 @@ export class LendingService {
 		return (updated)
 	}
 
+	// Loans still with the borrower once their end date has passed
+	async markOverdue(): Promise<number> {
+		const overdue = await this.db
+			.update(lending)
+			.set({ status: 'overdue', updatedAt: new Date() })
+			.where(and(eq(lending.status, 'active'), lt(lending.lendedTo, new Date())))
+			.returning({ id: lending.id })
+
+		return (overdue.length)
+	}
+
 	private async assertStillAcceptable(request: typeof lending.$inferSelect) {
 		assertTransition(request.status, 'accepted')
 
