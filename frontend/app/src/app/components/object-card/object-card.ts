@@ -28,7 +28,8 @@ export class ObjectCard {
 
 	get imageClasses(): string {
 		const base =
-			'bg-muted rounded-t-card overflow-clip flex items-center justify-center h-[88px] md:h-[112px]'
+			'bg-[linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.9)),url(/img/bg.png)] bg-cover bg-center rounded-t-card overflow-clip flex items-center justify-center h-[88px] md:h-[112px] '
+
 
 		return `${base}`;
 	}
