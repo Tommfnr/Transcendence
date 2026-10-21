@@ -50,7 +50,7 @@ export class ChatComponent {
     private refreshService = inject(RefreshService);
 
     readonly conversationId = input.required<number>();
-    readonly placeholder = input('Écrire un message…');
+    readonly placeholder = input('Write a message…');
 
     protected readonly maxLength = MESSAGE_MAX_LENGTH;
     protected readonly me = this.refreshService.user;
@@ -150,6 +150,6 @@ export class ChatComponent {
         const fieldErrors = err.error?.errors
             ? Object.values(err.error.errors).flat().join(', ')
             : '';
-        this.error.set(fieldErrors || err.error?.message || 'Une erreur est survenue');
+        this.error.set(fieldErrors || err.error?.message || 'An error occurred');
     }
 }

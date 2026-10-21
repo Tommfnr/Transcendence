@@ -2,7 +2,7 @@
 
 <div #scroller role="log" class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
     @if (loading()) {
-        <p class="m-auto text-xs text-text-secondary">Chargement…</p>
+        <p class="m-auto text-xs text-text-secondary">Loading…</p>
     } @else {
         @for (message of messages(); track message.id) {
             @let mine = message.ownerId === me()?.id;
@@ -21,7 +21,7 @@
                 </span>
             </div>
         } @empty {
-            <p class="m-auto text-xs text-text-secondary">Aucun message pour l'instant.</p>
+            <p class="m-auto text-xs text-text-secondary">No messages yet</p>
         }
     }
 </div>
