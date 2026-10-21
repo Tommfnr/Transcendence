@@ -137,4 +137,8 @@ export const routes: Routes = [
 			}
 		]
 	},
+	{
+		path: '**',
+		redirectTo: 'app/notFound',
+	},
 ];

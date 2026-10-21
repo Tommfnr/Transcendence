@@ -59,7 +59,7 @@
         <section class="flex gap-4">
             <div class="flex flex-1 flex-col gap-1">
                 <label for="post-from" class="text-2xs font-bold text-text-secondary">From</label>
-                <app-date-picker [formField]="postForm.fromDate" />
+                <app-date-picker [formField]="postForm.fromDate" [minDate]="today" />
                 @if (postForm.fromDate().touched() && postForm.fromDate().errors().length > 0) {
                     @for (error of postForm.fromDate().errors(); track error.kind) {
                         <span class="text-xs text-error">{{ error.message }}</span>
@@ -69,7 +69,7 @@
 
             <div class="flex flex-1 flex-col gap-1">
                 <label for="post-to" class="text-2xs font-bold text-text-secondary">To</label>
-                <app-date-picker [formField]="postForm.toDate" [minDate]="postForm.fromDate().value()" />
+                <app-date-picker [formField]="postForm.toDate" [minDate]="minToDate()" />
                 @if (postForm.toDate().touched() && postForm.toDate().errors().length > 0) {
                     @for (error of postForm.toDate().errors(); track error.kind) {
                         <span class="text-xs text-error">{{ error.message }}</span>

@@ -9,9 +9,16 @@ export const createPostSchema = z.object({
 	fromDate:		z.coerce.date(),
 	toDate:			z.coerce.date(),
 	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group'),
-}).refine((data) => data.toDate >= data.fromDate, {
-	message: 'toDate must be on or after fromDate',
+}).refine((data) => data.toDate > data.fromDate, {
+	message: 'End date must be after the start date',
 	path: ['toDate'],
+}).refine((data) => {
+	const startOfToday = new Date()
+	startOfToday.setUTCHours(0, 0, 0, 0)
+	return (data.fromDate >= startOfToday)
+}, {
+	message: 'Start date cannot be in the past',
+	path: ['fromDate'],
 })
 
 export class CreatePostDto extends createZodDto(createPostSchema) {}

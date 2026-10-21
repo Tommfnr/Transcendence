@@ -39,6 +39,7 @@ export const loginIdentifierSchema = z
 
 export const nameSchema = (max: number) => z
 	.string('Please input a string')
+	.trim()
 	.min(1, 'Name required')
 	.max(max, `Max ${max} characters`)
 	.regex(/^[a-zA-Z0-9 ]{1,}$/, 'Only letters, digits, and spaces allowed')

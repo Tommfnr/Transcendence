@@ -4,16 +4,13 @@ import { PostsService } from './posts.service'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PostOwnerGuard } from './guards/post-owner.guard'
+import { PostGroupGuard } from './guards/post-group.guard'
+
 
 @Controller('posts')
 @UseGuards(SharedAuthGuard)
 export class PostsController {
 	constructor(private readonly postsService: PostsService) { }
-
-	@Get()
-	findAll() {
-		return (this.postsService.findAll())
-	}
 
 	@Get('my')
 	findMy(@CurrentUser('sub') userId: number) {
@@ -32,11 +29,13 @@ export class PostsController {
 	}
 
 	@Get(':postId')
+	@UseGuards(PostGroupGuard)
 	findOne(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.findOne(postId))
 	}
 
 	@Get(':postId/groups')
+	@UseGuards(PostGroupGuard)
 	findGroups(@Param('postId', ParseIdPipe) postId: number) {
 		return (this.postsService.findGroups(postId))
 	}
