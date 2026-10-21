@@ -8,8 +8,7 @@ export type OfferCardState = 'pending' | 'accepted' | 'borrowed' | 'overdue' | '
  * One offer received on your request.
  *
  * Accept is primary, decline is present on purpose — refusing politely is
- * part of the flow, hiding it would only produce ghosting. Once accepted,
- * both buttons give way to a read-only badge.
+ * part of the flow, hiding it would only produce ghosting.
  *
  * The card BODY (who + object zones) opens the conversation with the
  * offerer — the chat bubble beside the time is the affordance; the

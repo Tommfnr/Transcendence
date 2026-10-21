@@ -43,6 +43,7 @@ export class MyRequest implements OnInit {
 	readonly cancelling = signal(false);
 	readonly bannerErrors = signal<string[]>([]);
 
+	private postId = this.modalService.myRequestPostId();
 
 	readonly offers = computed(() =>
 		this.lendings().map((l) => ({
@@ -65,13 +66,12 @@ export class MyRequest implements OnInit {
 
 
 	ngOnInit(): void {
-		const postId = this.modalService.myRequestPostId();
-		if (postId === null)
+		if (this.postId === null)
 			return;
 
-		this.loadPost(postId);
-		this.loadGroupsPost(postId);
-		this.loadReceivedOffers(postId);
+		this.loadPost(this.postId);
+		this.loadGroupsPost(this.postId);
+		this.loadReceivedOffers(this.postId);
 	}
 
 	private loadPost(postId: number): void {
@@ -153,13 +153,12 @@ export class MyRequest implements OnInit {
 	}
 
 	onCancelRequest(): void {
-		const postId = this.modalService.myRequestPostId();
-		if (postId === null || this.cancelling())
+		if (this.postId === null || this.cancelling())
 			return;
 
 		this.bannerErrors.set([]);
 		this.cancelling.set(true);
-		this.postsService.remove(postId)
+		this.postsService.remove(this.postId)
 			.pipe(finalize(() => this.cancelling.set(false)))
 			.subscribe({
 				next: () => this.modalService.close(),
@@ -177,13 +176,12 @@ export class MyRequest implements OnInit {
 
 	// Sends an action on an offer or on the chosen loan, then reloads them
 	private applyAction(action: Observable<LendingEntity>): void {
-		const postId = this.modalService.myRequestPostId();
-		if (postId === null)
+		if (this.postId === null)
 			return;
 
 		this.bannerErrors.set([]);
 		action.subscribe({
-			next: () => this.loadReceivedOffers(postId),
+			next: () => this.modalService.close(),
 			error: (err) => this.showError(this.errorMessageOf(err)),
 		});
 	}

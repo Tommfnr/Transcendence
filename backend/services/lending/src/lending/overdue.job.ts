@@ -5,6 +5,8 @@ import { LendingService } from './lending.service'
 // Marks loans as overdue once their end date has passed, without anyone having to act
 @Injectable()
 export class OverdueJob implements OnApplicationBootstrap {
+	private readonly logger = new Logger(OverdueJob.name)
+	
 	constructor(private readonly lendingService: LendingService) {}
 	
 	// Catches up right after a restart instead of waiting for the next hour
@@ -12,7 +14,6 @@ export class OverdueJob implements OnApplicationBootstrap {
 		await this.run()
 	}
 	
-	private readonly logger = new Logger(OverdueJob.name)
 	@Cron(CronExpression.EVERY_HOUR)
 	async run() {
 		try {
