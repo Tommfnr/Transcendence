@@ -9,10 +9,6 @@ import { PostEntity, PostInput, PostGroupData } from '../models/post.model';
 export class PostsService {
 	private http = inject(HttpClient)
 
-	findAll() {
-		return this.http.get<PostEntity[]>('/api/posts');
-	}
-
 	findMy() {
 		return this.http.get<PostEntity[]>('/api/posts/my');
 	}

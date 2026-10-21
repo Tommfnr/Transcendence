@@ -1,6 +1,10 @@
 import { Body, Controller, Get, Delete, HttpCode, Param, Patch, UseGuards, ForbiddenException } from '@nestjs/common'
-import { SharedAuthGuard, CurrentUser, ParseIdPipe } from '@pep/shared'
+import { SharedAuthGuard, CurrentUser, ParseIdPipe, UserView } from '@pep/shared'
 import { UsersProxyService } from './users-proxy.service'
+
+function toPublicUser(user: UserView) {
+	return ({ id: user.id, username: user.username })
+}
 
 @UseGuards(SharedAuthGuard)
 @Controller('users')
@@ -8,8 +12,9 @@ export class UsersController {
 	constructor(private readonly usersProxy: UsersProxyService) {}
 
 	@Get()
-	findAll() {
-		return (this.usersProxy.findAll())
+	async findAll() {
+		const users = await this.usersProxy.findAll()
+		return (users.map(toPublicUser))
 	}
 
 	@Get('me')
@@ -23,13 +28,15 @@ export class UsersController {
 	}
 
 	@Get('username/:username')
-	findByUsername(@Param('username') username: string) {
-		return (this.usersProxy.findByUsername(username))
+	async findByUsername(@Param('username') username: string) {
+		const user = await this.usersProxy.findByUsername(username)
+		return (toPublicUser(user))
 	}
 
 	@Get(':id')
-	findOne(@Param('id', ParseIdPipe) id: number) {
-		return (this.usersProxy.findById(id))
+	async findOne(@Param('id', ParseIdPipe) id: number) {
+		const user = await this.usersProxy.findById(id)
+		return (toPublicUser(user))
 	}
 
 	@Delete(':id')

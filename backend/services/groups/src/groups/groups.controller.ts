@@ -30,6 +30,7 @@ export class GroupsController {
 	}
 
 	@Get(':groupId')
+	@UseGuards(GroupMemberGuard)
 	findOne(@Param('groupId', ParseIdPipe) groupId: number) {
 		return (this.groupsService.findByIdOrThrow(groupId))
 	}

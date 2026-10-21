@@ -55,6 +55,18 @@ export class ObjectsService {
 		return (object)
 	}
 
+	async findLiveByIdOrThrow(objectId: number) {
+		const [object] = await this.db
+				.select()
+				.from(objects)
+				.where(and(eq(objects.id, objectId), isNull(objects.deletedAt)))
+
+		if (!object)
+			throw new NotFoundException(`Object ${objectId} not found`)
+
+		return (object)
+	}
+
 	async create(userId: number, dto: CreateObjectDto) {
 		try {
 			return (await this.db

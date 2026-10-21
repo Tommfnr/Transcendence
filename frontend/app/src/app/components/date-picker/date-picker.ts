@@ -11,7 +11,7 @@ const MONTHS = [
 // "5/1/2026" must become "2026-01-05", never "2026-1-5"
 const pad = (n: number) => String(n).padStart(2, '0');
 const toIso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
-const todayIso = () => {
+export const todayIso = () => {
   const now = new Date();
   return toIso(now.getFullYear(), now.getMonth(), now.getDate());
 };
