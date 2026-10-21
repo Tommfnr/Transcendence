@@ -249,7 +249,7 @@ export class Dashboard {
 			}
 			else if (post.status === 'closed') {
 				statusLabel = 'closed';
-				tone = 'done';
+				tone = 'cancel';
 			}
 			else if (offers > 0) {
 				statusLabel = `${offers} offer${offers > 1 ? 's' : ''}`;

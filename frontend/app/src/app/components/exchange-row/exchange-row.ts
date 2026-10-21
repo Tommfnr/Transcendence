@@ -1,6 +1,6 @@
 import { Component, booleanAttribute, computed, input, output } from '@angular/core';
 
-export type ExchangeStatus = 'attention' | 'waiting' | 'done';
+export type ExchangeStatus = 'attention' | 'waiting' | 'cancel' | 'closed';
 
 /**
  * One exchange you are part of — whether you asked or you offered.
@@ -28,7 +28,8 @@ export class ExchangeRowComponent {
 		const tones: Record<ExchangeStatus, string> = {
 			attention: 'text-primary',
 			waiting: 'text-text-secondary',
-			done: 'text-success',
+			cancel: 'text-text-secondary',
+			closed: 'text-success'
 		};
 		return `${base} ${tones[this.status()]}`;
 	});
