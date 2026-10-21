@@ -10,6 +10,13 @@ export const OBJECT_TYPES = [
 	'Other',
 ] as const;
 
+export const OBJECT_TYPES_EMOJI: Record<ObjectType, string> = {
+	DIY: '🛠️',
+	Electronics: '💻',
+	Leisure: '🎾',
+	Other: '📦',
+};
+
 export type ObjectType = typeof OBJECT_TYPES[number];
 
 export interface ObjectEntity {

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { AvatarComponent } from '../../components/avatar/avatar';
 import { TagComponent } from '../../components/tag/tag';
@@ -23,6 +24,7 @@ export class ICanHelp implements OnInit {
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 	private route = inject(ActivatedRoute);
+	private router = inject(Router);
 
 	readonly postId = Number(this.route.snapshot.paramMap.get('postId'));
 	readonly post = signal<PostEntity | null>(null);
@@ -74,7 +76,13 @@ export class ICanHelp implements OnInit {
 					this.showError('This request was deleted');
 				this.loadAuthor(post.ownerId);
 			},
-			error: () => this.showError('This request no longer exists'),
+			error: (err: HttpErrorResponse) => {
+				if (err.status === 404) {
+					this.router.navigate(['/app/notFound'], { skipLocationChange: true });
+					return;
+				}
+				this.showError('Could not load this request, please try again');
+			},
 		});
 	}
 

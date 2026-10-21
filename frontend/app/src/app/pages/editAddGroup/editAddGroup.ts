@@ -54,10 +54,14 @@ export class EditAddGroup implements OnInit {
 
 	ngOnInit(): void {
 		if (this.isEditMode()) {
-			this.groupsService.findOne(Number(this.groupId)).subscribe((data) => {
-				this.group.set({ name: data.name, description: data.description ?? '' });
-				this.ownerId.set(data.ownerId);
+			this.groupsService.findOne(Number(this.groupId)).subscribe({
+				next: (data) => {
+					this.group.set({ name: data.name, description: data.description ?? '' });
+					this.ownerId.set(data.ownerId);
+				},
+				error: () => this.errorMessage.set('Could not load the group'),
 			});
+
 			this.loadMembers();
 		}
 	}

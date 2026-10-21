@@ -61,7 +61,7 @@
     <div class="flex min-h-0 flex-col gap-4 lg:flex-row">
         <!-- Live list: reordered by ChatSocketService on every new message. Desktop only: on mobile the chat is opened from My exchanges -->
         <nav
-            aria-label="Mes conversations"
+            aria-label="My conversations"
             class="hidden lg:flex lg:max-h-[70dvh] lg:w-md lg:shrink-0 min-h-0 flex-col gap-3 overflow-y-auto p-1"
         >
             <div class="flex items-baseline justify-between">
@@ -88,7 +88,7 @@
                     </li>
                 } @empty {
                     <li class="px-3 py-2 text-xs text-text-secondary">
-                        {{ loaded() ? "Aucune conversation pour l'instant." : 'Chargement…' }}
+                        {{ loaded() ? "No conversations yet." : 'Loading...' }}
                     </li>
                 }
             </ul>
@@ -108,7 +108,7 @@
             </app-chat>
         } @else if (loaded()) {
             <p class="text-sm text-text-secondary">
-                Aucune conversation pour l'instant — créez-en une ci-dessus.
+                No conversations yet.
             </p>
         }
     </div>

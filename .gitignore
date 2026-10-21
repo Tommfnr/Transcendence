@@ -25,6 +25,7 @@ dist-ssr
 *.sw?
 .env
 .env*
+!.env.example
 secrets/
 zhelp*
 scripts/
