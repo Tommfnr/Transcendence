@@ -6,7 +6,7 @@ export function userDeletedHandler(objects: ObjectsService) {
 	const logger = new Logger('UserDeletedHandler')
 
 	return async (data: UserDeletedData): Promise<void> => {
-		const unavailable = await objects.updateAllByOwnerDeleted(data.userId)
-		logger.log(`user.deleted(${data.userId}) -> marked ${unavailable} objects unavailable`)
+		const deleted = await objects.updateAllByOwnerDeleted(data.userId)
+		logger.log(`user.deleted(${data.userId}) -> deleted ${deleted} objects`)
 	}
 }
