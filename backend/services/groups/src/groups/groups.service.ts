@@ -7,6 +7,8 @@ import { pgErrorCode } from '@pep/shared'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 
+type Executor = Pick<PostgresJsDatabase, 'select'>
+
 @Injectable()
 export class GroupsService {
 	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
@@ -61,8 +63,21 @@ export class GroupsService {
 			.where(eq(groupMembers.groupId, groupId))
 	}
 
-	private async findMembership(groupId: number, userId: number) {
-		const [membership] = await this.db
+	private async lockGroup(t: Executor, groupId: number) {
+		const [group] = await t
+			.select()
+			.from(groups)
+			.where(and(eq(groups.id, groupId), isNull(groups.deletedAt)))
+			.for('update')
+
+		if (!group)
+			throw new NotFoundException('Group not found')
+
+		return group
+	}
+
+	private async findMembership(groupId: number, userId: number, executor: Executor = this.db) {
+		const [membership] = await executor
 			.select()
 			.from(groupMembers)
 			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
@@ -180,18 +195,20 @@ export class GroupsService {
 	}
 
 	async addMember(groupId: number, targetUserId: number) {
-		const existingUser = await this.findMembership(groupId, targetUserId)
-
-		if (existingUser)
-			throw new ForbiddenException('User already in group')
-
 		try {
-			const [member] = await this.db
-				.insert(groupMembers)
-				.values({ groupId, userId: targetUserId, role: 'member' })
-				.returning()
+			return await this.db.transaction(async (t) => {
+				await this.lockGroup(t, groupId)
 
-			return member
+				if (await this.findMembership(groupId, targetUserId, t))
+					throw new ForbiddenException('User already in group')
+
+				const [member] = await t
+					.insert(groupMembers)
+					.values({ groupId, userId: targetUserId, role: 'member' })
+					.returning()
+
+				return member
+			})
 		} catch (err: unknown) {
 			const wrappedCause = err instanceof Error ? (err as { cause?: unknown }).cause : undefined
 			const cause = wrappedCause instanceof Error ? wrappedCause : err
@@ -206,55 +223,61 @@ export class GroupsService {
 	}
 
 	async updateMemberRole(groupId: number, targetUserId: number, role: 'admin' | 'member') {
-		const group = await this.findByIdOrThrow(groupId)
+		return this.db.transaction(async (t) => {
+			const group = await this.lockGroup(t, groupId)
 
-		if (group.ownerId === targetUserId)
-			throw new ForbiddenException('Cannot change the role of the group owner')
+			if (group.ownerId === targetUserId)
+				throw new ForbiddenException('Cannot change the role of the group owner')
 
-		const target = await this.findMembership(groupId, targetUserId)
+			const target = await this.findMembership(groupId, targetUserId, t)
 
-		if (!target)
-			throw new NotFoundException('Target user not in group')
+			if (!target)
+				throw new NotFoundException('Target user not in group')
 
-		if (target.role === 'admin' && role === 'member') {
-			const admins = await this.db
-				.select()
-				.from(groupMembers)
-				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')))
+			if (target.role === 'admin' && role === 'member') {
+				const admins = await t
+					.select()
+					.from(groupMembers)
+					.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')))
 
-			if (admins.length <= 1)
-				throw new ForbiddenException('Cannot demote the only remaining admin')
-		}
+				if (admins.length <= 1)
+					throw new ForbiddenException('Cannot demote the only remaining admin')
+			}
 
-		const [updated] = await this.db
-			.update(groupMembers)
-			.set({ role, updatedAt: new Date() })
-			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
-			.returning()
+			const [updated] = await t
+				.update(groupMembers)
+				.set({ role, updatedAt: new Date() })
+				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
+				.returning()
 
-		return updated
+			return updated
+		})
 	}
 
 	async removeMember(groupId: number, targetUserId: number) {
-		const target = await this.findMembership(groupId, targetUserId)
+		return this.db.transaction(async (t) => {
+			await this.lockGroup(t, groupId)
 
-		if (!target)
-			throw new NotFoundException('Target user not in group')
-		if (target.role == 'admin')
-			throw new ForbiddenException('Cannot remove an admin')
+			const target = await this.findMembership(groupId, targetUserId, t)
 
-		await this.db
-			.delete(groupMembers)
-			.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
+			if (!target)
+				throw new NotFoundException('Target user not in group')
+			if (target.role == 'admin')
+				throw new ForbiddenException('Cannot remove an admin')
 
-		return { message: 'Member successfully removed' }
+			await t
+				.delete(groupMembers)
+				.where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, targetUserId)))
+
+			return { message: 'Member successfully removed' }
+		})
 	}
 
 	async leaveGroup(groupId: number, userId: number) {
 		return this.db.transaction(async (t) => {
-			const group = await this.findByIdOrThrow(groupId)
+			const group = await this.lockGroup(t, groupId)
 
-			const membership = await this.findMembership(groupId, userId)
+			const membership = await this.findMembership(groupId, userId, t)
 
 			if (!membership)
 				throw new NotFoundException('Not a member of this group')
@@ -309,6 +332,8 @@ export class GroupsService {
 	// so every read that goes through group_members stops seeing it
 	async deleteGroup(groupId: number) {
 		await this.db.transaction(async (t) => {
+			await this.lockGroup(t, groupId)
+
 			await t
 				.update(groups)
 				.set({ deletedAt: new Date(), updatedAt: new Date() })
