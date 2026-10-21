@@ -1,5 +1,5 @@
 <button type="button" (click)="pick.emit()" [class]="classes()">
-    <div class="flex h-14 w-full items-center justify-center bg-muted lg:h-20">
+    <div class="flex h-14 w-full items-center justify-center bg-[linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.9)),url(/img/bg.png)] bg-cover bg-center lg:h-20">
         @if (imageUrl()) {
             <img [src]="imageUrl()" [alt]="name()" class="h-full w-full object-cover" />
         } @else {
