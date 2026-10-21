@@ -174,12 +174,10 @@ export class MyRequest implements OnInit {
 		this.applyAction(this.lendingService.giveBack(lendingId));
 	}
 
-	// Sends an action on an offer or on the chosen loan, then reloads them
+	// Sends an action on an offer or on the chosen loan
 	private applyAction(action: Observable<LendingEntity>): void {
-		if (this.postId === null)
-			return;
-
 		this.bannerErrors.set([]);
+		
 		action.subscribe({
 			next: () => this.modalService.close(),
 			error: (err) => this.showError(this.errorMessageOf(err)),
