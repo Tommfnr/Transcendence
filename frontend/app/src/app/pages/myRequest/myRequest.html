@@ -22,6 +22,7 @@
 		}
 		@for (offer of offers(); track offer.id) {
 			<app-offer-card
+				[type]="offer.objectType"
 				[name]="offer.name"
 				[group]="offer.group"
 				[time]="offer.time"

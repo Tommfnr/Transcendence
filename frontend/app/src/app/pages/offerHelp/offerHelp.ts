@@ -21,6 +21,7 @@ import { ObjectEntity } from '../../models/object.model';
 import { normalizeForSearch } from '../../shared/normalize-text';
 import { todayIso } from '../../components/date-picker/date-picker';
 
+
 const MESSAGE_MAX_LENGTH = 250;
 
 // First message of the chat when the helper leaves the offer message empty

@@ -1,51 +1,61 @@
 <article class="flex w-full flex-col gap-2 rounded-card bg-card p-3 shadow-card">
-	<button
-		type="button"
-		(click)="press.emit()"
-		class="-m-1 flex cursor-pointer flex-col gap-2 rounded-card p-1 text-left transition-colors hover:bg-background"
-	>
-		<div class="flex w-full items-center gap-2">
+    <button
+        type="button"
+        (click)="press.emit()"
+        class="-m-1 flex cursor-pointer flex-col gap-2 rounded-card p-1 text-left hover:ring-primary hover:ring-1 hover:text-primary transition"
+    >
+        <div class="flex w-full items-center gap-2">
             <app-avatar size="md" kind="person"></app-avatar>
-			
-			<div class="flex min-w-0 flex-1 flex-col">
-				<p class="truncate text-xs font-bold text-strong">{{ name() }}</p>
-				<p class="truncate text-2xs font-light text-text-secondary">{{ group() }}</p>
-			</div>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.8"
-				stroke-linejoin="round"
-				class="size-4 shrink-0 text-text-secondary"
-				aria-hidden="true"
-			>
-				<path d="M5 6 H19 V14 H11 L8 17 V14 H5 Z" />
-			</svg>
-			<p class="shrink-0 text-2xs font-light text-text-secondary">{{ time() }}</p>
-		</div>
 
-		<div class="flex w-full items-start gap-2 pt-1">
-			<span class="size-12 shrink-0 rounded-card bg-muted/50" aria-hidden="true"></span>
-			<div class="flex min-w-0 flex-1 flex-col gap-1">
-				<p class="truncate text-sm font-bold text-text">{{ objectName() }}</p>
-				@if (message()) {
-					<p class="truncate text-xs text-text-secondary">{{ message() }}</p>
-				}
-			</div>
-		</div>
-	</button>
+            <div class="flex min-w-0 flex-1 flex-col">
+                <p class="truncate text-xs font-bold text-strong">{{ name() }}</p>
+                <p class="truncate text-2xs font-light text-text-secondary">{{ group() }}</p>
+            </div>
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+                class="size-4 shrink-0"
+                aria-hidden="true"
+            >
+                <path d="M5 6 H19 V14 H11 L8 17 V14 H5 Z" />
+            </svg>
+            <p class="shrink-0 text-2xs font-light text-text-secondary">{{ time() }}</p>
+        </div>
 
-	<div class="flex w-full items-center gap-2 pt-1" [class.justify-end]="state() === 'pending'">
-		@if (state() === 'pending') {
-			<button appButton size="xsmall" variant="secondary" type="button" (click)="decline.emit()">
-				Decline
-			</button>
-			<button appButton size="xsmall" variant="primary" type="button" (click)="accept.emit()">
-				Accept
-			</button>
-		} @else {
-			<app-status-badge status="done" label="Offer accepted" />
-		}
-	</div>
+        <div class="flex w-full items-start gap-2 pt-1">
+            <div
+                class="size-12 flex items-center justify-center "
+            >
+                <span class="text-2xl lg:text-3xl leading-none select-none">{{ emoji() }}</span>
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <p class="truncate text-sm font-bold text-text">{{ objectName() }}</p>
+                @if (message()) {
+                    <p class="truncate text-xs text-text-secondary">{{ message() }}</p>
+                }
+            </div>
+        </div>
+    </button>
+
+    <div class="flex w-full items-center gap-2 pt-1" [class.justify-end]="state() === 'pending'">
+        @if (state() === 'pending') {
+            <button
+                appButton
+                size="xsmall"
+                variant="secondary"
+                type="button"
+                (click)="decline.emit()"
+            >
+                Decline
+            </button>
+            <button appButton size="xsmall" variant="primary" type="button" (click)="accept.emit()">
+                Accept
+            </button>
+        } @else {
+            <app-status-badge status="done" label="Offer accepted" />
+        }
+    </div>
 </article>

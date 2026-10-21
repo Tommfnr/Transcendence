@@ -22,7 +22,7 @@ export class StatCardComponent {
 	@Input() tone: StatTone = 'primary';
 
 	get containerClasses(): string {
-		const base = 'flex items-center rounded-sm border px-1 py-2 shadow-raised';
+		const base = 'flex items-center rounded-sm border px-1 py-2 shadow-card';
 		const tones: Record<StatTone, string> = {
 			primary: 'border-primary-border bg-primary-surface',
 			success: 'border-success-border bg-success-surface',

@@ -48,6 +48,7 @@ export class MyRequest implements OnInit {
 			group: this.sharedGroupName(l.lenderId),
 			time: formatTimeAgo(l.createdAt),
 			objectName: this.objectsById().get(l.objectId)?.name ?? '…',
+			objectType: this.objectsById().get(l.objectId)?.type ?? null,
 			message: l.message,
 			state: (l.status === 'accepted' ? 'accepted' : 'pending') as OfferCardState,
 		}))
@@ -91,7 +92,7 @@ export class MyRequest implements OnInit {
 			this.groupsService.findMembers(group.id).subscribe({
 				next: (members) => this.memberIdsByGroupId.update((map) =>
 					new Map(map).set(group.id, members.map((m) => m.userId))),
-				error: () => {},
+				error: () => { },
 			});
 		}
 	}
