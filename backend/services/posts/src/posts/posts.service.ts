@@ -126,11 +126,24 @@ export class PostsService {
 		const fromDate = postFields.fromDate ?? post.fromDate
 		const toDate = postFields.toDate ?? post.toDate
 
-		if (toDate < fromDate) {
+		if (toDate <= fromDate) {
 			throw new BadRequestException({
 				statusCode: 400,
 				message: 'Validation failed',
-				errors: { toDate: ['toDate must be on or after fromDate'] },
+				errors: { toDate: ['End date must be after the start date'] },
+				formErrors: [],
+			})
+		}
+
+		const startOfToday = new Date()
+		startOfToday.setUTCHours(0, 0, 0, 0)
+
+		const fromDateChanged = fromDate.getTime() !== new Date(post.fromDate).getTime()
+		if (fromDateChanged && fromDate < startOfToday) {
+			throw new BadRequestException({
+				statusCode: 400,
+				message: 'Validation failed',
+				errors: { fromDate: ['Start date cannot be in the past'] },
 				formErrors: [],
 			})
 		}

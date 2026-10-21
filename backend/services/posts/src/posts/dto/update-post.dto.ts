@@ -10,8 +10,8 @@ export const updatePostSchema = z.object({
 	fromDate:		z.coerce.date().optional(),
 	toDate:			z.coerce.date().optional(),
 	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group').optional(),
-}).refine((data) => !(data.fromDate && data.toDate) || data.toDate >= data.fromDate, {
-	message: 'toDate must be on or after fromDate',
+}).refine((data) => !(data.fromDate && data.toDate) || data.toDate > data.fromDate, {
+	message: 'End date must be after the start date',
 	path: ['toDate'],
 })
 
