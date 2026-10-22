@@ -11,6 +11,6 @@ export class InternalObjectsController {
 	async findOne(@Param('id', ParseIdPipe) id: number): Promise<ObjectView> {
 		const object = await this.objectsService.findByIdOrThrow(id)
 
-		return ({ id: object.id, number: object.id, ownerId: object.ownerId, isAvailable: object.isAvailable })
+		return ({ id: object.id, name: object.name, ownerId: object.ownerId, isAvailable: object.isAvailable })
 	}
 }

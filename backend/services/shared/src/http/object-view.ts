@@ -1,6 +1,6 @@
 export interface ObjectView {
 	id: number
-	name: number
+	name: string
 	ownerId: number
 	isAvailable: boolean
 }
