@@ -125,14 +125,28 @@
         }
     </form>
     <!-- Wait for the owner to be known, or the owner would briefly miss "Delete" -->
-    @if (isEditMode() && ownerId() !== null) {
-        <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onLeaveGroup()">
-            Leave this group
-        </button>
-        @if (isOwner()) {
-            <button appButton type="button" variant="muted" class="mt-4 hover:bg-alert" (click)="onDeleteGroup()">
-                Delete this group
+    <div class="flex gap-4 mt-4">
+        @if (isEditMode() && ownerId() !== null) {
+            <button
+                appButton
+                type="button"
+                variant="muted"
+                class="hover:bg-alert"
+                (click)="onLeaveGroup()"
+            >
+                Leave group
             </button>
+            @if (isOwner()) {
+                <button
+                    appButton
+                    type="button"
+                    variant="muted"
+                    class="hover:bg-alert"
+                    (click)="onDeleteGroup()"
+                >
+                    Delete group
+                </button>
+            }
         }
-    }
+    </div>
 </app-modal>
