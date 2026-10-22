@@ -141,7 +141,8 @@ export class Chats implements OnInit {
 
         this.lendingService.listAll().subscribe({
             next: (lendings) => this.lendings.set(lendings),
-            error: (err) => console.error('Failed to load lendings', err),
+            // Without lendings the chats still work, only the offer details are missing
+            error: () => this.lendings.set([]),
         });
     }
 
