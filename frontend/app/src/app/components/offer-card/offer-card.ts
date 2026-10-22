@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { ButtonDirective } from '../button/button.directive';
 import { StatusBadgeComponent } from '../status-badge/status-badge';
+import { AvatarComponent } from '../avatar/avatar';
 
 export type OfferCardState = 'pending' | 'accepted';
 
@@ -18,7 +19,7 @@ export type OfferCardState = 'pending' | 'accepted';
 @Component({
 	selector: 'app-offer-card',
 	standalone: true,
-	imports: [ButtonDirective, StatusBadgeComponent],
+	imports: [ButtonDirective, StatusBadgeComponent, AvatarComponent],
 	templateUrl: './offer-card.html',
 })
 export class OfferCardComponent {
