@@ -62,11 +62,11 @@ export class Profile implements OnInit {
   ngOnInit(): void {
     this.objectService.findMy().subscribe({
       next: (objects) => this.objects.set(objects),
-      error: (err) => console.error('Failed to load my objects', err),
+      error: () => this.bannerErrors.update((errors) => [...errors, 'Could not load your objects']),
     });
     this.groupsService.findMy().subscribe({
       next: (groups) => this.groups.set(groups),
-      error: (err) => console.error('Failed to load my groups', err),
+      error: () => this.bannerErrors.update((errors) => [...errors, 'Could not load your groups']),
     });
   }
 

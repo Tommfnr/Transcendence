@@ -141,7 +141,8 @@ export class Chats implements OnInit {
 
         this.lendingService.listAll().subscribe({
             next: (lendings) => this.lendings.set(lendings),
-            error: (err) => console.error('Failed to load lendings', err),
+            // Without lendings the chats still work, only the offer details are missing
+            error: () => this.lendings.set([]),
         });
     }
 
@@ -153,7 +154,7 @@ export class Chats implements OnInit {
             .map((member) => member.username);
 
         // A conversation whose other member deleted their account keeps a usable label
-        return names.length > 0 ? names.join(', ') : 'Utilisateur supprimé';
+        return names.length > 0 ? names.join(', ') : 'Deleted user';
     }
 
     // The offer behind a conversation: same post, between the same two people (listAll is newest first)
@@ -261,6 +262,6 @@ export class Chats implements OnInit {
         const fieldErrors = err.error?.errors
             ? Object.values(err.error.errors).flat().join(', ')
             : '';
-        this.createError.set(fieldErrors || err.error?.message || 'Une erreur est survenue');
+        this.createError.set(fieldErrors || err.error?.message || 'An error occurred');
     }
 }
