@@ -99,6 +99,8 @@ export class LendingService {
 				return (await t.insert(lending).values({
 					objectId: dto.objectId,
 					postId: dto.postId,
+					objectName: object.name,
+					postTitle: post.title,
 					lenderId,
 					borrowerId,
 					status: 'pending',
