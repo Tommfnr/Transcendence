@@ -25,37 +25,32 @@
             <p class="shrink-0 text-2xs font-light text-text-secondary">{{ time() }}</p>
         </div>
 
-        <div class="flex w-full items-start gap-2 pt-1">
-            <div
-                class="size-12 flex items-center justify-center "
-            >
-                <span class="text-2xl lg:text-3xl leading-none select-none">{{ emoji() }}</span>
-            </div>
-            <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p class="truncate text-sm font-bold text-text">{{ objectName() }}</p>
-                @if (message()) {
-                    <p class="truncate text-xs text-text-secondary">{{ message() }}</p>
-                }
-            </div>
-        </div>
-    </button>
-
-    <div class="flex w-full items-center gap-2 pt-1" [class.justify-end]="state() === 'pending'">
-        @if (state() === 'pending') {
-            <button
-                appButton
-                size="xsmall"
-                variant="secondary"
-                type="button"
-                (click)="decline.emit()"
-            >
-                Decline
-            </button>
-            <button appButton size="xsmall" variant="primary" type="button" (click)="accept.emit()">
-                Accept
-            </button>
-        } @else {
-            <app-status-badge status="done" label="Offer accepted" />
-        }
-    </div>
+	<div class="flex w-full items-center gap-2 pt-1" [class.justify-end]="state() === 'pending'">
+		@if (state() === 'pending') {
+			<button appButton size="xsmall" variant="secondary" type="button" (click)="decline.emit()">
+				Decline
+			</button>
+			<button appButton size="xsmall" variant="primary" type="button" (click)="accept.emit()">
+				Accept
+			</button>
+		} 
+		@else if (state() === 'accepted') {
+			<app-status-badge status="done" label="Offer accepted" />
+			<button appButton size="xsmall" variant="primary" type="button" class="ml-auto" (click)="pickUp.emit()">
+				Item received
+			</button>
+		} 
+		@else if (state() === 'borrowed' || state() === 'overdue') {
+			<app-status-badge status="done" [label]="state() === 'overdue' ? 'Return overdue' : 'Borrowed'" />
+			<button appButton size="xsmall" variant="primary" type="button" class="ml-auto" (click)="giveBack.emit()">
+				Item returned
+			</button>
+		} 
+		@else if (state() === 'returning') {
+			<app-status-badge status="done" label="Waiting for the lender" />
+		} 
+		@else {
+			<app-status-badge status="done" label="Item returned" />
+		}
+	</div>
 </article>

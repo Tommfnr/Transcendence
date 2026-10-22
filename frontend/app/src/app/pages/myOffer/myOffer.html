@@ -2,7 +2,7 @@
 	<div class="flex flex-col gap-4 p-2 lg:p-6">
 		<section class="flex flex-col gap-2 rounded-card bg-primary-surface p-3">
 			<p class="text-2xs font-bold uppercase tracking-wide text-text-secondary">Their request</p>
-			<h3 class="text-base font-bold text-text">{{ post()?.title }}</h3>
+			<h3 class="text-base font-bold text-text">{{ lending()?.postTitle }}</h3>
 			@if (requester()) {
 				<p class="text-xs text-text-secondary">by {{ requester()?.username }}</p>
 			}
@@ -18,7 +18,7 @@
 
 		<section class="flex flex-col gap-1 rounded-card bg-card p-3 shadow-card">
 			<p class="text-2xs font-bold uppercase tracking-wide text-text-secondary">Your offer · {{ sentAgo() }}</p>
-			<p class="text-sm font-bold text-text">{{ object()?.name }}</p>
+			<p class="text-sm font-bold text-text">{{ lending()?.objectName }}</p>
 			@if (lending()?.message) {
 				<p class="text-xs text-text-secondary">{{ lending()?.message }}</p>
 			}
@@ -34,7 +34,7 @@
 			@if (canReturn()) {
 				<button appButton size="small" variant="primary" type="button" [disabled]="returning()"
 					(click)="onReturn()">
-					Item returned
+					Confirm return
 				</button>
 			}
 			<button appButton size="small" variant="primary" type="button" (click)="onOpenConversation()">

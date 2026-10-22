@@ -4,12 +4,15 @@ import { DB } from '../database/database.module'
 import { and, count, desc, eq, gt, inArray, lt, or, sql } from 'drizzle-orm'
 import { pgErrorCode } from '@pep/shared'
 import { lending } from '../database/schema'
+import { assertTransition } from './lending-state-handler'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { ObjectsProxyService } from './objects-proxy.service'
 import { PostsProxyService } from './posts-proxy.service'
 import { GroupsProxyService } from './groups-proxy.service'
 
+// Statuses that keep the object busy; must match the no_overlap constraint in init.sql
 const BOOKED_STATUSES = ['accepted', 'active', 'awaiting_confirmation', 'overdue'] as const
+
 const OBJECT_LOCK_NAMESPACE = 1
 
 @Injectable()
@@ -29,7 +32,7 @@ export class LendingService {
 			.from(lending)
 			.where(or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)))
 
-		const happenedStatuses: string[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue', 'returned', 'disputed']
+		const happenedStatuses: string[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue', 'returned']
 
 		const lent = myLendings.filter((loan) =>
 			loan.lenderId === userId && happenedStatuses.includes(loan.status)).length
@@ -56,34 +59,21 @@ export class LendingService {
 		if (!object.isAvailable)
 			throw new ConflictException('Object not available')
 
-		let lenderId: number
-		let borrowerId: number
+		const post = await this.postsProxy.findById(dto.postId)
 
-		if (dto.postId) {
-			const post = await this.postsProxy.findById(dto.postId)
+		if (post.status !== 'open')
+			throw new ConflictException('Post is no longer open')
+		if (object.ownerId !== userId)
+			throw new ForbiddenException('You can only offer your own objects')
+		if (post.ownerId === userId)
+			throw new BadRequestException('You cannot offer help on your own post')
+		if (new Date(dto.lendedFrom) < new Date(post.fromDate) || new Date(dto.lendedTo) > new Date(post.toDate))
+			throw new BadRequestException('Offer window must fit inside the post window')
+		if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
+			throw new ForbiddenException('You can only offer help on posts of your groups')
 
-			if (post.status !== 'open')
-				throw new ConflictException('Post is no longer open')
-			if (object.ownerId !== userId)
-				throw new ForbiddenException('You can only offer your own objects')
-			if (post.ownerId === userId)
-				throw new BadRequestException('You cannot offer help on your own post')
-			if (new Date(dto.lendedFrom) < new Date(post.fromDate) || new Date(dto.lendedTo) > new Date(post.toDate))
-				throw new BadRequestException('Offer window must fit inside the post window')
-			if (!(await this.groupsProxy.sharesGroup([userId], post.groupIds)))
-				throw new ForbiddenException('You can only offer help on posts of your groups')
-
-			lenderId = userId
-			borrowerId = post.ownerId
-		} else {
-			if (object.ownerId === userId)
-				throw new BadRequestException('You cannot borrow your own object')
-			if (!(await this.groupsProxy.sharesGroup([userId, object.ownerId])))
-				throw new ForbiddenException('You can only borrow from members of your groups')
-
-			lenderId = object.ownerId
-			borrowerId = userId
-		}
+		const lenderId = userId
+		const borrowerId = post.ownerId
 
 		const lendedFrom = new Date(dto.lendedFrom)
 		const lendedTo = new Date(dto.lendedTo)
@@ -109,6 +99,8 @@ export class LendingService {
 				return (await t.insert(lending).values({
 					objectId: dto.objectId,
 					postId: dto.postId,
+					objectName: object.name,
+					postTitle: post.title,
 					lenderId,
 					borrowerId,
 					status: 'pending',
@@ -163,7 +155,7 @@ export class LendingService {
 			.set({ status: 'cancelled', updatedAt: new Date() })
 			.where(and(
 				eq(lending.postId, postId),
-				inArray(lending.status, ['pending', 'accepted']),
+				eq(lending.status, 'pending'),
 			))
 			.returning({ id: lending.id })
 
@@ -192,9 +184,7 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = this.approverFor(t)
-
-		if (approverId !== userId)
+		if (t.borrowerId !== userId)
 			throw new ForbiddenException('Only the other party can accept this request')
 
 		const postId = t.postId
@@ -207,7 +197,7 @@ export class LendingService {
 			await t
 				.select({ id: lending.id })
 				.from(lending)
-				.where(postId ? or(eq(lending.objectId, objectId), eq(lending.postId, postId)) : eq(lending.objectId, objectId))
+				.where(or(eq(lending.objectId, objectId), eq(lending.postId, postId)))
 				.orderBy(lending.id)
 				.for('update')
 
@@ -237,15 +227,13 @@ export class LendingService {
 					gt(lending.lendedTo, accepted.lendedFrom),
 				))
 
-			if (accepted.postId) {
-				await t
-					.update(lending)
-					.set({ status: 'rejected', updatedAt: new Date() })
-					.where(and(
-						eq(lending.postId, accepted.postId),
-						eq(lending.status, 'pending'),
-					))
-			}
+			await t
+				.update(lending)
+				.set({ status: 'rejected', updatedAt: new Date() })
+				.where(and(
+					eq(lending.postId, accepted.postId),
+					eq(lending.status, 'pending'),
+				))
 
 			return (accepted)
 		})
@@ -253,8 +241,7 @@ export class LendingService {
 		if (!updated)
 			throw new NotFoundException()
 
-		if (updated.postId)
-			await this.closePost(updated.postId)
+		await this.closePost(updated.postId)
 
 		return (updated)
 	}
@@ -267,50 +254,16 @@ export class LendingService {
 		}
 	}
 
-	private async assertStillAcceptable(request: typeof lending.$inferSelect) {
-		if (request.status !== 'pending')
-			throw new ConflictException('Request is no longer pending')
-		if (request.lendedTo <= new Date())
-			throw new ConflictException('Requested period is already over')
-
-		let object
-		try {
-			object = await this.objectsProxy.findById(request.objectId)
-		} catch (err: unknown) {
-			if (err instanceof NotFoundException)
-				throw new ConflictException('Object no longer exists')
-			throw err
-		}
-		if (!object.isAvailable)
-			throw new ConflictException('Object not available')
-
-		if (!request.postId)
-			return
-
-		let post
-		try {
-			post = await this.postsProxy.findById(request.postId)
-		} catch (err: unknown) {
-			if (err instanceof NotFoundException)
-				throw new ConflictException('Post no longer exists')
-			throw err
-		}
-		if (post.status !== 'open')
-			throw new ConflictException('Post is no longer open')
-		if (request.lendedFrom < new Date(post.fromDate) || request.lendedTo > new Date(post.toDate))
-			throw new ConflictException('Requested period no longer fits inside the post window')
-	}
-
 	async rejectLend(id: number, userId: number) {
 		const [t] = await this.db.select().from(lending).where(eq(lending.id, id))
 
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		const approverId = this.approverFor(t)
-
-		if (approverId !== userId)
+		if (t.borrowerId !== userId)
 			throw new ForbiddenException('Only the other party can reject this request')
+
+		assertTransition(t.status, 'rejected')
 
 		const [updated] = await this.db
 			.update(lending)
@@ -329,8 +282,10 @@ export class LendingService {
 		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
 
-		if (this.approverFor(t) === userId)
+		if (t.borrowerId === userId)
 			throw new ForbiddenException('Only the requester can cancel this request')
+
+		assertTransition(t.status, 'cancelled')
 
 		const [updated] = await this.db
 			.update(lending)
@@ -339,7 +294,51 @@ export class LendingService {
 			.returning()
 
 		if (!updated)
+			throw new ConflictException('Only a pending offer can be cancelled')
+		return (updated)
+	}
+
+	async pickUpLend(id: number, userId: number) {
+		const [t] = await this.db.select().from(lending).where(eq(lending.id, id))
+
+		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
 			throw new NotFoundException()
+
+		if (t.borrowerId !== userId)
+			throw new ForbiddenException('Only the requester can confirm they received the item')
+
+		assertTransition(t.status, 'active')
+
+		const [updated] = await this.db
+			.update(lending)
+			.set({ status: 'active', pickedUpAt: new Date(), updatedAt: new Date() })
+			.where(and(eq(lending.id, id), eq(lending.status, 'accepted')))
+			.returning()
+
+		if (!updated)
+			throw new ConflictException('Only an accepted loan can be picked up')
+		return (updated)
+	}
+
+	async giveBackLend(id: number, userId: number) {
+		const [t] = await this.db.select().from(lending).where(eq(lending.id, id))
+
+		if (!t || (t.lenderId !== userId && t.borrowerId !== userId))
+			throw new NotFoundException()
+
+		if (t.borrowerId !== userId)
+			throw new ForbiddenException('Only the requester can say they gave the item back')
+
+		assertTransition(t.status, 'awaiting_confirmation')
+
+		const [updated] = await this.db
+			.update(lending)
+			.set({ status: 'awaiting_confirmation', borrowerReturnedAt: new Date(), updatedAt: new Date() })
+			.where(and(eq(lending.id, id), inArray(lending.status, ['active', 'overdue'])))
+			.returning()
+
+		if (!updated)
+			throw new ConflictException('Only a loan in progress can be given back')
 		return (updated)
 	}
 
@@ -352,22 +351,62 @@ export class LendingService {
 		if (t.lenderId !== userId)
 			throw new ForbiddenException('Only the lender can confirm the item is back')
 
+		assertTransition(t.status, 'returned')
+
 		const [updated] = await this.db
 			.update(lending)
 			.set({ status: 'returned', lenderConfirmedReturnedAt: new Date(), updatedAt: new Date() })
-			.where(and(eq(lending.id, id), inArray(lending.status, [...BOOKED_STATUSES])))
+			.where(and(eq(lending.id, id), eq(lending.status, 'awaiting_confirmation')))
 			.returning()
 
 		if (!updated)
-			throw new ConflictException('This loan is not in progress')
+			throw new ConflictException('Only a loan the borrower gave back can be confirmed')
 		return (updated)
+	}
+
+	// Loans still with the borrower once their end date has passed
+	async markOverdue(): Promise<number> {
+		const overdue = await this.db
+			.update(lending)
+			.set({ status: 'overdue', updatedAt: new Date() })
+			.where(and(eq(lending.status, 'active'), lt(lending.lendedTo, new Date())))
+			.returning({ id: lending.id })
+
+		return (overdue.length)
+	}
+
+	private async assertStillAcceptable(request: typeof lending.$inferSelect) {
+		assertTransition(request.status, 'accepted')
+
+		if (request.lendedTo <= new Date())
+			throw new ConflictException('Requested period is already over')
+
+		let object
+		try {
+			object = await this.objectsProxy.findById(request.objectId)
+		} catch (err: unknown) {
+			if (err instanceof NotFoundException)
+				throw new ConflictException('Object no longer exists')
+			throw err
+		}
+		if (!object.isAvailable)
+			throw new ConflictException('Object not available')
+
+		let post
+		try {
+			post = await this.postsProxy.findById(request.postId)
+		} catch (err: unknown) {
+			if (err instanceof NotFoundException)
+				throw new ConflictException('Post no longer exists')
+			throw err
+		}
+		if (post.status !== 'open')
+			throw new ConflictException('Post is no longer open')
+		if (request.lendedFrom < new Date(post.fromDate) || request.lendedTo > new Date(post.toDate))
+			throw new ConflictException('Requested period no longer fits inside the post window')
 	}
 
 	private async lockObject(t: Pick<PostgresJsDatabase, 'execute'>, objectId: number) {
 		await t.execute(sql`select pg_advisory_xact_lock(${OBJECT_LOCK_NAMESPACE}::int, ${objectId}::int)`)
-	}
-
-	private approverFor(t: { postId: number | null, lenderId: number, borrowerId: number }): number {
-		return (t.postId ? t.borrowerId : t.lenderId)
 	}
 }

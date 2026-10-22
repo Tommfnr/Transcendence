@@ -100,8 +100,8 @@ export class ObjectsService {
 	async updateAllByOwnerDeleted(ownerId: number): Promise<number> {
 		const updated = await this.db
 			.update(objects)
-			.set({ isAvailable: false, updatedAt: new Date() })
-			.where(eq(objects.ownerId, ownerId))
+			.set({ deletedAt: new Date(), isAvailable: false, updatedAt: new Date() })
+			.where(and(eq(objects.ownerId, ownerId), isNull(objects.deletedAt)))
 			.returning({ id: objects.id })
 		return (updated.length)
 	}
