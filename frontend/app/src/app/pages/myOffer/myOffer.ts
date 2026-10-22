@@ -2,10 +2,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { PostsService } from '../../services/posts.service';
-import { PostEntity } from '../../models/post.model';
-import { ObjectService } from '../../services/object.service';
-import { ObjectEntity } from '../../models/object.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
@@ -24,14 +20,10 @@ import { formatTimeAgo } from '../../shared/date-format';
 })
 export class MyOffer implements OnInit {
 	readonly modalService = inject(ModalService);
-	private postsService = inject(PostsService);
-	private objectService = inject(ObjectService);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 	private router = inject(Router);
 
-	readonly post = signal<PostEntity | null>(null);
-	readonly object = signal<ObjectEntity | null>(null);
 	readonly requester = signal<User | null>(null);
 	readonly lending = signal<LendingEntity | null>(null);
 	readonly cancelling = signal(false);
@@ -66,25 +58,9 @@ export class MyOffer implements OnInit {
 		this.lendingService.findOne(lendingId).subscribe({
 			next: (lending) => {
 				this.lending.set(lending);
-				this.loadObject(lending.objectId);
 				this.loadRequester(lending.borrowerId);
-				this.loadPost(lending.postId);
 			},
 			error: () => this.showError('This offer no longer exists'),
-		});
-	}
-
-	private loadPost(postId: number): void {
-		this.postsService.findOne(postId).subscribe({
-			next: (post) => this.post.set(post),
-			error: () => this.showError('Could not load the request'),
-		});
-	}
-
-	private loadObject(objectId: number): void {
-		this.objectService.findOne(objectId).subscribe({
-			next: (object) => this.object.set(object),
-			error: () => this.showError('Could not load the offered item'),
 		});
 	}
 

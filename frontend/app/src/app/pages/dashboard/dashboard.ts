@@ -14,8 +14,6 @@ import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
 import { LendingEntity, CHOSEN_STATUSES } from '../../models/lending.model';
-import { ObjectService } from '../../services/object.service';
-import { ObjectEntity } from '../../models/object.model';
 import { RefreshService } from '../../services/refresh.service';
 import { forkJoin } from 'rxjs';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
@@ -37,14 +35,12 @@ export class Dashboard {
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
 	private usersService = inject(UsersService);
-	private objectService = inject(ObjectService);
 	private lendingService = inject(LendingService);
 
 	readonly groups = signal<GroupEntity[]>([]);
 	private posts = signal<PostEntity[]>([]);
 	private authorsById = signal<Map<number, User>>(new Map());
 	private groupsByPostId = signal<Map<number, PostGroupData[]>>(new Map());
-	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private lendings = signal<LendingEntity[]>([]);
 	private selectedGroupId = signal<number | null>(null);
 	readonly activeTab = signal<DashboardTab>('requests');
@@ -145,20 +141,10 @@ export class Dashboard {
 		this.lendingService.listAll().subscribe({
 			next: (lendings) => {
 				this.lendings.set(lendings);
-				this.loadObjectsById(lendings);
 				this.loadBorrowersById(lendings);
 			},
 			error: () => this.showError('Could not load your exchanges'),
 		});
-	}
-
-	private loadObjectsById(lendings: LendingEntity[]): void {
-		for (const objectId of new Set(lendings.map((l) => l.objectId))) {
-			this.objectService.findOne(objectId).subscribe({
-				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
-				error: () => this.showError('Could not load some items of your exchanges'),
-			});
-		}
 	}
 
 	private loadBorrowersById(lendings: LendingEntity[]): void {
@@ -279,7 +265,7 @@ export class Dashboard {
 				id: `lending-${l.id}`,
 				kind: 'offer',
 				postId: l.postId,
-				title: `${this.objectsById().get(l.objectId)?.name ?? ''} → ${this.authorsById().get(l.borrowerId)?.username ?? ''}`,
+				title: `${l.objectName} → ${this.authorsById().get(l.borrowerId)?.username ?? ''}`,
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: LENDING_STATUS_DISPLAY[l.status].label,
 				tone: LENDING_STATUS_DISPLAY[l.status].tone,

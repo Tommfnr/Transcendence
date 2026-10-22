@@ -6,8 +6,6 @@ import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
 import { PostsService } from '../../services/posts.service';
 import { PostEntity, PostGroupData } from '../../models/post.model';
-import { ObjectService } from '../../services/object.service';
-import { ObjectEntity } from '../../models/object.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
@@ -29,7 +27,6 @@ export class MyRequest implements OnInit {
 	readonly modalService = inject(ModalService);
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
-	private objectService = inject(ObjectService);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 	private router = inject(Router);
@@ -37,7 +34,6 @@ export class MyRequest implements OnInit {
 	private groupsPost = signal<PostGroupData[]>([]);
 	private memberIdsByGroupId = signal<Map<number, number[]>>(new Map());
 	readonly post = signal<PostEntity | null>(null);
-	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private lendings = signal<LendingEntity[]>([]);
 	private lendersById = signal<Map<number, User>>(new Map());
 	readonly cancelling = signal(false);
@@ -51,7 +47,7 @@ export class MyRequest implements OnInit {
 			name: this.lendersById().get(l.lenderId)?.username ?? '',
 			group: this.sharedGroupName(l.lenderId),
 			time: formatTimeAgo(l.createdAt),
-			objectName: this.objectsById().get(l.objectId)?.name ?? '',
+			objectName: l.objectName,
 			message: l.message,
 			state: this.cardStateOf(l.status),
 		}))
@@ -109,7 +105,6 @@ export class MyRequest implements OnInit {
 				);
 				this.lendings.set(offers);
 				this.loadLendersById(offers);
-				this.loadObjectsById(offers);
 			},
 			error: () => this.showError('Could not load the offers'),
 		});
@@ -120,15 +115,6 @@ export class MyRequest implements OnInit {
 			this.usersService.findOne(lenderId).subscribe({
 				next: (user) => this.lendersById.update((map) => new Map(map).set(lenderId, user)),
 				error: () => this.showError('Could not load who made some offers'),
-			});
-		}
-	}
-
-	private loadObjectsById(offers: LendingEntity[]): void {
-		for (const objectId of new Set(offers.map((l) => l.objectId))) {
-			this.objectService.findOne(objectId).subscribe({
-				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
-				error: () => this.showError('Could not load some offered items'),
 			});
 		}
 	}

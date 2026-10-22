@@ -14,9 +14,11 @@ export const CHOSEN_STATUSES: LendingStatus[] = ['accepted', 'active', 'awaiting
 export interface LendingEntity {
     id: number;
     objectId: number;
+    postId: number;
+    objectName: string;
+    postTitle: string;
     lenderId: number;
     borrowerId: number;
-    postId: number;
     status: LendingStatus;
     lendedFrom: string;
     lendedTo: string;
