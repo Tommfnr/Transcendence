@@ -203,8 +203,8 @@ All services share a single PostgreSQL database. The tables are created by [`bac
 │  USERS  │──────────►│ OBJECTS  │   │  POSTS  │◄──────┐
 └─────────┘           └──────────┘   └─────────┘       │
   │     │                  │              │            │
-  │     │ lender/borrower  │ the item     │ (optional) │
-  │     └─────────────────►▼◄─────────────┘ the request│
+  │     │ lender/borrower  │ the item     │ the        │
+  │     └─────────────────►▼◄─────────────┘ request    │
   │                  ┌──────────┐                      │
   │                  │ LENDING  │  = one loan          │
   │                  └──────────┘                      │
@@ -225,7 +225,7 @@ All services share a single PostgreSQL database. The tables are created by [`bac
 | `objects` | Things a user owns and can lend (a drill, a ladder), with a condition and an availability flag. |
 | `posts` | "I need X between these dates" requests, visible only to the groups they're shared with. |
 | `post_groups` | Which groups each post is shared with. |
-| `lending` | One loan of one object from a lender to a borrower for a date range, with a status. It can be linked to the post it answers. |
+| `lending` | One loan of one object from a lender to a borrower for a date range, with a status, answering one post. |
 | `conversations` | A private chat about a post. |
 | `conversation_members` | Who takes part in each conversation. |
 | `messages` | The messages sent in a conversation. |
@@ -236,143 +236,112 @@ All services share a single PostgreSQL database. The tables are created by [`bac
 
 - A **user** owns many **objects**, **posts** and **groups**, and belongs to many groups through **group_members** (unique per group and user).
 - A **post** is shared with one or more **groups** through **post_groups** (unique per post and group).
-- A **lending** row links one **object**, a **lender** and a **borrower** (both users), and optionally the **post** it answers.
+- A **lending** row links one **object**, a **lender** and a **borrower** (both users), and the **post** it answers.
 - A **conversation** is about one **post**, has its participants in **conversation_members**, and holds its **messages**.
 - `conversations.post_id` has no foreign key: posts belong to another service, so the chats service fetches the post's title from the posts service, and a conversation is kept when its post is deleted.
 - Unless noted otherwise, foreign keys use `ON DELETE CASCADE`. In practice users, objects, groups and posts are soft-deleted (`deleted_at`), so the rows stay and every query filters them out.
 
 ### Key fields and data types
 
-Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `updated_at` (`TIMESTAMPTZ`, default `NOW()`).
+Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `updated_at` (`TIMESTAMPTZ`). Foreign keys are `INTEGER`, and soft-deleted tables have a `deleted_at TIMESTAMPTZ`.
 
-**users**
-
-| Field | Type | Notes |
-|---|---|---|
-| `username` | `CITEXT` | Unique, case-insensitive |
-| `email` | `CITEXT` | Unique, case-insensitive |
-| `h_password` | `VARCHAR(255)` | Hashed password, never the plain text |
-| `deleted_at` | `TIMESTAMPTZ` | Soft delete |
-
-**objects**
-
-| Field | Type | Notes |
-|---|---|---|
-| `owner_id` | `INTEGER` | → `users.id` |
-| `name` | `VARCHAR(30)` | |
-| `type` | `object_type` | `DIY`, `Electronics`, `Leisure`, `Other` |
-| `description` | `VARCHAR(500)` | |
-| `condition` | `object_condition` | `new`, `good`, `worn` |
-| `is_available` | `BOOLEAN` | Default `true` |
-| `deleted_at` | `TIMESTAMPTZ` | Soft delete |
-
-**groups** and **group_members**
-
-| Table | Field | Type | Notes |
-|---|---|---|---|
-| `groups` | `owner_id` | `INTEGER` | → `users.id` |
-| `groups` | `name` | `VARCHAR(30)` | |
-| `groups` | `description` | `VARCHAR(500)` | |
-| `groups` | `deleted_at` | `TIMESTAMPTZ` | Soft delete |
-| `group_members` | `group_id`, `user_id` | `INTEGER` | → `groups.id`, `users.id`; unique together |
-| `group_members` | `role` | `group_role` | `admin` or `member` (default `member`) |
-
-**posts** and **post_groups**
-
-| Table | Field | Type | Notes |
-|---|---|---|---|
-| `posts` | `owner_id` | `INTEGER` | → `users.id` |
-| `posts` | `title` | `VARCHAR(60)` | |
-| `posts` | `object_type` | `object_type` | Category of the object needed |
-| `posts` | `description` | `VARCHAR(500)` | |
-| `posts` | `status` | `post_status` | `open` or `closed` (default `open`) |
-| `posts` | `from_date`, `to_date` | `TIMESTAMPTZ` | `CHECK (to_date > from_date)` |
-| `posts` | `deleted_at` | `TIMESTAMPTZ` | Soft delete |
-| `post_groups` | `post_id`, `group_id` | `INTEGER` | → `posts.id`, `groups.id`; unique together |
-
-**lending**
-
-| Field | Type | Notes |
-|---|---|---|
-| `object_id` | `INTEGER` | → `objects.id` |
-| `lender_id`, `borrower_id` | `INTEGER` | → `users.id` |
-| `post_id` | `INTEGER` | → `posts.id`, optional |
-| `status` | `lending_status` | Default `created` (see below) |
-| `lended_from`, `lended_to` | `TIMESTAMPTZ` | Loan period |
-| `message` | `VARCHAR(250)` | Note sent with the offer |
-| `picked_up_at`, `borrower_returned_at`, `lender_confirmed_returned_at` | `TIMESTAMPTZ` | Handover timestamps |
-
-`lending_status` is `created`, `pending`, `accepted`, `active`, `awaiting_confirmation`, `returned`, `disputed`, `rejected`, `cancelled` or `overdue`. Two exclusion constraints protect the bookings:
-
-- `no_overlap`: the same object can't have two loans with overlapping dates while they are `accepted`, `active`, `awaiting_confirmation` or `overdue`.
-- `no_duplicate_pending`: the same lender can't send the same borrower two pending offers for the same object and overlapping dates.
-
-**conversations**, **conversation_members** and **messages**
-
-| Table | Field | Type | Notes |
-|---|---|---|---|
-| `conversations` | `post_id` | `INTEGER` | The post the conversation is about (no foreign key) |
-| `conversation_members` | `conversation_id`, `user_id` | `INTEGER` | → `conversations.id`, `users.id`; unique together |
-| `messages` | `conversation_id` | `INTEGER` | → `conversations.id` |
-| `messages` | `owner_id` | `INTEGER` | → `users.id`, the sender |
-| `messages` | `content` | `TEXT` | |
-
-**refresh_tokens** and **api_keys**
-
-| Table | Field | Type | Notes |
-|---|---|---|---|
-| `refresh_tokens` | `jti` | `UUID` | Unique token id, matched against the cookie's token |
-| `refresh_tokens` | `user_id` | `INTEGER` | → `users.id` |
-| `refresh_tokens` | `revoked`, `expires_at` | `BOOLEAN`, `TIMESTAMPTZ` | |
-| `api_keys` | `user_id` | `INTEGER` | → `users.id` |
-| `api_keys` | `name`, `prefix` | `VARCHAR(50)`, `VARCHAR(16)` | Shown to the user to identify the key |
-| `api_keys` | `key_hash` | `VARCHAR(64)` | Unique; the key itself is never stored |
-| `api_keys` | `last_used_at`, `revoked_at` | `TIMESTAMPTZ` | |
+| Table | Key fields |
+|---|---|
+| `users` | `username`, `email` `CITEXT` (unique, case-insensitive) · `h_password` `VARCHAR(255)` (hash only) |
+| `objects` | `name` `VARCHAR(30)` · `type` `object_type` (`DIY`, `Electronics`, `Leisure`, `Other`) · `condition` `object_condition` (`new`, `good`, `worn`) · `is_available` `BOOLEAN` |
+| `groups` | `name` `VARCHAR(30)` · `description` `VARCHAR(500)` · `owner_id` → `users` |
+| `group_members` | `group_id`, `user_id` (unique together) · `role` `group_role` (`admin`, `member`) |
+| `posts` | `title` `VARCHAR(60)` · `object_type` · `status` `post_status` (`open`, `closed`) · `from_date`, `to_date` `TIMESTAMPTZ` (`to_date > from_date`) |
+| `post_groups` | `post_id`, `group_id` (unique together) |
+| `lending` | `object_id`, `lender_id`, `borrower_id`, `post_id` · `object_name` `VARCHAR(30)`, `post_title` `VARCHAR(60)` (copied at creation) · `status` `lending_status` (`pending`, `accepted`, `active`, `awaiting_confirmation`, `returned`, `rejected`, `cancelled`, `overdue`) · `lended_from`, `lended_to` `TIMESTAMPTZ` · `message` `VARCHAR(250)` · handover timestamps · exclusion constraints: no overlapping dates for the same object once accepted (`no_overlap`), no duplicate pending offers (`no_duplicate_pending`) |
+| `conversations` | `post_id` (no foreign key) |
+| `conversation_members` | `conversation_id`, `user_id` (unique together) |
+| `messages` | `conversation_id` · `owner_id` (sender) · `content` `TEXT` |
+| `refresh_tokens` | `jti` `UUID` (unique) · `revoked` `BOOLEAN` · `expires_at` `TIMESTAMPTZ` |
+| `api_keys` | `name` `VARCHAR(50)` · `prefix` `VARCHAR(16)` · `key_hash` `VARCHAR(64)` (unique, the key itself is never stored) · `last_used_at`, `revoked_at` `TIMESTAMPTZ` |
 
 ## Features List
 
 ### Main Features
 
-**Users & Authentication** //Louis
+**Authentication** *(lgirerd, tiaperei)*
 
-- A complete authentication service: registration and login with short-lived JWT access tokens and revocable refresh tokens stored in an httpOnly cookie *(lgirerd: backend; tiaperei: login and registration pages)*
-- Profile editing, including changing the username *(lgirerd: backend; tfournie, abonifac: profile pages)*
-- Account deletion: the user is soft-deleted, their posts are closed, their objects are marked unavailable, their open loans are cancelled and the groups they own are handed over *(rshin, lgirerd)*
-- [...]
+- Registration and login, with form validation on both the frontend and the backend
+- Short-lived JWT access tokens and revocable refresh tokens stored in an httpOnly cookie
+- Silent token refresh: an expired access token is renewed automatically without logging the user out
+- Logout, which revokes the refresh token
+- Protected routes: pages under `/app` are only reachable when logged in
 
-**Objects**
+**Users** *(lgirerd, rshin, tfournie, abonifac)*
 
-- A personal catalog of objects that each user can offer when answering a request *(rshin, lgirerd: backend; abonifac, rshin, tiaperei: object form)*
-- Search, category filters, sorting and pagination in the catalog *(tfournie, abonifac)*
+- Profile page and profile editing, including changing the username
+- User lookup by username, used to add people to groups
+- Account deletion: the user is soft-deleted, their posts are closed, their objects are marked unavailable, their open loans are cancelled and the groups they own are handed over
 
-**Groups**
+**Objects** *(rshin, tiaperei, tfournie, abonifac)*
 
-*(rshin, lgirerd: backend; tfournie, abonifac, rshin: frontend)*
+- A personal catalog of objects, each with a name, category, condition, description and availability
+- Create, edit and delete objects; only the owner can modify them
+- Search, category filters, sorting and pagination in the catalog
 
+**Groups** *(rshin, tiaperei, abonifac, tfournie)*
+
+- Create, edit and delete groups
 - Invite-only groups: members are added by the group's admins
 - Three levels of permission: **owner**, **admin** and **member**
   - The owner and admins can add or remove members, promote or demote admins, and edit the group
   - Only the owner can delete the group
-  - Members can view the group's details or leave it
-- If the owner leaves, ownership passes automatically to the longest-standing member. If no other member remains, the group is deleted.
+- Members can leave a group. If the owner leaves, ownership passes automatically to the longest-standing member; if no other member remains, the group is deleted.
 
-**Posts & Lending** //Tiago
+**Posts** *(rshin, tiaperei, abonifac)*
 
-- Posts (requests for help) can be shared with one or more groups and are visible only to members of those groups *(rshin: backend; tiaperei, abonifac: frontend)*
-- Each loan between a lender and a borrower is tracked as an exchange. A group member offers an object (`pending`), the poster accepts or rejects it, and the lender confirms when the object comes back (`returned`). An offer can also be cancelled. *(lgirerd: backend; tiaperei: dashboard, offer and request pages)*
-- [...]
+- Requests for help with a title, category, description and the period the object is needed for
+- Shared with one or more groups and visible only to members of those groups
+- A feed of open requests from the user's groups, and a list of the user's own requests
+- Create, edit and delete requests; a request is closed once a loan is agreed
 
-**Chats** //Tom
+**Lending** *(lgirerd, tiaperei)*
 
-- Real-time messaging built on WebSockets (Socket.IO) *(tfournie, lgirerd)*
-- Each conversation is tied to a post, so the person asking and the people offering help can sort out the details *(tfournie, lgirerd)*
-- [...]
+- A group member answers a request by offering one of their objects
+- The poster accepts or rejects offers. Accepting one rejects the other offers on the request and closes it.
+- An object can't be booked twice for overlapping periods, enforced by the database
+- Full loan lifecycle: offered (`pending`), accepted, picked up (`active`), given back by the borrower, and return confirmed by the lender (`returned`). An offer can also be cancelled.
+- A dashboard of the user's offers, requests and ongoing loans
 
-**User Analytics**
+**Chats** *(tfournie, lgirerd)*
 
-- A dashboard showing each user their activity and usage statistics (totals, most frequent interactions, ratios, etc.) *(rshin: statistics endpoints and wiring; abonifac: page design)*
+- Each conversation is tied to a post, so the person asking and the people offering help can sort out the details
+- Real-time delivery of new conversations and messages over WebSockets (Socket.IO)
+- Message history for each conversation
 
-[...] //any
+**User Analytics** *(rshin, abonifac)*
+
+- A dashboard showing each user their activity: objects (total, available), requests (open, closed, top category), groups and neighbours, conversations and busiest day, loans (lent, borrowed, requests answered)
+
+**Public API** *(lgirerd)*
+
+- REST endpoints to list, read, create, update and delete objects (`/api/public/v1/objects`)
+- Users create, list and revoke their own API keys (up to 10). Keys are stored hashed, and the full key is shown only once.
+- Rate limiting on every public endpoint
+- Interactive Swagger documentation at `/api/public/docs`, with an OpenAPI spec and a Postman collection
+
+**Interface** *(abonifac)*
+
+- A custom design system with reusable components (buttons, cards, modals, text fields, badges, date picker…), its own color palette, typography and icons
+- Separate layouts for the public site and the app, with desktop and mobile headers
+- Landing page, help & support page, Privacy Policy, Terms of Service and a 404 page
+
+**Infrastructure** *(lgirerd)*
+
+- Backend split into microservices (auth, users, objects, groups, posts, lending, chats) behind an API gateway, all running with Docker Compose
+- Services communicate through internal HTTP calls and events (e.g. `user.deleted`)
+- HTTPS through a Caddy reverse proxy
+
+**Monitoring** *(rshin)*
+
+- Prometheus collects metrics from the API gateway (request rate and latency per service) and from the host through Node Exporter (CPU, memory)
+- A Grafana dashboard, provisioned automatically and served at `/grafana`
+- Alert rules for a service going down, high gateway latency and spikes in failed logins
 
 ## Modules //RAPHAEL
 
