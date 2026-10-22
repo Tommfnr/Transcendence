@@ -1,21 +1,24 @@
 export type LendingStatus =
-    | 'created'
     | 'pending'
     | 'accepted'
     | 'active'
     | 'awaiting_confirmation'
     | 'returned'
-    | 'overdue'
-    | 'disputed'
     | 'rejected'
-    | 'cancelled';
+    | 'cancelled'
+    | 'overdue';
+
+/** A loan that went past the offer stage: the requester picked this helper. */
+export const CHOSEN_STATUSES: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'returned', 'overdue'];
 
 export interface LendingEntity {
     id: number;
     objectId: number;
+    postId: number;
+    objectName: string;
+    postTitle: string;
     lenderId: number;
     borrowerId: number;
-    postId: number | null;
     status: LendingStatus;
     lendedFrom: string;
     lendedTo: string;
@@ -29,7 +32,7 @@ export interface LendingEntity {
 
 export interface LendingInput {
     objectId: number;
-    postId?: number;
+    postId: number;
     lendedFrom: string;
     lendedTo: string;
     message?: string;

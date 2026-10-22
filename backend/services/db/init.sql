@@ -151,13 +151,11 @@ CREATE TABLE IF NOT EXISTS api_keys (
 DO $$
 BEGIN
 	CREATE TYPE lending_status as ENUM (
-		'created',
 		'pending',
 		'accepted',
 		'active',
 		'awaiting_confirmation',
 		'returned',
-		'disputed',
 		'rejected',
 		'cancelled',
 		'overdue'
@@ -167,20 +165,22 @@ EXCEPTION
 END $$;
 
 CREATE TABLE IF NOT EXISTS lending (
-	id														SERIAL PRIMARY KEY,
-	object_id											INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
-	lender_id											INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	borrower_id										INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	post_id												INTEGER REFERENCES posts(id) ON DELETE CASCADE,
-	status												lending_status NOT NULL DEFAULT 'created',
-	lended_from										TIMESTAMPTZ NOT NULL,
-	lended_to											TIMESTAMPTZ NOT NULL,
-	message												VARCHAR(250),
-	picked_up_at									TIMESTAMPTZ,
-	borrower_returned_at					TIMESTAMPTZ,
+	id								SERIAL PRIMARY KEY,
+	object_id						INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
+	lender_id						INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	borrower_id						INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	post_id							INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+	object_name						VARCHAR(30) NOT NULL,
+	post_title						VARCHAR(60) NOT NULL,
+	status							lending_status NOT NULL DEFAULT 'pending',
+	lended_from						TIMESTAMPTZ NOT NULL,
+	lended_to						TIMESTAMPTZ NOT NULL,
+	message							VARCHAR(250),
+	picked_up_at					TIMESTAMPTZ,
+	borrower_returned_at			TIMESTAMPTZ,
 	lender_confirmed_returned_at	TIMESTAMPTZ,
-	created_at										TIMESTAMPTZ DEFAULT NOW(),
-	updated_at										TIMESTAMPTZ DEFAULT NOW()
+	created_at						TIMESTAMPTZ DEFAULT NOW(),
+	updated_at						TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE lending ADD CONSTRAINT no_overlap

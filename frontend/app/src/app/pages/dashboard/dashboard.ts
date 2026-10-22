@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RequestCard } from '../../components/request-card/request-card';
 import { HelpRequest } from '../../models/help-request.model';
-import { Exchange, ExchangeTone, TONE_ORDER, LENDING_STATUS_DISPLAY, CHOSEN_STATUSES } from '../../models/exchange.model';
+import { Exchange, ExchangeTone, TONE_ORDER, LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { ModalService } from '../../services/modal.service';
 import { GroupsService } from '../../services/groups.service';
@@ -13,9 +13,7 @@ import { PostEntity, PostGroupData } from '../../models/post.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
-import { LendingEntity } from '../../models/lending.model';
-import { ObjectService } from '../../services/object.service';
-import { ObjectEntity } from '../../models/object.model';
+import { LendingEntity, CHOSEN_STATUSES } from '../../models/lending.model';
 import { RefreshService } from '../../services/refresh.service';
 import { forkJoin } from 'rxjs';
 import { HeaderAppComponent } from '../../components/header-app/header-app';
@@ -37,14 +35,12 @@ export class Dashboard {
 	private groupsService = inject(GroupsService);
 	private postsService = inject(PostsService);
 	private usersService = inject(UsersService);
-	private objectService = inject(ObjectService);
 	private lendingService = inject(LendingService);
 
 	readonly groups = signal<GroupEntity[]>([]);
 	private posts = signal<PostEntity[]>([]);
 	private authorsById = signal<Map<number, User>>(new Map());
 	private groupsByPostId = signal<Map<number, PostGroupData[]>>(new Map());
-	private objectsById = signal<Map<number, ObjectEntity>>(new Map());
 	private lendings = signal<LendingEntity[]>([]);
 	private selectedGroupId = signal<number | null>(null);
 	readonly activeTab = signal<DashboardTab>('requests');
@@ -77,7 +73,7 @@ export class Dashboard {
 	private pendingReceivedOffers = computed(() => {
 		const myPostIds = new Set(this.myPosts().map((post) => post.id));
 		return (this.lendings().filter((l) =>
-			l.postId !== null && myPostIds.has(l.postId) && l.status === 'pending'));
+			myPostIds.has(l.postId) && l.status === 'pending'));
 	});
 
 	readonly myExchanges = computed<Exchange[]>(() =>
@@ -145,20 +141,10 @@ export class Dashboard {
 		this.lendingService.listAll().subscribe({
 			next: (lendings) => {
 				this.lendings.set(lendings);
-				this.loadObjectsById(lendings);
 				this.loadBorrowersById(lendings);
 			},
 			error: () => this.showError('Could not load your exchanges'),
 		});
-	}
-
-	private loadObjectsById(lendings: LendingEntity[]): void {
-		for (const objectId of new Set(lendings.map((l) => l.objectId))) {
-			this.objectService.findOne(objectId).subscribe({
-				next: (object) => this.objectsById.update((map) => new Map(map).set(objectId, object)),
-				error: () => this.showError('Could not load some items of your exchanges'),
-			});
-		}
 	}
 
 	private loadBorrowersById(lendings: LendingEntity[]): void {
@@ -249,7 +235,7 @@ export class Dashboard {
 			}
 			else if (post.status === 'closed') {
 				statusLabel = 'closed';
-				tone = 'done';
+				tone = 'cancel';
 			}
 			else if (offers > 0) {
 				statusLabel = `${offers} offer${offers > 1 ? 's' : ''}`;
@@ -274,12 +260,12 @@ export class Dashboard {
 		const me = this.currentUserId();
 
 		return (this.lendings()
-			.filter((l) => l.lenderId === me && l.postId !== null)
+			.filter((l) => l.lenderId === me)
 			.map((l) => ({
 				id: `lending-${l.id}`,
 				kind: 'offer',
-				postId: l.postId!,
-				title: `${this.objectsById().get(l.objectId)?.name ?? '…'} → ${this.authorsById().get(l.borrowerId)?.username ?? '…'}`,
+				postId: l.postId,
+				title: `${l.objectName} → ${this.authorsById().get(l.borrowerId)?.username ?? ''}`,
 				subtitle: `my offer · ${formatTimeAgo(l.createdAt)}`,
 				statusLabel: LENDING_STATUS_DISPLAY[l.status].label,
 				tone: LENDING_STATUS_DISPLAY[l.status].tone,
