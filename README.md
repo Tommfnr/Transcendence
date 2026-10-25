@@ -123,7 +123,11 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 
 ### Others
 
-- //websockets ? //Tom
+**Websockets:**
+
+- Socket.IO documentation: https://socket.io/docs/v4/
+- NestJS WebSocket gateways: https://docs.nestjs.com/websockets/gateways
+
 - //microservices ? //Louis
 - //auth/login ? //Louis/Tiago
 - //any (Anyone)
