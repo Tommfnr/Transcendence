@@ -6,12 +6,16 @@ import { DB } from '../database/database.module'
 import { pgErrorCode } from '@pep/shared'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
+import { UsersProxyService } from './users-proxy.service'
 
 type Executor = Pick<PostgresJsDatabase, 'select'>
 
 @Injectable()
 export class GroupsService {
-	constructor(@Inject(DB) private db : PostgresJsDatabase) {}
+	constructor(
+		@Inject(DB) private db : PostgresJsDatabase,
+		private readonly usersProxy: UsersProxyService,
+	) {}
 
 	// Groups the user belongs to, with their role and how many members each group has
 	findAll(userId: number) {
@@ -195,6 +199,8 @@ export class GroupsService {
 	}
 
 	async addMember(groupId: number, targetUserId: number) {
+		await this.usersProxy.findActiveById(targetUserId)
+
 		try {
 			return await this.db.transaction(async (t) => {
 				await this.lockGroup(t, groupId)

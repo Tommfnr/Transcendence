@@ -95,7 +95,7 @@ export class ApiKeysService {
 			.select({ id: apiKeys.id, sub: users.id, username: users.username })
 			.from(apiKeys)
 			.innerJoin(users, eq(users.id, apiKeys.userId))
-			.where(and(eq(apiKeys.keyHash, hashApiKey(key)), isNull(apiKeys.revokedAt)))
+			.where(and(eq(apiKeys.keyHash, hashApiKey(key)), isNull(apiKeys.revokedAt), isNull(users.deletedAt)))
 
 		if (!row) {
 			return (null)
