@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by rshin, abonifac, tfournie, tiaperei, lgirerd*
+*This project has been created as part of the 42 curriculum by rshin, abonifac, tfournie, tiaperei, lgirerd.*
 
 ## Description
 
@@ -174,20 +174,23 @@ We deliberately restricted AI use for writing application code and for performin
 - Managed deadlines, meetings and team discussions
 - Tracked and organized issues
 
-## Project Management //TODO Raphael
+## Project Management
 
-**Approach.** We tried several management practices early on, including a Trello board and weekly meetings, but dropped them as the project took shape. // TODO: list the other abandoned practices and why they were dropped
+**Organization.**
+Work was first split by layer (frontend, backend, infrastructure), then progressively reassigned so that each member owned features end to end (see [Team Information](#team-information) and [Individual Contributions](#individual-contributions)). We tried a Trello board and weekly meetings early on but dropped them as the project took shape. Project management then focused on making sure everything ran smoothly, and stepping in only when something was unclear or blocked.
 
-Because responsibilities were clearly divided between members, trusting each person's workflow and progress worked better than heavy coordination. Project management therefore focused on making sure everything ran smoothly and stepping in only when something was unclear or blocked.
+**Git workflow.**
+Each feature or fix was developed on its own branch (`feat/…`, `fix/…`) and merged through a pull request. Commit messages follow a `type(scope): subject` convention, so the history shows which service each change touches.
 
 **Tools.**
 
 - **GitHub Issues** for task tracking
 - **Discord** for day-to-day communication and task coordination
 
-**Informal practices.** Much of our coordination also happened in person: ad hoc meetings, discussions on the 42 campus and brainstorming sessions.
+**Informal practices.**
+Much of our coordination also happened in person: ad hoc meetings, discussions on the 42 campus and brainstorming sessions.
 
-> "As project manager, I took personal responsibility for keeping the team informed, staying attentive to the group's overall morale, checking in with each member, organizing team leisure activities, and taking the lead in setting direction and providing a clear framework for our work."
+> "My role as project manager was to keep everyone aligned on priorities, check in regularly with each member to catch blockers early, and set a clear framework for our work, while keeping the team motivated."
 > — Raphael
 
 ## Technical Stack //TIAGO, LOUIS
@@ -280,7 +283,7 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 - Profile page and profile editing, including changing the username
 - User lookup by username, used to add people to groups
-- Account deletion: the user is soft-deleted, their posts are closed, their objects are marked unavailable, their open loans are cancelled and the groups they own are handed over
+- Account deletion: the user is soft-deleted, their posts are closed, their objects are deleted, their open loans are cancelled and the groups they own are handed over
 
 **Objects** *(rshin, tiaperei, tfournie, abonifac)*
 
@@ -347,37 +350,72 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 - A Grafana dashboard, provisioned automatically and served at `/grafana`
 - Alert rules for a service going down, high gateway latency and spikes in failed logins
 
-## Modules //RAPHAEL
+## Modules
 
-### 1. Web Modules, total = 8pts
+### 1. Web Modules, total = 9pts
 
 - Major: Use a framework for both the frontend and backend (lgirerd, tiaperei) + 2pts
+  - **Why:** frameworks give us routing, dependency injection and a consistent structure across a large codebase shared by five people.
+  - **How:** Angular 22 for the frontend; NestJS 11 for the gateway and every backend service.
+
 - Major: Implement real-time features using WebSockets or similar technology (tfournie) + 2pts
+  - **Why:** chat messages and new conversations must appear instantly, without reloading.
+  - **How:** a Socket.IO gateway in the chats service checks the JWT on connection, puts each user in one room per conversation and broadcasts new messages to it; the client reconnects with a fresh token and resyncs missed messages.
+
 - Major: A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints (lgirerd) + 2pts
+  - **Why:** lets users manage their objects from scripts or other tools, outside the web app.
+  - **How:** 6 endpoints under `/api/public/v1/objects` (GET, POST, PUT, DELETE), API keys sent in `x-api-key` and stored as SHA-256 hashes, 60 requests per minute enforced by the gateway, Swagger documentation at `/api/public/docs`.
+
 - Minor: Use an ORM for the database (lgirerd) + 1pt
+  - **Why:** typed queries catch schema mistakes at compile time and protect against SQL injection.
+  - **How:** Drizzle ORM with `postgres-js`; each service declares only the tables it uses in its own `schema.ts`.
+
 - Minor: Custom-made design system with reusable components, including a proper color palette, typography, and icons (abonifac) + 1pt
+  - **Why:** a consistent look across every page, built once and reused.
+  - **How:** Tailwind theme tokens for colors and typography in `styles.css`, 26 reusable Angular components (buttons, cards, modals, text fields, date picker…) and an SVG icon set.
+
+- Minor: Implement advanced search functionality with filters, sorting, and pagination. (tfournie) + 1pt
+  - **Why:** users need to find an object quickly in a growing catalog.
+  - **How:** accent-insensitive search on name and description, category filters, A–Z / Z–A sorting and pagination in the catalog.
 
 ### 2. Accessibility and Internationalization, total = 1pt
 
-- Minor: Support for additional browsers (abonifac) + 1pt
+- Minor: Support for additional browsers (abonifac) + 1pt //ALEX
+  - **Why:** neighbours use different browsers, not only Chrome.
+  - **How:** every feature tested and fixed on [browsers]; known limitations: [limitations]. //ALEX
 
 ### 3. User Management, total = 5pts
 
 - Major: Advanced permissions system (rshin, abonifac, tfournie) + 2pts
+  - **Why:** group creators keep control, trusted members help manage, others only use the group.
+  - **How:** owner, admin and member roles per group, enforced by NestJS guards (`GroupMemberGuard`, `GroupAdminGuard`, `GroupOwnerGuard`); the frontend shows management controls only to admins and deletion only to the owner.
+
 - Major: An organization system (rshin, abonifac, tfournie) + 2pts
+  - **Why:** groups are the core of PEP: requests are only visible to the groups they're shared with.
+  - **How:** a `groups` microservice to create, edit and delete groups, add, remove or leave members, with ownership handed over when the owner leaves.
+
 - Minor: User activity analytics and insights dashboard (rshin, abonifac) + 1pt
+  - **Why:** shows users how they take part in their community.
+  - **How:** each service exposes `GET /api/<service>/stats`, displayed on an Angular page with stat cards and a donut chart.
 
 ### 7. Devops, total = 4pts
 
 - Major: Monitoring system with Prometheus and Grafana (rshin) + 2pts
+  - **Why:** one place to check that every microservice is up and responsive, with alerts when it isn't.
+  - **How:** Prometheus scrapes the gateway and Node Exporter; Grafana is provisioned with a dashboard and 3 alert rules (target down, high P95 latency, failed login spike), reachable only through Caddy over HTTPS with a login.
+
 - Major: Backend as microservices (lgirerd) + 2pts
+  - **Why:** each domain can be developed, deployed and restarted independently, which fits a team where each member owns services.
+  - **How:** seven NestJS services (auth, users, objects, groups, posts, lending, chats) behind a gateway; each one only accesses its own tables and talks to the others through internal REST endpoints and events such as `user.deleted`.
 
-### Bonus Modules, total = //5pts?
+### Bonus Modules
 
-- Major: //any (anyone) + 2pts
-- Minor: //any (anyone) + 1pt
+The modules above total 19 points: 14 required + 5 bonus, the maximum. Any module listed below is a backup in case one is not validated.
 
-## Individual Contributions //ALEX, TOM, LOUIS, TIAGO, RAPHAEL
+- Major: //any (anyone) + 2pts // TIAGO
+- Minor: //any (anyone) + 1pt //ALEX
+
+## Individual Contributions
 
 ### Louis (lgirerd)
 
@@ -391,6 +429,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 - Makefile and Docker infrastructure
 - Setup and maintenance of Caddy, PostgreSQL, Drizzle Gateway and NestJS
 
+**Challenges** //LOUIS
+- **Challenge 1.** *Solution:*
+- **Challenge 2.** *Solution:*
+
 ### Tiago (tiaperei)
 
 **Frontend**
@@ -401,6 +443,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 **Full-stack**
 - Transaction system (lending service), the core feature of the application
+
+**Challenges** //TIAGO
+- **Challenge 1.** *Solution:*
+- **Challenge 2.** *Solution:*
 
 ### Alex (abonifac)
 
@@ -413,6 +459,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 - Page wiring
 - Styled UI components
 
+**Challenges** //ALEX
+- **Challenge 1.** *Solution:*
+- **Challenge 2.** *Solution:*
+
 ### Tom (tfournie)
 
 **Design**
@@ -424,15 +474,23 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 **Full-stack**
 - Chat system
 
+**Challenges** //TOM
+- **Challenge 1.** *Solution:*
+- **Challenge 2.** *Solution:*
+
 ### Raphael (rshin)
 
 **Backend**
-- Groups service
-- Objects service
-- Posts service
+- Groups/Object/Posts services
+- Group roles and permission guards
 
 **Frontend**
 - Page wiring
 
 **Infrastructure**
 - Monitoring with Prometheus and Grafana
+
+**Challenges**
+- **Evolving the backend once services were wired together.** The first architecture didn't anticipate every need, so later changes had to fit services already calling each other without rewriting too much code, and the split between internal, public and shared code isn't consistent across services. *Solution:* targeted fixes, such as lookup variants (`findByIdOrThrow`, `findLiveByIdOrThrow`) and route guards added afterwards.
+- **Splitting roles.** With work divided by layer, frontend-only members didn't always know what the backend had to account for, and some features were split between three people (styling, wiring, endpoints), blurring who should fix them. *Solution:* responsibilities were reassigned along the way, with each member encouraged to own a feature end to end (backend and frontend) and to stay flexible about switching areas when needed.
+
