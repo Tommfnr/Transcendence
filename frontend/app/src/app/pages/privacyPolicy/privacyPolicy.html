@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-6">
     <div class="pt-12 flex flex-col gap-4">
         <h1 class="text-2xl font-bold">Privacy Policy</h1>
-        <p class="text-sm text-secondary">Last updated: 21/10/2026</p>
+        <p class="text-sm text-secondary">Last updated: 26/10/2026</p>
         <p>
             PEP is a school project with no commercial purpose. It is not intended to be hosted
             publicly. Data is used only to display content in the app and to demonstrate how it
@@ -17,20 +17,21 @@
             <li>Content: items (name, description, state, category), posts, groups and their descriptions</li>
             <li>Private messages</li>
             <li>Lending history</li>
-            <li>Technical data: refresh token, IP address</li>
+            <li>Technical data: refresh token, API keys (hashed), IP address (not stored)</li>
         </ul>
     </div>
 
     <div>
         <h2 class="text-xl font-bold">Data Usage</h2>
         <ul class="list-disc pl-6">
-            <li>Email: identifies your account and is used to send confirmation emails, password resets and alerts.</li>
+            <li>Email: identifies your account and can be used to log in. No emails are sent.</li>
             <li>Username: lets other users (friends, family, colleagues) identify you.</li>
             <li>Items, posts and private messages: make the lending system work.</li>
-            <li>Technical data (refresh token, IP address): keeps you logged in and allows us to monitor the service.</li>
+            <li>Technical data: the refresh token, kept in an httpOnly cookie, keeps you logged in. The IP address is only used in memory to rate limit requests.</li>
         </ul>
         <p>
-            Other users can see your username and your posts. Your email address and private
+            Other users can see your username, your items and the posts you share with their groups.
+            Your items are also visible through the public API. Your email address and private
             messages are never shown to other users, except the recipient of a message.
         </p>
     </div>
@@ -38,7 +39,8 @@
     <div>
         <h2 class="text-xl font-bold">Data Sharing</h2>
         <p>
-            Connection data (such as IP addresses) is used to monitor the service with Grafana.
+            The service is monitored with Prometheus and Grafana, which only record technical metrics
+            (request counts, response times, status codes) and no personal data.
             Grafana is hosted locally as part of the project: no data is sent to any third party.
         </p>
     </div>
@@ -46,17 +48,18 @@
     <div>
         <h2 class="text-xl font-bold">Data Retention</h2>
         <p>
-            Your data is kept as long as your account exists. All data is deleted at the end of
-            the project or after a database cleanup.
+            Your data is kept as long as your account exists. When you delete your account, your
+            private messages are deleted and the rest of your data is hidden but kept in the
+            database. All data is deleted at the end of the project or after a database cleanup.
         </p>
     </div>
 
     <div>
         <h2 class="text-xl font-bold">User Rights</h2>
         <p>
-            You can delete your profile, items and groups at any time. Private messages related
-            to a trade in progress remain available until that trade is completed. After that,
-            they are kept in the database until the next database clean. Same goes for you account.
+            You can delete your profile, items and the groups you own at any time. When you delete
+            your account, loans that have not started yet are cancelled and the groups you own are
+            handed over to their longest-standing member.
         </p>
         <p>To exercise your rights, contact us at rshin@student.42lyon.fr.</p>
     </div>
