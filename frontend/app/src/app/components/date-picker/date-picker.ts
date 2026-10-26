@@ -2,10 +2,10 @@ import { Component, ElementRef, computed, inject, input, model, output, signal }
 import { FormValueControl } from '@angular/forms/signals';
 import { ButtonDirective } from '../button/button.directive';
 
-const WEEKDAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
+const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const MONTHS = [
-  'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
 // "5/1/2026" must become "2026-01-05", never "2026-1-5"
@@ -59,7 +59,7 @@ export class DatePicker implements FormValueControl<string> {
   // Not named min/max: those names are reserved by FormValueControl
   readonly minDate = input<string>();
   readonly maxDate = input<string>();
-  readonly placeholder = input('Choisir une date…');
+  readonly placeholder = input('Pick a date…');
   readonly appearance = input<'field' | 'button'>('field');
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);

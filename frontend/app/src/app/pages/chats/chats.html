@@ -16,7 +16,7 @@
                 (change)="onRecipientChange($event)"
                 class="h-10 min-w-40 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
             >
-                <option value="">Choisir un utilisateur…</option>
+                <option value="">Choose a user…</option>
                 @for (user of recipients(); track user.id) {
                     <option [value]="user.id">{{ user.username }}</option>
                 }
@@ -48,7 +48,7 @@
                 [disabled]="!canCreate()"
                 class="shrink-0 disabled:cursor-not-allowed disabled:opacity-50"
             >
-                {{ creating() ? 'Création…' : 'Créer le chat' }}
+                {{ creating() ? 'Creating…' : 'Create chat' }}
             </button>
         </div>
 

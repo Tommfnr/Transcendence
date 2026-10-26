@@ -36,8 +36,8 @@ export class ButtonDirective {
 		const variants: Record<ButtonVariant, string> = {
 			primary: 'bg-primary text-on-primary hover:bg-alert active:bg-alert',
 			secondary: 'bg-secondary text-on-secondary hover:bg-primary hover:text-on-primary active:bg-primary active:text-on-primary',
-			// muted: action gardée discrète au repos (ex. Leave) — surface muted
-			// comme un bouton désactivé, mais vivante au survol.
+			// muted: action kept discreet at rest (e.g. Leave) — muted surface
+			// like a disabled button, but comes alive on hover.
 			muted: 'bg-muted text-text-secondary hover:bg-primary hover:text-on-primary active:bg-primary active:text-on-primary',
 		};
 
