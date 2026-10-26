@@ -14,7 +14,7 @@
     @if (value() && !disabled()) {
       <button
         type="button"
-        aria-label="Effacer la date"
+        aria-label="Clear date"
         (click)="clear()"
         class="flex size-7 cursor-pointer items-center justify-center rounded-full text-text-secondary hover:text-text"
       >
@@ -51,7 +51,7 @@
     @if (value() && !disabled()) {
       <button
         type="button"
-        aria-label="Effacer la date"
+        aria-label="Clear date"
         (click)="clear()"
         class="absolute top-1/2 right-1 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-text-secondary hover:text-text"
       >
@@ -64,13 +64,13 @@
 @if (isOpen()) {
   <div
     role="dialog"
-    aria-label="Choisir une date"
+    aria-label="Pick a date"
     class="mt-1 rounded-card bg-card p-2 shadow-raised"
   >
     <div class="mb-2 flex items-center justify-between">
       <button
         type="button"
-        aria-label="Mois précédent"
+        aria-label="Previous month"
         (click)="shiftMonth(-1)"
         class="size-7 cursor-pointer rounded-full hover:bg-primary-surface"
       >
@@ -79,7 +79,7 @@
       <strong class="text-sm text-text capitalize">{{ monthLabel() }}</strong>
       <button
         type="button"
-        aria-label="Mois suivant"
+        aria-label="Next month"
         (click)="shiftMonth(1)"
         class="size-7 cursor-pointer rounded-full hover:bg-primary-surface"
       >

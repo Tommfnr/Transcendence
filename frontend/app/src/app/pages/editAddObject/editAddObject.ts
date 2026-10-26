@@ -55,14 +55,17 @@ export class EditAddObject implements OnInit {
 
 	ngOnInit(): void {
 		if (this.objectId) {
-			this.objectService.findOne(Number(this.objectId)).subscribe((data) => {
-				this.object.set({
-					name: data.name,
-					type: data.type,
-					description: data.description ?? '',
-					condition: data.condition,
-					isAvailable: data.isAvailable,
-				});
+			this.objectService.findOne(Number(this.objectId)).subscribe({
+				next: (data) => {
+					this.object.set({
+						name: data.name,
+						type: data.type,
+						description: data.description ?? '',
+						condition: data.condition,
+						isAvailable: data.isAvailable,
+					});
+				},
+				error: () => this.bannerErrors.set(['Could not load the item']),
 			});
 		}
 	}

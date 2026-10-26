@@ -25,6 +25,7 @@ export class ObjectsController {
 	}
 
 	@Get(':objectId')
+	@UseGuards(ObjectOwnerGuard)
 	findOne(@Param('objectId', ParseIdPipe) objectId: number) {
 		return (this.objectsService.findLiveByIdOrThrow(objectId))
 	}

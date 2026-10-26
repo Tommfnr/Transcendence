@@ -6,6 +6,7 @@ import { ObjectsProxyService } from './objects-proxy.service'
 import { PostsProxyService } from './posts-proxy.service'
 import { GroupsProxyService } from './groups-proxy.service'
 import { GROUPS_INTERNAL_CLIENT, OBJECTS_INTERNAL_CLIENT, POSTS_INTERNAL_CLIENT } from './lending.tokens'
+import { OverdueJob } from './overdue.job'
 
 const DEFAULT_OBJECTS_URL = 'http://objects:3000'
 const DEFAULT_POSTS_URL = 'http://posts:3000'
@@ -21,6 +22,7 @@ const DEFAULT_GROUPS_URL = 'http://groups:3000'
 		PostsProxyService,
 		GroupsProxyService,
 		LendingService,
+		OverdueJob,
 	],
 	exports: [LendingService],
 })

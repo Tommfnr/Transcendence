@@ -22,6 +22,7 @@
 		}
 		@for (offer of offers(); track offer.id) {
 			<app-offer-card
+				[type]="offer.objectType"
 				[name]="offer.name"
 				[group]="offer.group"
 				[time]="offer.time"
@@ -31,10 +32,20 @@
 				(press)="openConversation(offer.id)"
 				(accept)="onAccept(offer.id)"
 				(decline)="onDecline(offer.id)"
+				(pickUp)="onPickUp(offer.id)"
+				(giveBack)="onGiveBack(offer.id)"
 			/>
 		}
 		@empty {
 			<p class="text-center text-sm text-text-secondary">No offers yet.</p>
+		}
+		@if (canCancel()) {
+			<div class="flex justify-end">
+				<button appButton size="small" variant="secondary" type="button" [disabled]="cancelling()"
+					(click)="onCancelRequest()">
+					Cancel my request
+				</button>
+			</div>
 		}
 	</div>
 </app-modal>

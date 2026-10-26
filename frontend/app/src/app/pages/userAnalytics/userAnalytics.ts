@@ -2,16 +2,19 @@ import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { ObjectStats, PostStats, GroupStats, ChatStats, LendingStats } from '../../models/stats.model';
 import { StatsService } from '../../services/stats.service';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 @Component({
 	selector: 'app-user-analytics',
-	imports: [TitleBarComponent],
+	imports: [TitleBarComponent, ErrorBannerComponent],
 	templateUrl: './userAnalytics.html',
 	styles: ``,
 })
 export class UserAnalytics implements OnInit {
 
 	private statsService = inject(StatsService);
+
+	bannerErrors = signal<string[]>([]);
 
 	objectStats = signal<ObjectStats>({
 		total: 0,
@@ -76,39 +79,58 @@ export class UserAnalytics implements OnInit {
 		return `conic-gradient(${stops.join(', ')})`;
 	}
 
+	private addBannerError(message: string): void {
+		this.bannerErrors.update((errors) => [...errors, message]);
+	}
+
 	ngOnInit():void {
-		this.statsService.objectStats().subscribe((data) => {
-			this.objectStats.set({
-				total: data.total,
-				available: data.available,
-			});
+		this.statsService.objectStats().subscribe({
+			next: (data) => {
+				this.objectStats.set({
+					total: data.total,
+					available: data.available,
+				});
+			},
+			error: () => this.addBannerError('Could not load your object stats'),
 		});
-		this.statsService.groupStats().subscribe((data) => {
-			this.groupStats.set({
-				total: data.total,
-				neighbours: data.neighbours,
-			});
+		this.statsService.groupStats().subscribe({
+			next: (data) => {
+				this.groupStats.set({
+					total: data.total,
+					neighbours: data.neighbours,
+				});
+			},
+			error: () => this.addBannerError('Could not load your group stats'),
 		});
-		this.statsService.postStats().subscribe((data) => {
-			this.postStats.set({
-				total: data.total,
-				open: data.open,
-				closed: data.closed,
-				topCategory: data.topCategory
-			});
+		this.statsService.postStats().subscribe({
+			next: (data) => {
+				this.postStats.set({
+					total: data.total,
+					open: data.open,
+					closed: data.closed,
+					topCategory: data.topCategory
+				});
+			},
+			error: () => this.addBannerError('Could not load your post stats'),
 		});
-		this.statsService.lendingStats().subscribe((data) => {
-			this.lendingStats.set({
-				lent: data.lent,
-				borrowed: data.borrowed,
-				requestsAnswered: data.requestsAnswered,
-			});
+		this.statsService.lendingStats().subscribe({
+			next: (data) => {
+				this.lendingStats.set({
+					lent: data.lent,
+					borrowed: data.borrowed,
+					requestsAnswered: data.requestsAnswered,
+				});
+			},
+			error: () => this.addBannerError('Could not load your exchange stats'),
 		});
-		this.statsService.chatStats().subscribe((data) => {
-			this.chatStats.set({
-				conversations: data.conversations,
-				topDay: data.topDay,
-			});
+		this.statsService.chatStats().subscribe({
+			next: (data) => {
+				this.chatStats.set({
+					conversations: data.conversations,
+					topDay: data.topDay,
+				});
+			},
+			error: () => this.addBannerError('Could not load your chat stats'),
 		});
 	};
 };

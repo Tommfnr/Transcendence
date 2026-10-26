@@ -49,6 +49,16 @@ export class LendingController {
 		return (this.lendingService.cancelLend(id, userId))
 	}
 
+	@Patch(':id/pickup')
+	pickUpLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.pickUpLend(id, userId))
+	}
+
+	@Patch(':id/give-back')
+	giveBackLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
+		return (this.lendingService.giveBackLend(id, userId))
+	}
+
 	@Patch(':id/return')
 	returnLend(@Param('id', ParseIdPipe) id: number, @CurrentUser('sub') userId: number) {
 		return (this.lendingService.returnLend(id, userId))

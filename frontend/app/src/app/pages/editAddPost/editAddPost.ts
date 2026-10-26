@@ -81,26 +81,37 @@ export class EditAddPost implements OnInit {
 
 	ngOnInit(): void {
 		if (this.isEditMode()) {
-			this.postsService.findOne(Number(this.postId)).subscribe((data) => {
-				this.post.set({
-					title: data.title,
-					objectType: data.objectType,
-					description: data.description ?? '',
-					status: data.status,
-					fromDate: data.fromDate,
-					toDate: data.toDate,
-				});
+			this.postsService.findOne(Number(this.postId)).subscribe({
+				next: (data) => {
+					this.post.set({
+						title: data.title,
+						objectType: data.objectType,
+						description: data.description ?? '',
+						status: data.status,
+						fromDate: data.fromDate,
+						toDate: data.toDate,
+					});
+				},
+				error: () => this.showError('Could not load the request'),
 			});
 
-			this.postsService.findGroups(Number(this.postId)).subscribe((postGroups) => {
-				this.myPostGroups.set(postGroups);
+			this.postsService.findGroups(Number(this.postId)).subscribe({
+				next: (postGroups) => this.myPostGroups.set(postGroups),
+				error: () => this.showError('Could not load the groups of the request'),
 			});
 		} else {
-			this.groupsService.findMy().subscribe((groups) => {
-				this.myGroups.set(groups);
-				this.selectedGroupIds.set(new Set(groups.map((g) => g.id)));
+			this.groupsService.findMy().subscribe({
+				next: (groups) => {
+					this.myGroups.set(groups);
+					this.selectedGroupIds.set(new Set(groups.map((g) => g.id)));
+				},
+				error: () => this.showError('Could not load your groups'),
 			});
 		}
+	}
+
+	private showError(message: string): void {
+		this.bannerErrors.update((errors) => errors.includes(message) ? errors : [...errors, message]);
 	}
 
 	onSubmit(event: Event) {

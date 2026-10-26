@@ -2,10 +2,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Modal } from '../../components/modal/modal';
 import { ModalService } from '../../services/modal.service';
-import { PostsService } from '../../services/posts.service';
-import { PostEntity } from '../../models/post.model';
-import { ObjectService } from '../../services/object.service';
-import { ObjectEntity } from '../../models/object.model';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../models/user.model';
 import { LendingService } from '../../services/lending.service';
@@ -16,8 +12,6 @@ import { finalize } from 'rxjs';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
 
-// Loan states where the lender can confirm the item came back
-const LOAN_IN_PROGRESS: LendingStatus[] = ['accepted', 'active', 'awaiting_confirmation', 'overdue'];
 
 @Component({
 	selector: 'app-myOffer',
@@ -26,14 +20,10 @@ const LOAN_IN_PROGRESS: LendingStatus[] = ['accepted', 'active', 'awaiting_confi
 })
 export class MyOffer implements OnInit {
 	readonly modalService = inject(ModalService);
-	private postsService = inject(PostsService);
-	private objectService = inject(ObjectService);
 	private usersService = inject(UsersService);
 	private lendingService = inject(LendingService);
 	private router = inject(Router);
 
-	readonly post = signal<PostEntity | null>(null);
-	readonly object = signal<ObjectEntity | null>(null);
 	readonly requester = signal<User | null>(null);
 	readonly lending = signal<LendingEntity | null>(null);
 	readonly cancelling = signal(false);
@@ -53,10 +43,7 @@ export class MyOffer implements OnInit {
 
 	readonly canCancel = computed(() => this.lending()?.status === 'pending');
 
-	readonly canReturn = computed(() => {
-		const lending = this.lending();
-		return (lending !== null && LOAN_IN_PROGRESS.includes(lending.status));
-	});
+	readonly canReturn = computed(() => this.lending()?.status === 'awaiting_confirmation');
 
 
 	ngOnInit(): void {
@@ -71,26 +58,9 @@ export class MyOffer implements OnInit {
 		this.lendingService.findOne(lendingId).subscribe({
 			next: (lending) => {
 				this.lending.set(lending);
-				this.loadObject(lending.objectId);
 				this.loadRequester(lending.borrowerId);
-				if (lending.postId !== null)
-					this.loadPost(lending.postId);
 			},
 			error: () => this.showError('This offer no longer exists'),
-		});
-	}
-
-	private loadPost(postId: number): void {
-		this.postsService.findOne(postId).subscribe({
-			next: (post) => this.post.set(post),
-			error: () => this.showError('Could not load the request'),
-		});
-	}
-
-	private loadObject(objectId: number): void {
-		this.objectService.findOne(objectId).subscribe({
-			next: (object) => this.object.set(object),
-			error: () => this.showError('Could not load the offered item'),
 		});
 	}
 
@@ -101,6 +71,15 @@ export class MyOffer implements OnInit {
 		});
 	}
 
+
+	// The chat of an offer is the one about its post with the requester
+	onOpenConversation(): void {
+		const lending = this.lending();
+		this.modalService.close();
+		this.router.navigate(['/app/chats'], {
+			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
+		});
+	}
 
 	onCancel(): void {
 		const lending = this.lending();
@@ -130,16 +109,6 @@ export class MyOffer implements OnInit {
 				next: () => this.modalService.close(),
 				error: () => this.showError('Could not confirm the return, please try again'),
 			});
-	}
-
-
-	// The chat of an offer is the one about its post with the requester
-	onOpenConversation(): void {
-		const lending = this.lending();
-		this.modalService.close();
-		this.router.navigate(['/app/chats'], {
-			queryParams: lending ? { post: lending.postId, with: lending.borrowerId } : {},
-		});
 	}
 
 	// Adds a message to the banner once, even when several requests fail the same way

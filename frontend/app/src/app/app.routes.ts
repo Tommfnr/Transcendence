@@ -29,27 +29,33 @@ export const routes: Routes = [
 		children: [
 			{
 				path: '',
-				component: Landing
+				component: Landing,
+				title: 'Welcome on PEP'
 			},
 			{
 				path: 'login',
-				component: Login
+				component: Login,
+				title: 'Login'
 			},
 			{
 				path: 'register',
-				component: Register
+				component: Register,
+				title: 'Register'
 			},
 			{
 				path: 'privacyPolicy',
-				component: PrivacyPolicy
+				component: PrivacyPolicy,
+				title: 'Privacy Policy'
 			},
 			{
 				path: 'termsOfService',
 				component: TermsOfService,
+				title: 'Terms of service'
 			},
 			{
 				path: 'notFound',
 				component: NotFound,
+				title: '404 - Page not found'
 			}
 		],
 	},
@@ -65,80 +71,99 @@ export const routes: Routes = [
 			},
 			{
 				path: 'dashboard',
-				component: Dashboard
+				component: Dashboard,
+				title: 'Dashboard'
 			},
 			{
 				path: 'profile',
-				component: Profile
+				component: Profile,
+				title: 'Profile'
 			},
 			{
 				path: 'catalog',
-				component: Catalog
+				component: Catalog,
+				title: 'Your catalog'
 			},
 			{
 				path: 'editAddObject',
-				component: EditAddObject
+				component: EditAddObject,
+				title: 'Edit / add item'
 			},
 			{
 				path: 'editAddObject/:id',
-				component: EditAddObject
+				component: EditAddObject,
+				title: 'Edit / add item'
 			},
 			{
 				path: 'editAddPost',
-				component: EditAddPost
+				component: EditAddPost,
+				title: 'Edit / add post'
 			},
 			{
 				path: 'editAddPost/:id',
-				component: EditAddPost
+				component: EditAddPost,
+				title: 'Edit / add post'
 			},
 			{
 				path: 'groupParameter',
-				component: GroupParameter
+				component: GroupParameter,
+				title: 'Group parameters'
 			},
 			{
 				path: 'editAddGroup',
-				component: EditAddGroup
+				component: EditAddGroup,
+				title: 'Edit / add group'
 			},
 			{
 				path: 'editAddGroup/:id',
-				component: EditAddGroup
+				component: EditAddGroup,
+				title: 'Edit / add group'
 			},
 			{
 				path: 'iCanHelp/:postId',
-				component: ICanHelp
+				component: ICanHelp,
+				title: 'I can help'
 			},
 			{
 				path: 'offerHelp/:postId',
-				component: OfferHelp
+				component: OfferHelp,
+				title: 'I offer my help'
 			},
 			{
 				path: 'chats',
-				component: Chats
+				component: Chats,
+				title: 'Chats'
 			},
 			{
 				path: 'userAnalytics',
-				component: UserAnalytics
+				component: UserAnalytics,
+				title: 'User analytics'
 			},
 			{
 				path: 'privacyPolicy',
-				component: PrivacyPolicy
+				component: PrivacyPolicy,
+				title: 'Privacy Policy'
 			},
 			{
 				path: 'termsOfService',
 				component: TermsOfService,
+				title: 'Terms of service'
 			},
 			{
 				path: 'helpSupport',
 				component: HelpSupport,
+				title: 'Help support'
 			},
 			{
 				path: 'notFound',
 				component: NotFound,
+				title: '404 - Not found'
 			}
 		]
 	},
 	{
 		path: '**',
 		redirectTo: 'app/notFound',
+		title: '404 - Not found'
 	},
 ];

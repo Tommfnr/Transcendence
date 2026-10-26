@@ -1,6 +1,5 @@
 import { Component, input, output } from '@angular/core';
 import { AvatarComponent } from '../avatar/avatar';
-import { ButtonComponent } from '../button/button';
 
 @Component({
     selector: 'app-group-card',
