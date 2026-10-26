@@ -12,7 +12,7 @@
     <section class="flex items-center justify-between gap-2">
         <select
             (change)="onGroupFilterChange($event)"
-            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-card cursor-pointer"
+            class="flex h-10 min-w-40 flex-1 items-center gap-3 rounded-card bg-card px-3 shadow-card cursor-pointer transition-shadow hover:shadow-raised"
         >
             <option value="">All my groups</option>
             @for (group of groups(); track group.id) {
@@ -24,7 +24,7 @@
         <a
             routerLink="/app/groupParameter"
             aria-label="Settings"
-            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-card"
+            class="flex h-10 w-16 shrink-0 items-center justify-center rounded-card bg-card shadow-card transition-shadow hover:shadow-raised"
         >
             <img src="/icons/settings.svg" alt="" class="size-6" />
         </a>

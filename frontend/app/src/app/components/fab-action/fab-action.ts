@@ -34,7 +34,7 @@ export class FabActionComponent {
 	}
 
 	get circleClasses(): string {
-		const base = 'flex size-11 shrink-0 items-center justify-center rounded-full';
+		const base = 'flex size-11 shrink-0 items-center justify-center rounded-full shadow-card';
 		const tones: Record<FabActionTone, string> = {
 			object: 'bg-primary-surface-solid',
 			request: 'bg-complementary-surface-solid',

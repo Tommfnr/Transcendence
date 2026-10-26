@@ -1,7 +1,8 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { ButtonDirective } from '../button/button.directive';
 import { StatusBadgeComponent } from '../status-badge/status-badge';
 import { AvatarComponent } from '../avatar/avatar';
+import { ObjectType, OBJECT_TYPES_EMOJI } from '../../models/object.model';
 
 export type OfferCardState = 'pending' | 'accepted' | 'borrowed' | 'overdue' | 'returning' | 'returned';
 
@@ -35,4 +36,16 @@ export class OfferCardComponent {
 	readonly giveBack = output<void>();
 	/** Body pressed — open the conversation with the offerer. */
 	readonly press = output<void>();
+
+	readonly type = input<ObjectType | null>(null);
+
+	readonly emoji = computed(() => {
+		const type = this.type();
+		return type ? OBJECT_TYPES_EMOJI[type] : '📦';
+	});
+
 }
+
+
+
+
