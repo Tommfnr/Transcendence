@@ -8,12 +8,13 @@ import { GroupCardComponent } from '../../components/group-card/group-card';
 import { ModalService } from '../../services/modal.service';
 import { RefreshService } from '../../services/refresh.service';
 import { Location } from '@angular/common';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 
 
 @Component({
 	selector: 'app-groupParameter',
-	imports: [ ButtonDirective, TitleBarComponent, GroupCardComponent],
+	imports: [ ButtonDirective, TitleBarComponent, GroupCardComponent, ErrorBannerComponent],
 	templateUrl: './groupParameter.html',
 })
 
@@ -21,6 +22,8 @@ export class GroupParameter implements OnInit {
 	private groupsService = inject(GroupsService);
 	readonly groupData = signal<GroupEntity[]>([]);
 	readonly memberCounts = signal<Record<number, number>>({});
+	readonly bannerErrors = signal<string[]>([]);
+	readonly loadFailed = signal(false);
 	readonly modalService = inject(ModalService);
 	private location = inject(Location);
 	private router = inject(Router);
@@ -45,15 +48,28 @@ export class GroupParameter implements OnInit {
 	}
 
 	private loadGroups(): void {
-		this.groupsService.findMy().subscribe((data) => {
-			this.groupData.set(data);
+		this.bannerErrors.set([]);
+		this.loadFailed.set(false);
+		this.groupsService.findMy().subscribe({
+			next: (data) => {
+				this.groupData.set(data);
 
-			for (const group of data) {
-				this.groupsService.findMembers(group.id).subscribe((members) => {
-					this.memberCounts.update((current) => ({ ...current, [group.id]: members.length }));
-				});
-			}
+				for (const group of data) {
+					this.groupsService.findMembers(group.id).subscribe({
+						next: (members) => this.memberCounts.update((current) => ({ ...current, [group.id]: members.length })),
+						error: () => this.showError('Could not load the member count of some groups'),
+					});
+				}
+			},
+			error: () => {
+				this.loadFailed.set(true);
+				this.showError('Could not load your groups');
+			},
 		});
+	}
+
+	private showError(message: string): void {
+		this.bannerErrors.update((errors) => errors.includes(message) ? errors : [...errors, message]);
 	}
 
 	roleLabel(group: GroupEntity): string {
@@ -63,8 +79,9 @@ export class GroupParameter implements OnInit {
 	}
 
 	deleteGroup(groupId: number): void {
-		this.groupsService.deleteGroup(groupId).subscribe(() => {
-			this.groupData.update((groups) => groups.filter((group) => group.id !== groupId));
+		this.groupsService.deleteGroup(groupId).subscribe({
+			next: () => this.groupData.update((groups) => groups.filter((group) => group.id !== groupId)),
+			error: () => this.showError('Could not delete the group'),
 		});
 	}
 

@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { LendingService } from '../../services/lending.service';
 import { ObjectEntity } from '../../models/object.model';
@@ -12,6 +12,8 @@ import { normalizeForSearch } from '../../shared/normalize-text';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { Location } from '@angular/common';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
+import { LendingEntity } from '../../models/lending.model';
 
 interface Category {
 	label: string;
@@ -20,7 +22,7 @@ interface Category {
 
 @Component({
 	selector: 'app-catalog',
-	imports: [ TextFieldComponent, ChipComponent, ObjectCard, TitleBarComponent, FabActionComponent],
+	imports: [ TextFieldComponent, ChipComponent, ObjectCard, TitleBarComponent, FabActionComponent, ErrorBannerComponent],
 	templateUrl: './catalog.html',
 })
 
@@ -30,6 +32,8 @@ export class Catalog {
   readonly modalService = inject(ModalService);
   private lendingService = inject(LendingService);
   readonly objectData = signal<ObjectEntity[]>([]);
+  readonly bannerErrors = signal<string[]>([]);
+  readonly loadFailed = signal(false);
   private location = inject(Location);
   private router = inject(Router);
 
@@ -42,23 +46,45 @@ export class Catalog {
 	}
 
 	private loadObjects(): void {
-		forkJoin([this.objectService.findMy(), this.lendingService.listAll()]).subscribe(([objects, loans]) => {
-			const lentIds = loans
-				.filter((loan) => ['active', 'overdue', 'awaiting_confirmation'].includes(loan.status))
-				.map((loan) => loan.objectId);
-			this.objectData.set(objects.map((object) =>
-				lentIds.includes(object.id) ? { ...object, isAvailable: false } : object));
+		this.bannerErrors.set([]);
+		this.loadFailed.set(false);
+		const loans$ = this.lendingService.listAll().pipe(
+			catchError(() => {
+				this.showError('Could not check which items are lent');
+				return of([] as LendingEntity[]);
+			}),
+		);
+
+		forkJoin([this.objectService.findMy(), loans$]).subscribe({
+			next: ([objects, loans]) => {
+				const lentIds = loans
+					.filter((loan) => ['active', 'overdue', 'awaiting_confirmation'].includes(loan.status))
+					.map((loan) => loan.objectId);
+				this.objectData.set(objects.map((object) =>
+					lentIds.includes(object.id) ? { ...object, isAvailable: false } : object));
+			},
+			error: () => {
+				this.loadFailed.set(true);
+				this.showError('Could not load your items');
+			},
 		});
+	}
+
+	private showError(message: string): void {
+		this.bannerErrors.update((errors) => errors.includes(message) ? errors : [...errors, message]);
 	}
 
 	deleteObject(id: number): void {
 		const name = this.objectData().find((object) => object.id === id)?.name;
 		if (confirm(`Delete "${name}"? This cannot be undone.`)) {
-			this.objectService.remove(id).subscribe(() => {
-				this.objectData.update((objects) => objects.filter((object) => object.id !== id));
-				if (this.currentPage() > this.totalPages()) {
-					this.currentPage.set(this.totalPages());
-				}
+			this.objectService.remove(id).subscribe({
+				next: () => {
+					this.objectData.update((objects) => objects.filter((object) => object.id !== id));
+					if (this.currentPage() > this.totalPages()) {
+						this.currentPage.set(this.totalPages());
+					}
+				},
+				error: () => this.showError(`Could not delete "${name}"`),
 			});
 		}
 	}

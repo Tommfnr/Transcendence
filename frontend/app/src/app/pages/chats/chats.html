@@ -58,6 +58,14 @@
     </form> -->
 	<!-- LEAVE THIS COMMENT FOR TESTS -->
 
+    @if (bannerErrors().length > 0) {
+        <app-error-banner>
+            @for (msg of bannerErrors(); track msg) {
+                <p>{{ msg }}</p>
+            }
+        </app-error-banner>
+    }
+
     <div class="flex min-h-0 flex-col gap-4 lg:flex-row">
         <!-- Live list: reordered by ChatSocketService on every new message. Desktop only: on mobile the chat is opened from My exchanges -->
         <nav
@@ -87,9 +95,12 @@
                         />
                     </li>
                 } @empty {
-                    <li class="px-3 py-2 text-xs text-text-secondary">
-                        {{ loaded() ? "No conversations yet." : 'Loading...' }}
-                    </li>
+                    <!-- On error the banner already explains why the list is empty -->
+                    @if (bannerErrors().length === 0) {
+                        <li class="px-3 py-2 text-xs text-text-secondary">
+                            {{ loaded() ? "No conversations yet." : 'Loading...' }}
+                        </li>
+                    }
                 }
             </ul>
         </nav>
@@ -106,7 +117,7 @@
 					<p class="text-sm text-text-secondary">{{ groupName() }}</p>
 				</div>
             </app-chat>
-        } @else if (loaded()) {
+        } @else if (loaded() && bannerErrors().length === 0) {
             <p class="text-sm text-text-secondary">
                 No conversations yet.
             </p>

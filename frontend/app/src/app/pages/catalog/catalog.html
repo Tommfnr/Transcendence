@@ -5,6 +5,14 @@
 ></app-title-bar>
 
 <div class="flex flex-col gap-4 pt-14 lg:pt-6">
+	@if (bannerErrors().length > 0) {
+		<app-error-banner>
+			@for (msg of bannerErrors(); track msg) {
+				<p>{{ msg }}</p>
+			}
+		</app-error-banner>
+	}
+
 	<div class="hidden lg:flex items-baseline justify-between">
 		<h1 class="text-xl font-bold">Catalog</h1>
 		<span class="text-text-secondary">{{ objectsCount() }} {{ objectsCount() > 1 ? 'items' : 'item' }}</span>
@@ -42,7 +50,10 @@
                 (remove)="deleteObject(object.id)"
             ></app-object-card>
         } @empty {
-            <p class="col-span-2">No objects match your search/filter.</p>
+            <!-- On error the banner already explains why the list is empty -->
+            @if (!loadFailed()) {
+                <p class="col-span-2">No objects match your search/filter.</p>
+            }
         }
 
 
