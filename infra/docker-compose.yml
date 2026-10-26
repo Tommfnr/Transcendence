@@ -11,6 +11,9 @@ services:
       context: ..
       dockerfile: ./infra/services/caddy/Dockerfile
     container_name: caddy
+    networks:
+      - public
+      - proxy
     restart: unless-stopped
     depends_on:
       gateway:
@@ -28,6 +31,8 @@ services:
       context: ../frontend/app
       dockerfile: ../../infra/services/frontend/Dockerfile
     container_name: frontend-angular
+    networks:
+      - proxy
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 4200"]
@@ -44,6 +49,8 @@ services:
       context: ../backend/services/db
       dockerfile: ../../../infra/services/db/Dockerfile
     container_name: postgres
+    networks:
+      - db
     restart: unless-stopped
     env_file:
       - ../.env
@@ -62,6 +69,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: gateway
+    networks:
+      - proxy
+      - backend
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -99,6 +109,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: auth
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -116,6 +129,8 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: users
+    networks:
+      - backend
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -133,6 +148,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: objects
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -153,6 +171,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: groups
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -168,6 +189,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: lending
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -191,6 +215,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: posts
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -211,6 +238,9 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: chats
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
     env_file:
@@ -226,6 +256,9 @@ services:
   drizzle-gateway:
     build: ./services/orm
     container_name: drizzle-gateway
+    networks:
+      - public
+      - db
     restart: unless-stopped
     ports:
       - "127.0.0.1:4983:4983"
@@ -242,6 +275,9 @@ services:
       context: ../infra/services/prometheus
       dockerfile: ./Dockerfile
     container_name: prometheus
+    networks:
+      - backend
+      - monitoring
     restart: unless-stopped
     env_file:
       - ../.env
@@ -253,6 +289,9 @@ services:
       context: ../infra/services/grafana
       dockerfile: ./Dockerfile
     container_name: grafana
+    networks:
+      - proxy
+      - monitoring
     restart: unless-stopped
     env_file:
       - ../.env
@@ -264,12 +303,25 @@ services:
       context: ../infra/services/node-exporter
       dockerfile: ./Dockerfile
     container_name: node-exporter
+    networks:
+      - monitoring
     restart: unless-stopped
     pid: host
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host/root:ro
+
+networks:
+  public:
+  proxy:
+    internal: true
+  backend:
+    internal: true
+  db:
+    internal: true
+  monitoring:
+    internal: true
 
 volumes:
     frontend_node_modules:
