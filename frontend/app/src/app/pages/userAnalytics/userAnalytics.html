@@ -1,6 +1,15 @@
 <app-title-bar title="User analytics" leading="back"></app-title-bar>
 <h1 class="hidden text-lg font-bold lg:block">User analytics</h1>
 <div class="flex flex-col gap-6 pt-12 lg:pt-8 lg:gap-8">
+
+    @if (bannerErrors().length > 0) {
+        <app-error-banner>
+            @for (msg of bannerErrors(); track msg) {
+                <p>{{ msg }}</p>
+            }
+        </app-error-banner>
+    }
+
     <section
         class="flex flex-col gap-1 rounded-card border border-primary-border bg-primary-surface p-4">
         <p class="truncate text-3xl font-bold text-text">{{ groupStats().neighbours }}</p>
