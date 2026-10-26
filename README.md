@@ -119,9 +119,13 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 **Zod:**
 - Official documentation link: https://zod.dev/
 
-**Tailwind:** //Alex
+**Tailwind:**
+- Official documentation: https://tailwindcss.com/
 
 ### Others
+
+**Figma:**
+- 
 
 **Websockets:**
 
@@ -410,8 +414,9 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 - Interactive Figma prototype
 
 **Frontend**
-- Page wiring
+- Web integration (HTML, CSS)
 - Styled UI components
+- Page wiring
 
 ### Tom (tfournie)
 
