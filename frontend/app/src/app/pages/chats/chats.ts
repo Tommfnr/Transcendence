@@ -19,6 +19,7 @@ import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row
 import { formatTimeAgo } from '../../shared/date-format';
 import { User } from '../../models/user.model';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
+import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 
 // Same limit as messageContentSchema in the backend
 const MESSAGE_MAX_LENGTH = 2000;
@@ -33,7 +34,7 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
 // Conversations page of the user
 @Component({
     selector: 'app-chats',
-    imports: [ChatComponent, ButtonDirective, TitleBarComponent, ExchangeRowComponent],
+    imports: [ChatComponent, ButtonDirective, TitleBarComponent, ExchangeRowComponent, ErrorBannerComponent],
     templateUrl: './chats.html',
 })
 export class Chats implements OnInit {
@@ -48,6 +49,8 @@ export class Chats implements OnInit {
 
     readonly conversationId = signal<number | null>(null);
     readonly loaded = signal(false);
+    // Set when the chats service can't be reached, cleared when the list reloads after a reconnection
+    protected readonly bannerErrors = signal<string[]>([]);
     protected readonly conversations = signal<ConversationWithMembers[]>([]);
     // Each conversation comes from an offer on a post; its status is shown like in My exchanges
     private readonly lendings = signal<LendingEntity[]>([]);
@@ -105,7 +108,10 @@ export class Chats implements OnInit {
                 switchMap(() => this.chatsService.findMy().pipe(catchError(() => EMPTY))),
                 takeUntilDestroyed(),
             )
-            .subscribe((conversations) => this.conversations.set(sortByActivity(conversations)));
+            .subscribe((conversations) => {
+                this.conversations.set(sortByActivity(conversations));
+                this.bannerErrors.set([]);
+            });
 
         // Any new message bumps its conversation back to the top of the list
         this.chatSocket.messageNew$.pipe(takeUntilDestroyed()).subscribe((message) => {
@@ -122,22 +128,31 @@ export class Chats implements OnInit {
     }
 
     ngOnInit(): void {
-        this.chatsService.findMy().subscribe((conversations) => {
-            this.conversations.set(sortByActivity(conversations));
-            // My exchanges links here with ?post=<id>, the Offers modal adds &with=<offerer id>;
-            // otherwise the most recent one opens
-            const params = this.route.snapshot.queryParamMap;
-            const postId = Number(params.get('post'));
-            const withId = params.has('with') ? Number(params.get('with')) : null;
-            const opened = this.conversations().find((conversation) =>
-                conversation.post.id === postId
-                && (withId === null || conversation.members.some((member) => member.id === withId)))
-                ?? this.conversations()[0];
-            this.conversationId.set(opened?.id ?? null);
-            this.loaded.set(true);
+        this.chatsService.findMy().subscribe({
+            next: (conversations) => {
+                this.conversations.set(sortByActivity(conversations));
+                // My exchanges links here with ?post=<id>, the Offers modal adds &with=<offerer id>;
+                // otherwise the most recent one opens
+                const params = this.route.snapshot.queryParamMap;
+                const postId = Number(params.get('post'));
+                const withId = params.has('with') ? Number(params.get('with')) : null;
+                const opened = this.conversations().find((conversation) =>
+                    conversation.post.id === postId
+                    && (withId === null || conversation.members.some((member) => member.id === withId)))
+                    ?? this.conversations()[0];
+                this.conversationId.set(opened?.id ?? null);
+                this.loaded.set(true);
+            },
+            error: () => {
+                this.bannerErrors.set(['Could not load your conversations']);
+                this.loaded.set(true);
+            },
         });
 
-        this.usersService.findAll().subscribe((users) => this.users.set(users));
+        this.usersService.findAll().subscribe({
+            next: (users) => this.users.set(users),
+            error: () => this.users.set([]),
+        });
 
         this.lendingService.listAll().subscribe({
             next: (lendings) => this.lendings.set(lendings),
