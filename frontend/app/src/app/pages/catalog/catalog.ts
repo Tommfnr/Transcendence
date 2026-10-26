@@ -1,6 +1,8 @@
 import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
+import { LendingService } from '../../services/lending.service';
 import { ObjectEntity } from '../../models/object.model';
 import { ModalService } from '../../services/modal.service';
 import { TextFieldComponent } from "../../components/text-field/text-field";
@@ -26,6 +28,7 @@ interface Category {
 export class Catalog {
   private objectService = inject(ObjectService);
   readonly modalService = inject(ModalService);
+  private lendingService = inject(LendingService);
   readonly objectData = signal<ObjectEntity[]>([]);
   private location = inject(Location);
   private router = inject(Router);
@@ -39,7 +42,13 @@ export class Catalog {
 	}
 
 	private loadObjects(): void {
-		this.objectService.findMy().subscribe((data) => { this.objectData.set(data); });
+		forkJoin([this.objectService.findMy(), this.lendingService.listAll()]).subscribe(([objects, loans]) => {
+			const lentIds = loans
+				.filter((loan) => ['active', 'overdue', 'awaiting_confirmation'].includes(loan.status))
+				.map((loan) => loan.objectId);
+			this.objectData.set(objects.map((object) =>
+				lentIds.includes(object.id) ? { ...object, isAvailable: false } : object));
+		});
 	}
 
 	deleteObject(id: number): void {
