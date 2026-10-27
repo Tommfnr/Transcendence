@@ -364,7 +364,7 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 - Major: Implement real-time features using WebSockets or similar technology (tfournie) + 2pts
   - **Why:** chat messages and new conversations must appear instantly, without reloading.
-  - **How:** a Socket.IO gateway in the chats service checks the JWT on connection, puts each user in one room per conversation and broadcasts new messages to it; the client reconnects with a fresh token and resyncs missed messages.
+  - **How:** a Socket.IO gateway in the chats service checks the JWT on connection and puts each socket in a personal room (`user:<id>`), so all of a user's tabs and devices are reached at once; new conversations and messages are emitted to the rooms of the conversation's members after the database commit. The client reconnects with a fresh token when the server drops an expired one, and reloads the history to catch messages missed while offline.
 
 - Major: A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints (lgirerd) + 2pts
   - **Why:** lets users manage their objects from scripts or other tools, outside the web app.
@@ -485,9 +485,9 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Full-stack**
 - Chat system
 
-**Challenges** //TOM
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Keeping the WebSocket alive with short-lived tokens.** Access tokens only last 60 seconds, but a chat socket stays open for as long as the page is. The server drops a socket when its token expires, and Socket.IO does not reconnect by itself after a server-side disconnect, so the chat silently stopped receiving messages. *Solution:* the client detects this disconnect, refreshes the token and reconnects. The token is passed through an `auth` callback, so every reconnection sends the current one. A cooldown between retries prevents an infinite loop when the token is really rejected, and after each reconnection the history is reloaded to catch messages sent in the meantime.
+- **Building a chat on data owned by other services.** A conversation needs its members' usernames and the title of its post, but users live in the auth service and posts in the posts service, with no foreign keys between databases. Fetching them for every conversation would have meant dozens of internal calls for a single list. *Solution:* internal proxy services that fetch all the users and posts of a list in one batched call each. When a member deleted their account or a post was removed, the conversation is kept and shows "Deleted user" or "Object deleted" instead of breaking.
 
 ### Raphael (rshin)
 
