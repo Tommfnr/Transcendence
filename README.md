@@ -119,9 +119,13 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 **Zod:**
 - Official documentation link: https://zod.dev/
 
-**Tailwind:** //Alex
+**Tailwind:**
+- Official documentation: https://tailwindcss.com/
 
 ### Others
+
+**Figma:**
+- https://www.figma.com/
 
 **Websockets:**
 
@@ -380,9 +384,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 ### 2. Accessibility and Internationalization, total = 1pt
 
-- Minor: Support for additional browsers (abonifac) + 1pt //ALEX
+- Minor: Support for additional browsers (abonifac) + 1pt
   - **Why:** neighbours use different browsers, not only Chrome.
-  - **How:** every feature tested and fixed on [browsers]; known limitations: [limitations]. //ALEX
+  - **How:** every feature tested and fixed on Firefox and Microsoft Edge. Known limitation: minor visual differences on the native `<select>` dropdown (dashboard and chats filters). Native `<input>` rendering also differs between browsers, but ours are wrapped in the `text-field` component, which applies our design everywhere.
+
 
 ### 3. User Management, total = 5pts
 
@@ -413,7 +418,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 The modules above total 19 points: 14 required + 5 bonus, the maximum. Any module listed below is a backup in case one is not validated.
 
 - Major: //any (anyone) + 2pts // TIAGO
-- Minor: //any (anyone) + 1pt //ALEX
+- Minor: Figma design system (abonifac) + 1pt
+  - **Why:** 3 people building the frontend need one source of truth for spacing, colors, fonts and components, so pages look consistent without asking the designer.
+  - **How:** a Figma file organised as a design system: color and typography variables with contrast checked for accessibility, reusable components with variants (buttons, cards, inputs, headers) mirrored by the Angular components, vectorised logo and icons, and mobile and desktop frames for every page. The team used Dev Mode to read exact values and CSS during integration, and an interactive prototype validated the flows before coding.
+
 
 ## Individual Contributions
 
@@ -453,15 +461,18 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Design**
 - Original concept of the application
 - Website UI/UX
-- Interactive Figma prototype
+- Interactive Figma prototype (https://www.figma.com/design/ryZ2j08u74fbypdTR0sUIT/UI-website?node-id=1824-2602&t=3RWdrrP0wX5mjO6K-1)
 
 **Frontend**
-- Page wiring
+- Web integration (HTML, CSS)
 - Styled UI components
+- Page wiring
 
-**Challenges** //ALEX
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Mastering figma.** Learning the good practices: building with frames, auto-layout, components and variables. Writing down explicit design rules so the mock-ups leave no room for doubt. Choosing colors and fonts, creating and vectorising the logo. Prototyping the flows to show how the app would be used before writing any code. Thinking the design for mobile and desktop at the same time: deciding which screens could share a layout and which needed their own (bottom navigation vs. header on desktop), while keeping a single set of components. 
+
+
+- **Angular components.** Learning how Angular and TypeScript work together, and what belongs to the template, the component class or the styles. Combining CSS and TypeScript to build dynamic components that open and close (modal, date-picker, select-pill), and wrapping native elements like `input` or `select` to apply our own design without losing their behaviour. Switching between the decorator-based API (`@Input`) and the newer Signals API (`input()`) as the project evolved. *Solution:* starting from small presentational components (button, avatar, chip) before working on stateful ones.
 
 ### Tom (tfournie)
 
