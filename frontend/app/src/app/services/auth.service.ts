@@ -8,7 +8,7 @@ import { tap } from 'rxjs';
 export class AuthService {
 	private http = inject(HttpClient);
 
-	login(body: { email?: string; username?: string; password: string; rememberMe: boolean }) {
+	login(body: { email?: string; username?: string; password: string }) {
 		return this.http.post<{ access_token: string }>('/api/auth/login', body).pipe(
 			tap((response) => { localStorage.setItem('token', response.access_token) })
 		);
