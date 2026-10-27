@@ -125,7 +125,7 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 ### Others
 
 **Figma:**
-- 
+- https://www.figma.com/
 
 **Websockets:**
 
