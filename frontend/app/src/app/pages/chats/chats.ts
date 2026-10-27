@@ -1,13 +1,10 @@
 import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import { EMPTY, catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { ChatComponent } from '../../components/chats/chats';
-import { ButtonDirective } from '../../components/button/button.directive';
 import { ChatsService } from '../../services/chats.service';
 import { ChatSocketService } from '../../services/chat-socket.service';
-import { UsersService } from '../../services/users.service';
 import { RefreshService } from '../../services/refresh.service';
 import { LendingService } from '../../services/lending.service';
 import { PostsService } from '../../services/posts.service';
@@ -17,12 +14,8 @@ import { LendingEntity } from '../../models/lending.model';
 import { ExchangeTone, LENDING_STATUS_DISPLAY } from '../../models/exchange.model';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
 import { formatTimeAgo } from '../../shared/date-format';
-import { User } from '../../models/user.model';
 import { TitleBarComponent } from '../../components/title-bar/title-bar';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
-
-// Same limit as messageContentSchema in the backend
-const MESSAGE_MAX_LENGTH = 2000;
 
 // findMy is sorted by last activity; we keep that order as the list changes live
 function sortByActivity(conversations: ConversationWithMembers[]): ConversationWithMembers[] {
@@ -34,13 +27,12 @@ function sortByActivity(conversations: ConversationWithMembers[]): ConversationW
 // Conversations page of the user
 @Component({
     selector: 'app-chats',
-    imports: [ChatComponent, ButtonDirective, TitleBarComponent, ExchangeRowComponent, ErrorBannerComponent],
+    imports: [ChatComponent, TitleBarComponent, ExchangeRowComponent, ErrorBannerComponent],
     templateUrl: './chats.html',
 })
 export class Chats implements OnInit {
     private chatsService = inject(ChatsService);
     private chatSocket = inject(ChatSocketService);
-    private usersService = inject(UsersService);
     private refreshService = inject(RefreshService);
     private lendingService = inject(LendingService);
     private route = inject(ActivatedRoute);
@@ -65,30 +57,6 @@ export class Chats implements OnInit {
         const conversation = this.selected();
         return conversation ? (this.groupNameByConversation().get(conversation.id) ?? '') : '';
     });
-
-    protected readonly maxLength = MESSAGE_MAX_LENGTH;
-    protected readonly recipientId = signal<number | null>(null);
-    // The post the conversation is about; the backend requires it
-    protected readonly postId = signal<number | null>(null);
-    protected readonly firstMessage = signal('');
-    protected readonly creating = signal(false);
-    protected readonly createError = signal<string | null>(null);
-
-    // The backend refuses a conversation with yourself, so we never offer it
-    private readonly users = signal<User[]>([]);
-    protected readonly recipients = computed(() => {
-        const meId = this.refreshService.user()?.id;
-        return this.users().filter((user) => user.id !== meId);
-    });
-
-    protected readonly canCreate = computed(
-        () =>
-            this.recipientId() !== null &&
-            this.postId() !== null &&
-            this.firstMessage().trim().length > 0 &&
-            this.firstMessage().length <= MESSAGE_MAX_LENGTH &&
-            !this.creating(),
-    );
 
     constructor() {
         // The header shows the shared group of the open conversation
@@ -147,11 +115,6 @@ export class Chats implements OnInit {
                 this.bannerErrors.set(['Could not load your conversations']);
                 this.loaded.set(true);
             },
-        });
-
-        this.usersService.findAll().subscribe({
-            next: (users) => this.users.set(users),
-            error: () => this.users.set([]),
         });
 
         this.lendingService.listAll().subscribe({
@@ -227,56 +190,11 @@ export class Chats implements OnInit {
         this.conversationId.set(conversationId);
     }
 
-    protected onRecipientChange(event: Event): void {
-        const value = (event.target as HTMLSelectElement).value;
-        this.recipientId.set(value ? Number(value) : null);
-    }
-
-    protected onPostIdInput(event: Event): void {
-        const value = (event.target as HTMLInputElement).value;
-        this.postId.set(value ? Number(value) : null);
-    }
-
-    protected onFirstMessageInput(event: Event): void {
-        this.firstMessage.set((event.target as HTMLInputElement).value);
-    }
-
-    // A conversation needs its first message: the backend creates both in one call
-    protected createConversation(): void {
-        const recipientId = this.recipientId();
-        const postId = this.postId();
-        if (!this.canCreate() || recipientId === null || postId === null) return;
-
-        this.creating.set(true);
-        this.createError.set(null);
-        this.chatsService
-            .create(recipientId, postId, this.firstMessage().trim())
-            .pipe(finalize(() => this.creating.set(false)))
-            .subscribe({
-                next: ({ conversation }) => {
-                    this.firstMessage.set('');
-                    this.recipientId.set(null);
-                    this.postId.set(null);
-                    this.upsertConversation(conversation);
-                    // Show the fresh conversation right away
-                    this.conversationId.set(conversation.id);
-                },
-                error: (err: HttpErrorResponse) => this.showError(err),
-            });
-    }
-
-    // The creator is told twice (POST response + socket), so the list is keyed by id
+    // The list is keyed by id so a conversation already shown is never duplicated
     private upsertConversation(conversation: ConversationWithMembers): void {
         this.conversations.update((current) => {
             const others = current.filter((item) => item.id !== conversation.id);
             return sortByActivity([conversation, ...others]);
         });
-    }
-
-    private showError(err: HttpErrorResponse): void {
-        const fieldErrors = err.error?.errors
-            ? Object.values(err.error.errors).flat().join(', ')
-            : '';
-        this.createError.set(fieldErrors || err.error?.message || 'An error occurred');
     }
 }

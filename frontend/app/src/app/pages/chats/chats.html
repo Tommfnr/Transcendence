@@ -2,62 +2,6 @@
 	<!-- Mobile only: the list is hidden there, so the bar shows the open conversation like the desktop chat header -->
 	<app-title-bar [title]="selected() ? peers(selected()!) : 'Chats'" leading="back" [meta]="groupName() || null"></app-title-bar>
 
-	<!-- LEAVE THIS COMMENT FOR TESTS -->
-    <!-- <form
-        class="flex flex-col gap-2 rounded-card bg-card p-3 shadow-card"
-        (submit)="$event.preventDefault(); createConversation()"
-    >
-        <h2 class="text-sm font-bold text-strong">Nouvelle conversation</h2>
-
-        <div class="flex flex-wrap items-end gap-2">
-            <select
-                aria-label="Destinataire"
-                [value]="recipientId() ?? ''"
-                (change)="onRecipientChange($event)"
-                class="h-10 min-w-40 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
-            >
-                <option value="">Choose a user…</option>
-                @for (user of recipients(); track user.id) {
-                    <option [value]="user.id">{{ user.username }}</option>
-                }
-            </select>
-
-            <input
-                type="number"
-                aria-label="Post"
-                placeholder="Post id"
-                [value]="postId() ?? ''"
-                (input)="onPostIdInput($event)"
-                class="h-10 w-24 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
-            />
-
-            <input
-                type="text"
-                aria-label="Premier message"
-                placeholder="Premier message…"
-                [value]="firstMessage()"
-                [maxLength]="maxLength"
-                (input)="onFirstMessageInput($event)"
-                class="h-10 min-w-0 flex-1 rounded-card border border-text-secondary bg-field-surface px-3 text-sm text-strong placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
-            />
-
-            <button
-                type="submit"
-                appButton
-                size="small"
-                [disabled]="!canCreate()"
-                class="shrink-0 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                {{ creating() ? 'Creating…' : 'Create chat' }}
-            </button>
-        </div>
-
-        @if (createError(); as message) {
-            <p class="text-xs text-error">{{ message }}</p>
-        }
-    </form> -->
-	<!-- LEAVE THIS COMMENT FOR TESTS -->
-
     @if (bannerErrors().length > 0) {
         <app-error-banner>
             @for (msg of bannerErrors(); track msg) {
