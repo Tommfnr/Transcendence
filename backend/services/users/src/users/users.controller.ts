@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Delete, HttpCode, Param, Patch, UseGuards, ForbiddenException } from '@nestjs/common'
-import { SharedAuthGuard, CurrentUser, ParseIdPipe, UserView } from '@pep/shared'
+import { Body, Controller, Get, Delete, HttpCode, Param, Patch, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common'
+import { SharedAuthGuard, CurrentUser, ParseIdPipe, UserView, usernameSchema } from '@pep/shared'
 import { UsersProxyService } from './users-proxy.service'
+import { UpdateMeDto } from './dto/update-me.dto'
 
 function toPublicUser(user: UserView) {
 	return ({ id: user.id, username: user.username })
@@ -23,12 +24,14 @@ export class UsersController {
 	}
 
 	@Patch('me')
-	updateMe(@CurrentUser('sub') userId: number, @Body() body: unknown) {
-		return (this.usersProxy.update(userId, body))
+	updateMe(@CurrentUser('sub') userId: number, @Body() dto: UpdateMeDto) {
+		return (this.usersProxy.update(userId, dto))
 	}
 
 	@Get('username/:username')
 	async findByUsername(@Param('username') username: string) {
+		if (!usernameSchema.safeParse(username).success)
+			throw new NotFoundException('User not found')
 		const user = await this.usersProxy.findByUsername(username)
 		return (toPublicUser(user))
 	}
