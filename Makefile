@@ -3,7 +3,6 @@
 INFRA_DIR = infra/
 ENV_FILE = .env
 
-D_COMPOSE_DEV = $(INFRA_DIR)docker-compose.dev.yml
 D_COMPOSE = $(INFRA_DIR)docker-compose.yml
 
 ########## SECRETS ##########
@@ -26,16 +25,11 @@ $(ENV_FILE):
 all: $(ENV_FILE)
 	@docker compose -f $(D_COMPOSE) up -d --build
 
-dev: $(ENV_FILE)
-	@docker compose -f $(D_COMPOSE_DEV) up -d --build
-
 down:
 	@docker compose -f $(D_COMPOSE) down
-# 	@docker compose -f $(D_COMPOSE_DEV) down
 
 logs:
 	@docker compose -f $(D_COMPOSE) logs -f
-# 	@docker compose -f $(D_COMPOSE_DEV) logs -f
 
 fclean: down
 	@docker system prune -a -f
@@ -45,4 +39,4 @@ hclean: down fclean
 
 re: fclean all
 
-.PHONY: all down fclean hclean re dev logs
+.PHONY: all down fclean hclean re logs

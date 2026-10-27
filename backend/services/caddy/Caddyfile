@@ -23,6 +23,6 @@ pep.localhost {
 
 	# This will handle all the rest of the routes to the frontend
 	handle {
-		reverse_proxy frontend:4200
+		reverse_proxy frontend:80
 	}
 }
