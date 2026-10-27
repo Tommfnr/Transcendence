@@ -24,7 +24,6 @@ export class Login {
 	private loginModel = signal<LoginData>({
 		identifier: '',
 		password: '',
-		rememberMe: false,
 	});
 
 	readonly loginForm = form(this.loginModel, (fieldPath) => {
@@ -47,11 +46,11 @@ export class Login {
 		event.preventDefault();
 
 		submit(this.loginForm, async (field) => {
-			const { identifier, password, rememberMe } = this.loginModel();
+			const { identifier, password } = this.loginModel();
 
 			this.bannerErrors.set([]);
 			try {
-				await firstValueFrom(this.refreshService.login({ identifier, password, rememberMe }));
+				await firstValueFrom(this.refreshService.login({ identifier, password }));
 				await firstValueFrom(this.refreshService.getMe());
 				this.router.navigate(['/app']);
 			}

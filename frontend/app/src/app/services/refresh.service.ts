@@ -18,7 +18,6 @@ export class RefreshService {
     login(body: {
         identifier: string;
         password: string;
-        rememberMe?: boolean;
     }): Observable<LoginResponse> {
         return this.http.post<LoginResponse>('/api/auth/login', body).pipe(
             tap(({ access_token }) => {

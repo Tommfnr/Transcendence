@@ -25,10 +25,6 @@
 				label="Password"
 				[formField]="loginForm.password"
 			></app-text-field>
-			<label class="flex items-center gap-2 text-sm">
-				<input type="checkbox" [formField]="loginForm.rememberMe" class="accent-primary" />
-				Remember me
-			</label>
 
 			<button appButton block size="large" type="submit" variant="primary" [disabled]="loginForm().submitting()">
 				Log in
