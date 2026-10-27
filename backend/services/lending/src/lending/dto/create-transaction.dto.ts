@@ -1,14 +1,15 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { idSchema, hasNoNulChar } from '@pep/shared'
 
 const lendingDateSchema = z.iso.datetime({ offset: true }).or(z.iso.datetime()).or(z.iso.date())
 
 export const createTransactionSchema = z.object({
-	objectId: z.number('Please input a number').int().positive(),
-	postId: z.number('Please input a number').int().positive(),
+	objectId: idSchema,
+	postId: idSchema,
 	lendedFrom: lendingDateSchema,
 	lendedTo: lendingDateSchema,
-	message: z.string().trim().max(250, 'Max 250 characters').optional(),
+	message: z.string().trim().max(250, 'Max 250 characters').refine(hasNoNulChar, 'Invalid character').optional(),
 }).refine((dto) => new Date(dto.lendedTo) > new Date(dto.lendedFrom), {
 	message: 'Impossible dates',
 	path: ['lendedTo'],

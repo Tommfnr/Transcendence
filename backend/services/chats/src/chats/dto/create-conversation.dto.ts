@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { messageContentSchema } from '@pep/shared'
+import { messageContentSchema, idSchema } from '@pep/shared'
 
 export const createConversationSchema = z.object({
-	recipientId:	z.number().int().positive(),
+	recipientId:	idSchema,
 	content:		messageContentSchema,
-	postId:			z.number().int().positive(),
+	postId:			idSchema,
 })
 
 export class CreateConversationDto extends createZodDto(createConversationSchema) {}

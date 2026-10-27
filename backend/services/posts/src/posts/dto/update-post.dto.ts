@@ -1,15 +1,15 @@
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
-import { nameSchema, descriptionSchema, objectTypeSchema } from '@pep/shared'
+import { nameSchema, descriptionSchema, objectTypeSchema, idSchema, dateSchema } from '@pep/shared'
 
 export const updatePostSchema = z.object({
 	title:			nameSchema(60).optional(),
 	status:			z.enum(['open', 'closed']).optional(),
 	objectType:		objectTypeSchema.optional(),
 	description:	descriptionSchema.optional(),
-	fromDate:		z.coerce.date().optional(),
-	toDate:			z.coerce.date().optional(),
-	groupIds:		z.array(z.number().int().positive()).min(1, 'Select at least one group').optional(),
+	fromDate:		dateSchema.optional(),
+	toDate:			dateSchema.optional(),
+	groupIds:		z.array(idSchema).min(1, 'Select at least one group').optional(),
 }).refine((data) => !(data.fromDate && data.toDate) || data.toDate > data.fromDate, {
 	message: 'End date must be after the start date',
 	path: ['toDate'],
