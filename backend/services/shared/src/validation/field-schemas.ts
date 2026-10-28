@@ -1,4 +1,20 @@
 import { z } from 'zod'
+import { MAX_ID } from './parse-id'
+
+export const hasNoNulChar = (value: string) => !value.includes('\u0000')
+
+export const idSchema = z
+	.number('Please input a number')
+	.int('Invalid id')
+	.positive('Invalid id')
+	.max(MAX_ID, 'Invalid id')
+
+const MAX_DATE = new Date('9999-12-31T23:59:59.999Z')
+
+export const dateSchema = z
+	.string('Please input a date')
+	.transform((value) => new Date(value))
+	.pipe(z.date('Invalid date').max(MAX_DATE, 'Invalid date'))
 
 export const usernameSchema = z
 	.string('Please input a string')
@@ -47,6 +63,7 @@ export const nameSchema = (max: number) => z
 export const descriptionSchema = z
 	.string('Please input a string')
 	.max(500, 'Max 500 characters')
+	.refine(hasNoNulChar, 'Invalid character')
 
 export const objectTypeSchema = z
 	.enum([
@@ -64,3 +81,4 @@ export const messageContentSchema = z
 	.min(1, 'Message required')
 	.max(2000, 'Max 2000 characters')
 	.refine((v) => v.trim().length > 0, 'Message required')
+	.refine(hasNoNulChar, 'Invalid character')

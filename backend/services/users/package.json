@@ -14,6 +14,7 @@
     "@nestjs/platform-express": "^11.1.29",
     "@pep/shared": "file:../shared",
     "dotenv": "^17.4.2",
+    "nestjs-zod": "^5.4.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0",
     "zod": "^4.6.7"
