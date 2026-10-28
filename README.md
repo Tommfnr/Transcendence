@@ -53,6 +53,8 @@ GF_SERVER_ROOT_URL=https://pep.localhost:8443/grafana/
 GF_SERVER_SERVE_FROM_SUB_PATH=true
 ```
 
+> An `.env.example` file is provided with the project to assist you
+
 > `POSTGRES_HOST` must stay `postgres` (the name of the database service in Docker Compose). The two `GF_SERVER_*` values are required for Grafana to work under `/grafana`.
 
 ### 3. Build and start
@@ -73,6 +75,8 @@ Other useful commands:
 | `make fclean`| Stop all services and prune **all** unused Docker images and build cache on the machine |
 | `make hclean`| `fclean`, then prune Docker volumes. **This deletes the database.**                     |
 
+> A full `hclean` can clean on average 5 GB of cache
+
 ### 4. Access the application
 
 | Service           | URL                                         |
@@ -82,7 +86,7 @@ Other useful commands:
 | Grafana           | https://pep.localhost:8443/grafana          |
 | Drizzle Studio    | http://localhost:4983 (via Drizzle Gateway) |
 
-- **Certificate:** the HTTPS certificate is generated locally by Caddy, so your browser will show a security warning. Accept it to continue.
+- **Certificate:** the HTTPS certificate is generated locally by Caddy, so your browser **will** show a security warning. Accept it to continue.
 - **Grafana:** log in with `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` from `.env`.
 - **Drizzle Studio:** connect using the Postgres credentials from `.env`, with host `postgres` and port `5432`.
 
@@ -98,14 +102,19 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 
 **Angular:** //Tiago
 
-**Nest:** //Louis
+**NestJS:**
+- Official documentation : https://docs.nestjs.com/
 
-**Docker:** //Louis
+**Docker:**
+- Docker documentation : https://docs.docker.com/
+- Docker compose documentation : https://docs.docker.com/compose/
+- Docker networks documentation: https://docs.docker.com/engine/network/#user-defined-networks
 
 **Postgres:**
 - Official documentation: https://www.postgresql.org/docs/current/
 
-**Caddy:** //Louis
+**Caddy:**
+- Official documentation: https://caddyserver.com/docs/
 
 **Grafana:**
 - Official documentation: https://grafana.com/docs/
@@ -114,7 +123,9 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Official documentation: https://prometheus.io/docs/introduction/overview/
 - Node-exporter documentation: https://prometheus.io/docs/guides/node-exporter/
 
-**Drizzle:** //Louis
+**Drizzle:**
+- Drizzle documentation: https://orm.drizzle.team/docs/get-started/postgresql-new
+- Drizzle Gateway documentation: https://gateway.drizzle.team/docs/docker
 
 **Zod:**
 - Official documentation link: https://zod.dev/
@@ -131,9 +142,7 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 
 - Socket.IO documentation: https://socket.io/docs/v4/
 - NestJS WebSocket gateways: https://docs.nestjs.com/websockets/gateways
-
-- //microservices ? //Louis
-- //auth/login ? //Louis/Tiago
+- Argon2 (password hashing) : https://argon2-cffi.readthedocs.io/en/stable/argon2.html
 - //any (Anyone)
 
 [...]
@@ -152,7 +161,7 @@ We deliberately restricted AI use for writing application code and for performin
 
 ### Louis (lgirerd)
 **Tech Lead, Backend & DevOps**
-- Maintained the overall infrastructure
+- Maintained the overall infrastructure and API
 - Supervised backend changes
 - Main pull request reviewer
 
@@ -186,9 +195,11 @@ Work was first split by layer (frontend, backend, infrastructure), then progress
 **Git workflow.**
 Each feature or fix was developed on its own branch (`feat/…`, `fix/…`) and merged through a pull request. Commit messages follow a `type(scope): subject` convention, so the history shows which service each change touches.
 
+> During the project, we used close to 100 different branches
+
 **Tools.**
 
-- **GitHub Issues** for task tracking
+- **GitHub Issues & Github Projects** for task tracking
 - **Discord** for day-to-day communication and task coordination
 
 **Informal practices.**
