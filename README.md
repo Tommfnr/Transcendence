@@ -1,5 +1,7 @@
 *This project has been created as part of the 42 curriculum by rshin, abonifac, tfournie, tiaperei, lgirerd.*
 
+![Github Repo Banner](https://ghrb.waren.build/render/banner?images=%5B%7B%22src%22%3A%22https%3A%2F%2Fi.postimg.cc%2Fc4wkky5m%2Fmain-logo.png%22%2C%22x%22%3A360%2C%22y%22%3A45%2C%22w%22%3A128%2C%22h%22%3A128%2C%22rotation%22%3A45%2C%22fit%22%3A%22contain%22%2C%22placement%22%3A%22behind%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fi.postimg.cc%2FWpX029qw%2Fhand-heart.png%22%2C%22x%22%3A800%2C%22y%22%3A45%2C%22w%22%3A128%2C%22h%22%3A128%2C%22fit%22%3A%22contain%22%2C%22placement%22%3A%22behind%22%7D%5D&header=PEP&subheader=Pr%C3%AAt+entre+Particulier&bg=1F2937-4A4A4A&color=FF9D2E&subheadercolor=FFFFFF&headerfont=Nunito&subheaderfont=Nunito&support=true&watermarkpos=bottom-right)
+
 ## Description
 
 **PEP** (*Prêt Entre Particuliers*, French for "lending between individuals") started as an idea from abonifac (Alex) that the whole team agreed to build.
