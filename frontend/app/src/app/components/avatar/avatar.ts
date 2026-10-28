@@ -30,7 +30,7 @@ export class AvatarComponent {
 	}
 
 	get classes(): string {
-		const base = 'block shrink-0 rounded-full';
+		const base = 'block shrink-0 rounded-full select-none';
 		const sizes: Record<AvatarSize, string> = {
 			md: 'size-10',
 			lg: 'size-12',

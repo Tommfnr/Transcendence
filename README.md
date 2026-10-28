@@ -496,7 +496,7 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Design**
 - Original concept of the application
 - Website UI/UX
-- Interactive Figma prototype (https://www.figma.com/design/ryZ2j08u74fbypdTR0sUIT/UI-website?node-id=1824-2602&t=3RWdrrP0wX5mjO6K-1)
+- Interactive Figma prototype (https://www.figma.com/design/ryZ2j08u74fbypdTR0sUIT/UI-website?node-id=928-1081&t=ZlAngfqTGDkPmpwS-1)
 
 **Frontend**
 - Web integration (HTML, CSS)
