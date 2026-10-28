@@ -17,10 +17,11 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { TagComponent } from '../../components/tag/tag';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
+import { AvatarComponent } from '../../components/avatar/avatar';
 
 @Component({
 	selector: 'app-myRequest',
-	imports: [Modal, OfferCardComponent, ButtonDirective, TagComponent, ErrorBannerComponent],
+	imports: [Modal, OfferCardComponent, ButtonDirective, TagComponent, ErrorBannerComponent, AvatarComponent],
 	templateUrl: './myRequest.html',
 })
 export class MyRequest implements OnInit {

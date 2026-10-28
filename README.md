@@ -53,6 +53,8 @@ GF_SERVER_ROOT_URL=https://pep.localhost:8443/grafana/
 GF_SERVER_SERVE_FROM_SUB_PATH=true
 ```
 
+> An `.env.example` file is provided with the project to assist you
+
 > `POSTGRES_HOST` must stay `postgres` (the name of the database service in Docker Compose). The two `GF_SERVER_*` values are required for Grafana to work under `/grafana`.
 
 ### 3. Build and start
@@ -73,6 +75,8 @@ Other useful commands:
 | `make fclean`| Stop all services and prune **all** unused Docker images and build cache on the machine |
 | `make hclean`| `fclean`, then prune Docker volumes. **This deletes the database.**                     |
 
+> A full `hclean` can clean on average 5 GB of cache
+
 ### 4. Access the application
 
 | Service           | URL                                         |
@@ -82,7 +86,7 @@ Other useful commands:
 | Grafana           | https://pep.localhost:8443/grafana          |
 | Drizzle Studio    | http://localhost:4983 (via Drizzle Gateway) |
 
-- **Certificate:** the HTTPS certificate is generated locally by Caddy, so your browser will show a security warning. Accept it to continue.
+- **Certificate:** the HTTPS certificate is generated locally by Caddy, so your browser **will** show a security warning. Accept it to continue.
 - **Grafana:** log in with `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` from `.env`.
 - **Drizzle Studio:** connect using the Postgres credentials from `.env`, with host `postgres` and port `5432`.
 
@@ -101,14 +105,19 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Signals: https://angular.dev/guide/signals
 - Signal Forms: https://angular.dev/guide/forms/signals/overview
 
-**Nest:** //Louis
+**NestJS:**
+- Official documentation : https://docs.nestjs.com/
 
-**Docker:** //Louis
+**Docker:**
+- Docker documentation : https://docs.docker.com/
+- Docker compose documentation : https://docs.docker.com/compose/
+- Docker networks documentation: https://docs.docker.com/engine/network/#user-defined-networks
 
 **Postgres:**
 - Official documentation: https://www.postgresql.org/docs/current/
 
-**Caddy:** //Louis
+**Caddy:**
+- Official documentation: https://caddyserver.com/docs/
 
 **Grafana:**
 - Official documentation: https://grafana.com/docs/
@@ -117,14 +126,20 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Official documentation: https://prometheus.io/docs/introduction/overview/
 - Node-exporter documentation: https://prometheus.io/docs/guides/node-exporter/
 
-**Drizzle:** //Louis
+**Drizzle:**
+- Drizzle documentation: https://orm.drizzle.team/docs/get-started/postgresql-new
+- Drizzle Gateway documentation: https://gateway.drizzle.team/docs/docker
 
 **Zod:**
 - Official documentation link: https://zod.dev/
 
-**Tailwind:** //Alex
+**Tailwind:**
+- Official documentation: https://tailwindcss.com/
 
 ### Others
+
+**Figma:**
+- https://www.figma.com/
 
 **Websockets:**
 
@@ -136,8 +151,7 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Angular HTTP interceptors: https://angular.dev/guide/http/interceptors
 - Angular route guards: https://angular.dev/guide/routing/route-guards
 
-- //microservices ? //Louis
-- //auth/login ? //Louis/Tiago
+- Argon2 (password hashing) : https://argon2-cffi.readthedocs.io/en/stable/argon2.html
 - //any (Anyone)
 
 [...]
@@ -156,7 +170,7 @@ We deliberately restricted AI use for writing application code and for performin
 
 ### Louis (lgirerd)
 **Tech Lead, Backend & DevOps**
-- Maintained the overall infrastructure
+- Maintained the overall infrastructure and API
 - Supervised backend changes
 - Main pull request reviewer
 
@@ -190,9 +204,11 @@ Work was first split by layer (frontend, backend, infrastructure), then progress
 **Git workflow.**
 Each feature or fix was developed on its own branch (`feat/…`, `fix/…`) and merged through a pull request. Commit messages follow a `type(scope): subject` convention, so the history shows which service each change touches.
 
+> During the project, we used close to 100 different branches
+
 **Tools.**
 
-- **GitHub Issues** for task tracking
+- **GitHub Issues & Github Projects** for task tracking
 - **Discord** for day-to-day communication and task coordination
 
 **Informal practices.**
@@ -375,7 +391,7 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 - Major: Implement real-time features using WebSockets or similar technology (tfournie) + 2pts
   - **Why:** chat messages and new conversations must appear instantly, without reloading.
-  - **How:** a Socket.IO gateway in the chats service checks the JWT on connection, puts each user in one room per conversation and broadcasts new messages to it; the client reconnects with a fresh token and resyncs missed messages.
+  - **How:** a Socket.IO gateway in the chats service checks the JWT on connection and puts each socket in a personal room (`user:<id>`), so all of a user's tabs and devices are reached at once; new conversations and messages are emitted to the rooms of the conversation's members after the database commit. The client reconnects with a fresh token when the server drops an expired one, and reloads the history to catch messages missed while offline.
 
 - Major: A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints (lgirerd) + 2pts
   - **Why:** lets users manage their objects from scripts or other tools, outside the web app.
@@ -395,9 +411,10 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 ### 2. Accessibility and Internationalization, total = 1pt
 
-- Minor: Support for additional browsers (abonifac) + 1pt //ALEX
+- Minor: Support for additional browsers (abonifac) + 1pt
   - **Why:** neighbours use different browsers, not only Chrome.
-  - **How:** every feature tested and fixed on [browsers]; known limitations: [limitations]. //ALEX
+  - **How:** every feature tested and fixed on Firefox and Microsoft Edge. Known limitation: minor visual differences on the native `<select>` dropdown (dashboard and chats filters). Native `<input>` rendering also differs between browsers, but ours are wrapped in the `text-field` component, which applies our design everywhere.
+
 
 ### 3. User Management, total = 5pts
 
@@ -436,7 +453,10 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
   - **Value:** both sides always know where a loan stands, the owner confirms the item is really back before the loan closes, and late returns are flagged automatically.
   - **Why Major:** it goes well beyond CRUD. It spans the database (status enum, exclusion constraints), a dedicated microservice with 8 statuses and 7 actions, a scheduled job, events and calls between services, concurrency handling, and several frontend pages.
 
-- Minor: //any (anyone) + 1pt //ALEX
+- Minor: Figma design system (abonifac) + 1pt
+  - **Why:** 3 people building the frontend need one source of truth for spacing, colors, fonts and components, so pages look consistent without asking the designer.
+  - **How:** a Figma file organised as a design system: color and typography variables with contrast checked for accessibility, reusable components with variants (buttons, cards, inputs, headers) mirrored by the Angular components, vectorised logo and icons, and mobile and desktop frames for every page. The team used Dev Mode to read exact values and CSS during integration, and an interactive prototype validated the flows before coding.
+
 
 ## Individual Contributions
 
@@ -476,15 +496,18 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Design**
 - Original concept of the application
 - Website UI/UX
-- Interactive Figma prototype
+- Interactive Figma prototype (https://www.figma.com/design/ryZ2j08u74fbypdTR0sUIT/UI-website?node-id=928-1081&t=ZlAngfqTGDkPmpwS-1)
 
 **Frontend**
-- Page wiring
+- Web integration (HTML, CSS)
 - Styled UI components
+- Page wiring
 
-**Challenges** //ALEX
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Mastering figma.** Learning the good practices: building with frames, auto-layout, components and variables. Writing down explicit design rules so the mock-ups leave no room for doubt. Choosing colors and fonts, creating and vectorising the logo. Prototyping the flows to show how the app would be used before writing any code. Thinking the design for mobile and desktop at the same time: deciding which screens could share a layout and which needed their own (bottom navigation vs. header on desktop), while keeping a single set of components. 
+
+
+- **Angular components.** Learning how Angular and TypeScript work together, and what belongs to the template, the component class or the styles. Combining CSS and TypeScript to build dynamic components that open and close (modal, date-picker, select-pill), and wrapping native elements like `input` or `select` to apply our own design without losing their behaviour. Switching between the decorator-based API (`@Input`) and the newer Signals API (`input()`) as the project evolved. *Solution:* starting from small presentational components (button, avatar, chip) before working on stateful ones.
 
 ### Tom (tfournie)
 
@@ -497,9 +520,9 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Full-stack**
 - Chat system
 
-**Challenges** //TOM
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Keeping the WebSocket alive with short-lived tokens.** Access tokens only last 60 seconds, but a chat socket stays open for as long as the page is. The server drops a socket when its token expires, and Socket.IO does not reconnect by itself after a server-side disconnect, so the chat silently stopped receiving messages. *Solution:* the client detects this disconnect, refreshes the token and reconnects. The token is passed through an `auth` callback, so every reconnection sends the current one. A cooldown between retries prevents an infinite loop when the token is really rejected, and after each reconnection the history is reloaded to catch messages sent in the meantime.
+- **Building a chat on data owned by other services.** A conversation needs its members' usernames and the title of its post, but users live in the auth service and posts in the posts service, with no foreign keys between databases. Fetching them for every conversation would have meant dozens of internal calls for a single list. *Solution:* internal proxy services that fetch all the users and posts of a list in one batched call each. When a member deleted their account or a post was removed, the conversation is kept and shows "Deleted user" or "Object deleted" instead of breaking.
 
 ### Raphael (rshin)
 

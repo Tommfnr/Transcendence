@@ -15,13 +15,11 @@ export class RefreshService {
 
     readonly isLoggedIn = computed(() => this.accessToken() !== null);
 
-    login(body: {
-        identifier: string;
-        password: string;
-    }): Observable<LoginResponse> {
+    login(body: { identifier: string; password: string }): Observable<LoginResponse> {
         return this.http.post<LoginResponse>('/api/auth/login', body).pipe(
             tap(({ access_token }) => {
                 this.accessToken.set(access_token);
+                this.setSessionHint(true);
             }),
         );
     }
@@ -62,6 +60,7 @@ export class RefreshService {
         ).pipe(
             tap(({ access_token }) => {
                 this.accessToken.set(access_token);
+                this.setSessionHint(true);
             }),
             finalize(() => {
                 this.refreshInFlight$ = null;
@@ -77,6 +76,7 @@ export class RefreshService {
             tap(() => {
                 this.accessToken.set(null);
                 this.currentUser.set(null);
+                this.setSessionHint(false);
             }),
         );
     }
@@ -88,5 +88,26 @@ export class RefreshService {
     clearAccessToken(): void {
         this.accessToken.set(null);
         this.currentUser.set(null);
+        this.setSessionHint(false);
+    }
+
+    private static readonly SESSION_HINT_KEY = 'pep_session';
+
+    hasSessionHint(): boolean {
+        try {
+            return localStorage.getItem(RefreshService.SESSION_HINT_KEY) === '1';
+        } catch {
+            return true;
+        }
+    }
+
+    private setSessionHint(active: boolean): void {
+        try {
+            if (active) {
+                localStorage.setItem(RefreshService.SESSION_HINT_KEY, '1');
+            } else {
+                localStorage.removeItem(RefreshService.SESSION_HINT_KEY);
+            }
+        } catch {}
     }
 }

@@ -8,9 +8,12 @@ export interface RouteEntry {
 	prefix: string
 	target: string
 	ws?: boolean
+	timeoutMs?: number
 }
 
 const upstreamAgent = new Agent({ keepAlive: true, maxSockets: 256 })
+
+const DEFAULT_PROXY_TIMEOUT_MS = Number(optionalEnv('PROXY_TIMEOUT_MS', '30000'))
 
 const CHATS_TARGET = optionalEnv('CHATS_SERVICE_URL', 'http://chats:3000')
 
@@ -23,7 +26,7 @@ export const ROUTES: RouteEntry[] = [
 	{ prefix: '/api/lending', target: optionalEnv('LENDING_SERVICE_URL', 'http://lending:3000') },
 	{ prefix: '/api/posts', target: optionalEnv('POSTS_SERVICE_URL', 'http://posts:3000') },
 	{ prefix: '/api/chats', target: CHATS_TARGET },
-	{ prefix: '/api/socket.io', target: CHATS_TARGET, ws: true },
+	{ prefix: '/api/socket.io', target: CHATS_TARGET, ws: true, timeoutMs: 0 },
 ]
 
 export function matchRoute(path: string, routes: RouteEntry[] = ROUTES): RouteEntry | undefined {
@@ -34,7 +37,13 @@ export function createRouteProxies(routes: RouteEntry[] = ROUTES): Map<string, P
 	return (new Map<string, ProxyRequestHandler>(
 		routes.map((route) => [
 			route.prefix,
-			createProxyMiddleware({ target: route.target, changeOrigin: true, ws: route.ws === true, agent: upstreamAgent }),
+			createProxyMiddleware({
+				target: route.target,
+				changeOrigin: true,
+				ws: route.ws === true,
+				agent: upstreamAgent,
+				proxyTimeout: route.timeoutMs ?? DEFAULT_PROXY_TIMEOUT_MS,
+			}),
 		]),
 	))
 }

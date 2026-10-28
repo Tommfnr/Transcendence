@@ -11,11 +11,12 @@ import { ButtonDirective } from '../../components/button/button.directive';
 import { finalize } from 'rxjs';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatTimeAgo } from '../../shared/date-format';
+import { AvatarComponent } from '../../components/avatar/avatar';
 
 
 @Component({
 	selector: 'app-myOffer',
-	imports: [Modal, ButtonDirective, ErrorBannerComponent],
+	imports: [Modal, ButtonDirective, ErrorBannerComponent, AvatarComponent],
 	templateUrl: './myOffer.html',
 })
 export class MyOffer implements OnInit {

@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { form, FormField, required, submit } from '@angular/forms/signals';
+import { form, FormField, required, maxLength, validate, submit } from '@angular/forms/signals';
 import { GroupsService } from '../../services/groups.service';
 import { UsersService } from '../../services/users.service';
 import { GroupInput, GroupMemberView } from '../../models/group.model';
@@ -12,6 +12,7 @@ import { TextFieldComponent } from '../../components/text-field/text-field';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { ButtonDirective } from '../../components/button/button.directive';
 import { AvatarComponent } from '../../components/avatar/avatar';
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, NAME_PATTERN } from '../../shared/field-rules';
 
 @Component({
 	selector: 'app-editAddGroup',
@@ -50,6 +51,19 @@ export class EditAddGroup implements OnInit {
 
 	groupForm = form(this.group, (fieldPath) => {
 		required(fieldPath.name, { message: 'Name is required' });
+		validate(fieldPath.name, ({ value }) => {
+			const name = value().trim();
+			if (value() === '')
+				return (undefined);
+			if (name === '')
+				return ({ kind: 'name', message: 'Name is required' });
+			if (name.length > NAME_MAX_LENGTH)
+				return ({ kind: 'name', message: `Max ${NAME_MAX_LENGTH} characters` });
+			if (!NAME_PATTERN.test(name))
+				return ({ kind: 'name', message: 'Only letters, digits, and spaces allowed' });
+			return (undefined);
+		});
+		maxLength(fieldPath.description, DESCRIPTION_MAX_LENGTH, { message: `Max ${DESCRIPTION_MAX_LENGTH} characters` });
 	});
 
 	ngOnInit(): void {
