@@ -23,13 +23,13 @@ $(ENV_FILE):
 ########## RULES ##########
 
 all: $(ENV_FILE)
-	@docker compose -f $(D_COMPOSE) up -d --build
+	@docker compose --env-file $(ENV_FILE) -f $(D_COMPOSE) up -d --build
 
 down:
-	@docker compose -f $(D_COMPOSE) down
+	@docker compose --env-file $(ENV_FILE) -f $(D_COMPOSE) down
 
 logs:
-	@docker compose -f $(D_COMPOSE) logs -f
+	@docker compose --env-file $(ENV_FILE) -f $(D_COMPOSE) logs -f
 
 fclean: down
 	@docker system prune -a -f

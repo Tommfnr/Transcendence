@@ -129,7 +129,7 @@ export class LendingService {
 			.set({ status: 'cancelled', updatedAt: new Date() })
 			.where(and(
 				or(eq(lending.lenderId, userId), eq(lending.borrowerId, userId)),
-				inArray(lending.status, ['pending', 'accepted']),
+				inArray(lending.status, ['pending', ...BOOKED_STATUSES]),
 			))
 			.returning({ id: lending.id })
 

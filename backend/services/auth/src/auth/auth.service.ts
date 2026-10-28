@@ -4,6 +4,7 @@ import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { RefreshTokensService } from './refreshtokens.service'
 import { RegisterDto } from '../users/dto/register.dto'
+import { requireEnv } from '@pep/shared'
 
 @Injectable()
 export class AuthService {
@@ -22,12 +23,12 @@ export class AuthService {
 		}
 		const payload = { sub: user.id, username: user.username }
 		const access_token = await this.jwtService.signAsync(payload, {
-			secret: process.env.JWT_SECRET,
+			secret: requireEnv('JWT_SECRET'),
 			expiresIn: '60s',
 		})
 		const { jti } = await this.refreshTokensServices.issue(user.id)
 		const refresh_token = await this.jwtService.signAsync({ sub: user.id, type: 'refresh', jti }, {
-			secret: process.env.JWT_REFRESH_SECRET,
+			secret: requireEnv('JWT_REFRESH_SECRET'),
 			expiresIn: '7d',
 		})
 		return { access_token, refresh_token }
@@ -36,7 +37,7 @@ export class AuthService {
 	async refresh(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
 		let payload: { sub: number; type: string; jti: string }
 		try {
-			payload = await this.jwtService.verifyAsync(refreshToken, { secret: process.env.JWT_REFRESH_SECRET })
+			payload = await this.jwtService.verifyAsync(refreshToken, { secret: requireEnv('JWT_REFRESH_SECRET') })
 		} catch {
 			throw new UnauthorizedException('Invalid refresh token')
 		}
@@ -59,11 +60,11 @@ export class AuthService {
 		const { jti: newJti } = await this.refreshTokensServices.issue(payload.sub)
 		const newPayload = { sub: user.id, username: user.username }
 		const access_token = await this.jwtService.signAsync(newPayload, {
-			secret: process.env.JWT_SECRET,
+			secret: requireEnv('JWT_SECRET'),
 			expiresIn: '60s'
 		})
 		const refresh_token = await this.jwtService.signAsync({ ...newPayload, type: 'refresh', jti: newJti }, {
-			secret: process.env.JWT_REFRESH_SECRET,
+			secret: requireEnv('JWT_REFRESH_SECRET'),
 			expiresIn: '7d'
 		})
 		return { access_token, refresh_token }
@@ -75,7 +76,7 @@ export class AuthService {
 
 	async logout(refreshToken: string): Promise<void> {
 		try {
-			const payload = await this.jwtService.verifyAsync(refreshToken, { secret: process.env.JWT_REFRESH_SECRET })
+			const payload = await this.jwtService.verifyAsync(refreshToken, { secret: requireEnv('JWT_REFRESH_SECRET') })
 			if (payload?.jti) {
 				await this.refreshTokensServices.revoke(payload.jti)
 			}

@@ -11,6 +11,9 @@ services:
       context: ..
       dockerfile: ./infra/services/caddy/Dockerfile
     container_name: caddy
+    networks:
+      - public
+      - proxy
     restart: unless-stopped
     depends_on:
       gateway:
@@ -28,6 +31,8 @@ services:
       context: ../frontend/app
       dockerfile: ../../infra/services/frontend/Dockerfile
     container_name: frontend-angular
+    networks:
+      - proxy
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 80"]
@@ -41,9 +46,13 @@ services:
       context: ../backend/services/db
       dockerfile: ../../../infra/services/db/Dockerfile
     container_name: postgres
+    networks:
+      - db
     restart: unless-stopped
-    env_file:
-      - ../.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -59,10 +68,11 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: gateway
+    networks:
+      - proxy
+      - backend
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
       AUTH_SERVICE_URL: http://auth:3000
       USERS_SERVICE_URL: http://users:3000
@@ -96,11 +106,19 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: auth
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       EVENT_SUBSCRIBER_URLS: http://objects:3000,http://groups:3000,http://lending:3000,http://posts:3000,http://chats:3000
     depends_on:
       postgres:
@@ -113,11 +131,13 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: users
+    networks:
+      - backend
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       AUTH_INTERNAL_URL: http://auth:3000
     depends_on:
       auth:
@@ -130,11 +150,18 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: objects
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       AUTH_INTERNAL_URL: http://auth:3000
       EVENT_SUBSCRIBER_URLS: http://lending:3000
     depends_on:
@@ -150,10 +177,18 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: groups
+    networks:
+      - backend
+      - db
     restart: unless-stopped
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -165,11 +200,18 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: lending
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       OBJECTS_INTERNAL_URL: http://objects:3000
       POSTS_INTERNAL_URL: http://posts:3000
       GROUPS_INTERNAL_URL: http://groups:3000
@@ -188,11 +230,18 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: posts
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       GROUPS_INTERNAL_URL: http://groups:3000
       EVENT_SUBSCRIBER_URLS: http://lending:3000
     depends_on:
@@ -208,11 +257,18 @@ services:
       additional_contexts:
         shared: ../backend
     container_name: chats
+    networks:
+      - backend
+      - db
     restart: unless-stopped
     healthcheck: *node-healthcheck
-    env_file:
-      - ../.env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       AUTH_INTERNAL_URL: http://auth:3000
     depends_on:
       postgres:
@@ -223,11 +279,14 @@ services:
   drizzle-gateway:
     build: ./services/orm
     container_name: drizzle-gateway
+    networks:
+      - public
+      - db
     restart: unless-stopped
+    environment:
+      MASTERPASS: ${MASTERPASS:?MASTERPASS is not set}
     ports:
       - "127.0.0.1:4983:4983"
-    env_file:
-      - ../.env
     volumes:
       - drizzle_gateway_data:/app
     depends_on:
@@ -239,9 +298,10 @@ services:
       context: ../infra/services/prometheus
       dockerfile: ./Dockerfile
     container_name: prometheus
+    networks:
+      - backend
+      - monitoring
     restart: unless-stopped
-    env_file:
-      - ../.env
     volumes:
     - prometheus-data:/prometheus
 
@@ -250,9 +310,15 @@ services:
       context: ../infra/services/grafana
       dockerfile: ./Dockerfile
     container_name: grafana
+    networks:
+      - proxy
+      - monitoring
     restart: unless-stopped
-    env_file:
-      - ../.env
+    environment:
+      - GF_SECURITY_ADMIN_USER
+      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_SERVER_ROOT_URL
+      - GF_SERVER_SERVE_FROM_SUB_PATH
     depends_on:
       - prometheus
 
@@ -261,12 +327,25 @@ services:
       context: ../infra/services/node-exporter
       dockerfile: ./Dockerfile
     container_name: node-exporter
+    networks:
+      - monitoring
     restart: unless-stopped
     pid: host
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host/root:ro
+
+networks:
+  public:
+  proxy:
+    internal: true
+  backend:
+    internal: true
+  db:
+    internal: true
+  monitoring:
+    internal: true
 
 volumes:
     postgres_data:

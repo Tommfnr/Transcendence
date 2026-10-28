@@ -1,3 +1,14 @@
+{
+	admin off
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 30s
+			idle 2m
+		}
+	}
+}
+
 http://pep.localhost {
 	redir https://pep.localhost:8443{uri} permanent
 }
@@ -6,6 +17,30 @@ pep.localhost {
 
 	tls internal
 
+	@wrongHost not host pep.localhost
+	abort @wrongHost
+
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=300"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Cross-Origin-Opener-Policy same-origin
+		-Server
+	}
+
+	request_body {
+		max_size 10MB
+	}
+
+	log {
+		output stdout
+		format json
+	}
+
 	@internalRoutes path /internal /internal/*
 	handle @internalRoutes {
 		respond 404
@@ -13,7 +48,9 @@ pep.localhost {
 
 	# Single entry point: gateway does the per-prefix fan-out to the domain services
 	handle /api/* {
-		reverse_proxy gateway:3000
+		reverse_proxy gateway:3000 {
+			header_down -Via
+		}
 	}
 
 	redir /grafana /grafana/
