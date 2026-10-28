@@ -12,9 +12,9 @@ export const idSchema = z
 const MAX_DATE = new Date('9999-12-31T23:59:59.999Z')
 
 export const dateSchema = z
-	.coerce
-	.date('Invalid date')
-	.max(MAX_DATE, 'Invalid date')
+	.string('Please input a date')
+	.transform((value) => new Date(value))
+	.pipe(z.date('Invalid date').max(MAX_DATE, 'Invalid date'))
 
 export const usernameSchema = z
 	.string('Please input a string')
