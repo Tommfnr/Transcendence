@@ -21,12 +21,13 @@ import { FabActionComponent } from '../../components/fab-action/fab-action';
 import { ExchangeRowComponent } from '../../components/exchange-row/exchange-row';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner';
 import { formatDateRange, formatTimeAgo } from '../../shared/date-format';
+import { ButtonDirective } from '../../components/button/button.directive';
 
 type DashboardTab = 'requests' | 'exchanges';
 
 @Component({
 	selector: 'app-dashboard',
-	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent, ExchangeRowComponent, ErrorBannerComponent],
+	imports: [NgClass, RouterLink, RequestCard, StatCardComponent, HeaderAppComponent, FabActionComponent, ExchangeRowComponent, ErrorBannerComponent, ButtonDirective],
 	templateUrl: './dashboard.html',
 })
 export class Dashboard {

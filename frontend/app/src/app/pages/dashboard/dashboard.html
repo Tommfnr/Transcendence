@@ -84,9 +84,15 @@
                     @for (request of groupRequests(); track request.id) {
                         <app-request-card [request]="request" />
                     } @empty {
-                        <p class="text-center text-sm text-text-secondary">
-                            No requests right now.
-                        </p>
+						<div class="flex flex-col items-center gap-4 py-8 px-6">
+							<img src="/icons/hand-heart.svg" class="size-8">
+							<p class="text-strong text-lg">Nobody has asked for help yet</p>
+
+							<p class="text-center text-sm text-text-secondary">
+								When someone in your group is looking for an item, their request will show up here. You can also be the first to post one and follow it in My exchanges.
+							</p>
+							<button appButton variant="primary" (click)="openAddPostModal()">Make a request</button>
+						</div>
                     }
                 </div>
             </div>
