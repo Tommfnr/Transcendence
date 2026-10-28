@@ -22,7 +22,7 @@ Each step is designed on purpose to build engagement and responsibility, because
 
 On the technical side, the project gave us a foundation broad enough to build almost any module we wanted, so each team member could choose to work on what interested them personally and professionally.
 
-## Instructions //Louis check
+## Instructions
 
 ### 1. Prerequisites
 
@@ -208,7 +208,32 @@ Much of our coordination also happened in person: ad hoc meetings, discussions o
 > "My role as project manager was to keep everyone aligned on priorities, check in regularly with each member to catch blockers early, and set a clear framework for our work, while keeping the team motivated."
 > — Raphael
 
-## Technical Stack //TIAGO, LOUIS
+## Technical Stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Frontend | Angular 22, TypeScript, Tailwind CSS 4 | Single-page application and custom design system |
+| Backend | NestJS 11 on Node.js (LTS), Zod 4 | API gateway and seven microservices, input validation |
+| Real time | Socket.IO 4 | Chat messages and new conversations |
+| Database | PostgreSQL 16, Drizzle ORM | Storage, schema constraints, typed queries |
+| Security | argon2, JWT, `@nestjs/throttler` | Password hashing, sessions, rate limiting |
+| Infrastructure | Docker Compose, Caddy 2 | Containers, HTTPS reverse proxy |
+| Monitoring | Prometheus 3, Grafana 11, Node Exporter | Metrics, dashboard and alerts |
+
+The reasons for Angular, NestJS, Drizzle, Tailwind, Socket.IO, the microservices split and the monitoring stack are given in [Modules](#modules). The other choices are justified here.
+
+**PostgreSQL.** PEP is relational by nature: users own objects, belong to groups, answer posts and exchange loans. Several of our rules are enforced by the database itself instead of by application code, which keeps them safe when two users act at the same time:
+- an exclusion constraint (`btree_gist`) forbids two accepted loans of the same object over overlapping dates;
+- `CITEXT` makes emails unique regardless of case;
+- native enums (`lending_status`, `group_role`, `object_type`...) reject invalid values, and foreign keys keep the data consistent.
+
+All services share one database, but each one reads and writes only its own tables (see [Database Schema](#database-schema)). A single instance is enough for our scale and avoids distributed transactions.
+
+**Authentication.** Passwords are hashed with argon2, which salts each hash, and only the hash is stored. A login returns a short-lived JWT access token (60 seconds) and a refresh token (7 days) in an httpOnly cookie. Refresh tokens are tracked in the database, so they can be revoked on logout and a reused one is detected. Login is rate limited.
+
+**Zod.** Every request body and parameter is validated on the backend with Zod schemas. Unknown fields are stripped, which prevents mass assignment. The forms are validated again on the frontend for faster feedback.
+
+**Docker Compose and Caddy.** The whole stack, about 15 containers, starts with `make`. Caddy is the only public entry point (port 8443): it terminates HTTPS, sends `/api` to the gateway, `/grafana` to Grafana and everything else to the frontend. Internal services publish no port, so they are only reachable through the gateway. Caddy generates its own local certificate, so HTTPS works without any configuration.
 
 ## Database Schema
 
@@ -421,7 +446,7 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
   - **How:** Prometheus scrapes the gateway and Node Exporter; Grafana is provisioned with a dashboard and 3 alert rules (target down, high P95 latency, failed login spike), reachable only through Caddy over HTTPS with a login.
 
 - Major: Backend as microservices (lgirerd) + 2pts
-  - **Why:** each domain can be developed, deployed and restarted independently, which fits a team where each member owns services.
+  - **Why:** each domain can be developed, deployed and restarted independently, which fits a team where each member owns services. Very heavy decision if you already have a working monolith infrastructure
   - **How:** seven NestJS services (auth, users, objects, groups, posts, lending, chats) behind a gateway; each one only accesses its own tables and talks to the others through internal REST endpoints and events such as `user.deleted`.
 
 ### Bonus Modules
@@ -448,9 +473,8 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 - Makefile and Docker infrastructure
 - Setup and maintenance of Caddy, PostgreSQL, Drizzle Gateway and NestJS
 
-**Challenges** //LOUIS
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Backend as microservices.** This was a big decision since it involved about a month's worth of work on my side, I stayed consistent and did each microservice as a part, with testing, reviewing, fixing before starting another one
 
 ### Tiago (tiaperei)
 
