@@ -100,7 +100,10 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 
 ### Main frameworks documentation
 
-**Angular:** //Tiago
+**Angular:**
+- Official documentation: https://angular.dev/overview
+- Signals: https://angular.dev/guide/signals
+- Signal Forms: https://angular.dev/guide/forms/signals/overview
 
 **NestJS:**
 - Official documentation : https://docs.nestjs.com/
@@ -142,6 +145,12 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 
 - Socket.IO documentation: https://socket.io/docs/v4/
 - NestJS WebSocket gateways: https://docs.nestjs.com/websockets/gateways
+
+**Authentication:**
+
+- Angular HTTP interceptors: https://angular.dev/guide/http/interceptors
+- Angular route guards: https://angular.dev/guide/routing/route-guards
+
 - Argon2 (password hashing) : https://argon2-cffi.readthedocs.io/en/stable/argon2.html
 - //any (Anyone)
 
@@ -234,6 +243,13 @@ All services share one database, but each one reads and writes only its own tabl
 **Zod.** Every request body and parameter is validated on the backend with Zod schemas. Unknown fields are stripped, which prevents mass assignment. The forms are validated again on the frontend for faster feedback.
 
 **Docker Compose and Caddy.** The whole stack, about 15 containers, starts with `make`. Caddy is the only public entry point (port 8443): it terminates HTTPS, sends `/api` to the gateway, `/grafana` to Grafana and everything else to the frontend. Internal services publish no port, so they are only reachable through the gateway. Caddy generates its own local certificate, so HTTPS works without any configuration.
+
+**Frontend: Angular 22**
+- Same architecture as our NestJS backend (TypeScript, decorators, services with dependency injection, guards), so the whole team works with one set of concepts on both sides.
+- Router, HttpClient with interceptors (used to refresh the access token) and form validation are built in, so we did not have to pick and maintain third-party libraries for them.
+- Signals keep the UI in sync with the data without manual change detection.
+- Its imposed structure (one component = `.ts` + `.html`, API calls in services) kept the code consistent with five people working in parallel.
+
 
 ## Database Schema
 
@@ -453,7 +469,15 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 The modules above total 19 points: 14 required + 5 bonus, the maximum. Any module listed below is a backup in case one is not validated.
 
-- Major: //any (anyone) + 2pts // TIAGO
+- Major (Module of choice): Loan lifecycle system + 2pts
+  - **Why we chose it:** lending objects between neighbours is the core of PEP, and no listed module covers it. Matching a request with an offer is not enough: the app has to follow the object from the offer until it is back with its owner.
+  - **How:** a `lending` microservice built around a state machine: `pending` (offered) → `accepted` → `active` (picked up) → `awaiting_confirmation` (given back by the borrower) → `returned` (confirmed by the lender), plus `rejected`, `cancelled` and `overdue`. Each action belongs to one side only and is allowed only from the right status, otherwise the API answers 409. An hourly job marks loans still out after their end date as `overdue`. On the frontend, *My exchanges* on the dashboard and the request and offer modals show each loan at its current step, with only the actions allowed at that step.
+  - **Technical challenges:**
+    - *Double booking:* two offers of the same object can be accepted at the same moment. Accepting runs in a transaction with a lock per object, and PostgreSQL `EXCLUDE` constraints refuse two booked loans of the same object over overlapping dates, so a race ends in a clear 409 instead of a double booking. Accepting an offer also rejects the other pending offers on the same request and closes the request.
+    - *Data owned by other services:* a loan depends on users, objects and requests from three other microservices. Their deletion events (`user.deleted`, `object.deleted`, `post.deleted`) cancel what hasn't been handed over yet, while a loan already with the borrower keeps going so the item can still be returned. Each loan keeps a copy of the object name and request title, so it stays readable after a deletion.
+  - **Value:** both sides always know where a loan stands, the owner confirms the item is really back before the loan closes, and late returns are flagged automatically.
+  - **Why Major:** it goes well beyond CRUD. It spans the database (status enum, exclusion constraints), a dedicated microservice with 8 statuses and 7 actions, a scheduled job, events and calls between services, concurrency handling, and several frontend pages.
+
 - Minor: Figma design system (abonifac) + 1pt
   - **Why:** 3 people building the frontend need one source of truth for spacing, colors, fonts and components, so pages look consistent without asking the designer.
   - **How:** a Figma file organised as a design system: color and typography variables with contrast checked for accessibility, reusable components with variants (buttons, cards, inputs, headers) mirrored by the Angular components, vectorised logo and icons, and mobile and desktop frames for every page. The team used Dev Mode to read exact values and CSS during integration, and an interactive prototype validated the flows before coding.
@@ -487,9 +511,9 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 **Full-stack**
 - Transaction system (lending service), the core feature of the application
 
-**Challenges** //TIAGO
-- **Challenge 1.** *Solution:*
-- **Challenge 2.** *Solution:*
+**Challenges**
+- **Building pages from data owned by several microservices.** The dashboard's *My exchanges* mixes posts, loans, users, groups and objects, each owned by a different service, and no endpoint returns them already joined. **Deletions made it worse: once a user or an object was deleted, its service stopped returning it, and the exchanges pointing to it lost their names.** *Solution:* one small loader per resource, results stored in maps by id (`userById`, `groupById`…) and combined in computed signals; each loan keeps a copy of the object name and request title, so an exchange stays readable after a deletion.
+- **Keeping errors out of the browser console.** The subject forbids console errors, but Angular logs every failed request that has no error handler, and some forms were only validated by the backend. *Solution:* on my pages, every request handles its error and shows it in the shared error banner instead of the console; the register and login forms check the same rules as the backend Zod schemas (`shared/field-rules.ts`) before sending anything.
 
 ### Alex (abonifac)
 
