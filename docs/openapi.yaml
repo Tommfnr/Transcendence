@@ -33,7 +33,7 @@ paths:
         - Objects
       operationId: listObjects
       summary: List all objects
-      description: Returns every object, whoever owns it, ordered by id.
+      description: Returns every live object, whoever owns it, ordered by id. Deleted objects are not listed.
       security:
         - ApiKeyAuth: []
       responses:
@@ -56,6 +56,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
     post:
       tags:
         - Objects
@@ -74,7 +76,7 @@ paths:
               $ref: '#/components/schemas/ObjectInput'
             example:
               name: Cordless drill
-              type: Tools
+              type: DIY
               description: 18V drill with two batteries
               condition: good
               isAvailable: true
@@ -95,15 +97,33 @@ paths:
                 items:
                   $ref: '#/components/schemas/Object'
         '400':
-          description: Body is missing a required field or has an invalid value
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          description: API key missing or invalid, or the key's user no longer exists
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+              examples:
+                missing:
+                  value:
+                    statusCode: 401
+                    message: Missing API key
+                    error: Unauthorized
+                invalid:
+                  value:
+                    statusCode: 401
+                    message: Invalid API key
+                    error: Unauthorized
+                userGone:
+                  value:
+                    statusCode: 401
+                    message: User no longer exists
+                    error: Unauthorized
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /api/public/v1/objects/my:
     get:
@@ -134,6 +154,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /api/public/v1/objects/{objectId}:
     get:
@@ -141,7 +163,9 @@ paths:
         - Objects
       operationId: getObject
       summary: Get one object
-      description: Returns a single object by its id, whoever owns it.
+      description: |
+        Returns an object you own. An object that belongs to another user returns `403`,
+        and a deleted object returns `404`. To see other users' objects, use `GET /api/public/v1/objects`.
       security:
         - ApiKeyAuth: []
       parameters:
@@ -164,12 +188,13 @@ paths:
                 id: 42
                 name: Cordless drill
                 ownerId: 7
-                type: Tools
+                type: DIY
                 description: 18V drill with two batteries
                 condition: good
                 isAvailable: true
                 createdAt: '2026-09-30T14:21:07.512Z'
                 updatedAt: '2026-10-02T09:03:44.120Z'
+                deletedAt: null
         '400':
           description: '`objectId` is not a valid id'
           content:
@@ -182,10 +207,14 @@ paths:
                 error: Bad Request
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/NotOwner'
         '404':
           $ref: '#/components/responses/ObjectNotFound'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
     put:
       tags:
         - Objects
@@ -225,11 +254,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Object'
         '400':
-          description: '`objectId` is not a valid id, or the body is empty or has an invalid value'
+          description: '`objectId` is not a valid id (`Error`), or the body is empty or has an invalid value (`ValidationError`)'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -238,12 +269,17 @@ paths:
           $ref: '#/components/responses/ObjectNotFound'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
     delete:
       tags:
         - Objects
       operationId: deleteObject
       summary: Delete an object
-      description: Permanently deletes an object. Only the owner can do this.
+      description: |
+        Deletes an object. Only the owner can do this.
+        This is a soft delete: the object is marked as deleted and made unavailable,
+        then disappears from every listing and returns `404` afterwards.
       security:
         - ApiKeyAuth: []
       parameters:
@@ -276,6 +312,8 @@ paths:
           $ref: '#/components/responses/ObjectNotFound'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
 components:
   securitySchemes:
@@ -335,6 +373,29 @@ components:
             statusCode: 404
             message: Object 42 not found
             error: Not Found
+    ValidationFailed:
+      description: Body is missing a required field or has an invalid value
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            statusCode: 400
+            message: Validation failed
+            errors:
+              name:
+                - Name required
+            formErrors: []
+    ServiceUnavailable:
+      description: The authentication service is unreachable, so the key cannot be verified
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 503
+            message: auth service unavailable
+            error: Service Unavailable
     TooManyRequests:
       description: Rate limit exceeded
       headers:
@@ -377,6 +438,7 @@ components:
         - isAvailable
         - createdAt
         - updatedAt
+        - deletedAt
       properties:
         id:
           type: integer
@@ -391,13 +453,10 @@ components:
           type: string
           nullable: true
           enum:
-            - Tools
+            - DIY
             - Electronics
-            - Vehicles
-            - Outdoor & Recreation
-            - Media
-            - Events
-            - Clothing & Gear
+            - Leisure
+            - Other
         description:
           type: string
           nullable: true
@@ -416,6 +475,11 @@ components:
         updatedAt:
           type: string
           format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Always `null` in responses, since deleted objects are never returned
 
     ObjectInput:
       type: object
@@ -464,13 +528,10 @@ components:
     ObjectType:
       type: string
       enum:
-        - Tools
+        - DIY
         - Electronics
-        - Vehicles
-        - Outdoor & Recreation
-        - Media
-        - Events
-        - Clothing & Gear
+        - Leisure
+        - Other
 
     ObjectCondition:
       type: string
@@ -478,6 +539,31 @@ components:
         - new
         - good
         - worn
+
+    ValidationError:
+      type: object
+      required:
+        - statusCode
+        - message
+        - errors
+        - formErrors
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        errors:
+          type: object
+          description: Error messages grouped by field name
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        formErrors:
+          type: array
+          description: Errors that apply to the body as a whole, not to one field
+          items:
+            type: string
 
     Error:
       type: object
