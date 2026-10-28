@@ -204,7 +204,7 @@ Much of our coordination also happened in person: ad hoc meetings, discussions o
 ## Technical Stack //TIAGO, LOUIS
 
 **Frontend: Angular 22**
-- Same architecture as our NestJS backend (TypeScript, decorators, dependency injection, guards, interceptors), so the whole team works with one set of concepts on both sides.
+- Same architecture as our NestJS backend (TypeScript, decorators, services with dependency injection, guards), so the whole team works with one set of concepts on both sides.
 - Router, HttpClient with interceptors (used to refresh the access token) and form validation are built in, so we did not have to pick and maintain third-party libraries for them.
 - Signals keep the UI in sync with the data without manual change detection.
 - Its imposed structure (one component = `.ts` + `.html`, API calls in services) kept the code consistent with five people working in parallel.
