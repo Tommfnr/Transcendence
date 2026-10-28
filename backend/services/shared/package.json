@@ -5,7 +5,9 @@
 	"type": "commonjs",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
 		"clean": "rm -rf dist",
@@ -19,7 +21,9 @@
 		"testEnvironment": "node",
 		"rootDir": "src",
 		"testRegex": ".*\\.spec\\.ts$",
-		"collectCoverageFrom": ["**/*.(t|j)s"],
+		"collectCoverageFrom": [
+			"**/*.(t|j)s"
+		],
 		"coverageDirectory": "../coverage"
 	},
 	"peerDependencies": {
@@ -29,7 +33,9 @@
 		"zod": "^4.0.0"
 	},
 	"peerDependenciesMeta": {
-		"express": { "optional": true }
+		"express": {
+			"optional": true
+		}
 	},
 	"dependencies": {
 		"jsonwebtoken": "^9.0.2",
@@ -48,6 +54,6 @@
 		"rxjs": "^7.8.0",
 		"ts-jest": "^29.2.5",
 		"typescript": "^5.0.0",
-		"zod": "^4.4.3"
+		"zod": "^4.6.7"
 	}
 }

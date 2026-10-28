@@ -9,14 +9,14 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@pep/shared": "file:../shared",
     "@nestjs/common": "^11.1.29",
     "@nestjs/core": "^11.1.29",
     "@nestjs/platform-express": "^11.1.29",
+    "@pep/shared": "file:../shared",
     "dotenv": "^17.4.2",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.29",
@@ -45,5 +45,8 @@
         "statements": 80
       }
     }
+  },
+  "overrides": {
+    "multer": "^2.5.0"
   }
 }

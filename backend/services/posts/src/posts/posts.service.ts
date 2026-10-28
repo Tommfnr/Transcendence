@@ -208,6 +208,10 @@ export class PostsService {
 			.where(and(eq(posts.ownerId, ownerId), isNull(posts.deletedAt)))
 			.returning({ id: posts.id })
 
+		await Promise.all(updated.map(({ id }) =>
+			this.eventPublisher.publish(makeEvent(EVENT.PostDeleted, 'posts', { postId: id })),
+		))
+
 		return (updated.length)
 	}
 }

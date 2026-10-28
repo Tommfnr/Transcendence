@@ -1,13 +1,14 @@
 import { Module, Global } from '@nestjs/common'
 import postgres = require('postgres')
 import { drizzle } from 'drizzle-orm/postgres-js'
+import { requireEnv } from '@pep/shared'
 import * as schema from './schema'
 
 const client = postgres({
 	host: process.env.POSTGRES_HOST ?? 'postgres',
-	database: process.env.POSTGRES_DB,
-	user: process.env.POSTGRES_USER,
-	password: process.env.POSTGRES_PASSWORD,
+	database: requireEnv('POSTGRES_DB'),
+	user: requireEnv('POSTGRES_USER'),
+	password: requireEnv('POSTGRES_PASSWORD'),
 })
 
 export const DB = 'DB'

@@ -103,6 +103,11 @@ export class ObjectsService {
 			.set({ deletedAt: new Date(), isAvailable: false, updatedAt: new Date() })
 			.where(and(eq(objects.ownerId, ownerId), isNull(objects.deletedAt)))
 			.returning({ id: objects.id })
+
+		await Promise.all(updated.map(({ id }) =>
+			this.eventPublisher.publish(makeEvent(EVENT.ObjectDeleted, 'objects', { objectId: id })),
+		))
+
 		return (updated.length)
 	}
 }
