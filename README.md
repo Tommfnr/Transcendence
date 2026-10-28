@@ -22,6 +22,14 @@ Each step is designed on purpose to build engagement and responsibility, because
 
 On the technical side, the project gave us a foundation broad enough to build almost any module we wanted, so each team member could choose to work on what interested them personally and professionally.
 
+### Key features
+
+- Invite-only groups with owner, admin and member roles
+- Requests shared with your groups, answered with offers from your own objects
+- Loan tracking from offer to confirmed return, with no double booking
+- Real-time chat to agree on the details
+- Personal activity dashboard and a public API for your objects
+
 ## Instructions
 
 ### 1. Prerequisites
@@ -131,7 +139,7 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Drizzle Gateway documentation: https://gateway.drizzle.team/docs/docker
 
 **Zod:**
-- Official documentation link: https://zod.dev/
+- Official documentation: https://zod.dev/
 
 **Tailwind:**
 - Official documentation: https://tailwindcss.com/
@@ -152,9 +160,6 @@ The Bruno collections in `.bruno/` fill the database with test users, groups, ob
 - Angular route guards: https://angular.dev/guide/routing/route-guards
 
 - Argon2 (password hashing) : https://argon2-cffi.readthedocs.io/en/stable/argon2.html
-- //any (Anyone)
-
-[...]
 
 ### Usage of AI
 
@@ -208,7 +213,7 @@ Each feature or fix was developed on its own branch (`feat/…`, `fix/…`) and 
 
 **Tools.**
 
-- **GitHub Issues & Github Projects** for task tracking
+- **GitHub Issues & GitHub Projects** for task tracking
 - **Discord** for day-to-day communication and task coordination
 
 **Informal practices.**
@@ -445,11 +450,16 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 - Major: Advanced permissions system (rshin, abonifac, tfournie) + 2pts
   - **Why:** group creators keep control, trusted members help manage, others only use the group.
-  - **How:** owner, admin and member roles per group, enforced by NestJS guards (`GroupMemberGuard`, `GroupAdminGuard`, `GroupOwnerGuard`); the frontend shows management controls only to admins and deletion only to the owner.
+  - **How:**
+    - **Users (CRUD):** users are created at sign-up, viewed through profile pages and lookup by id or username (`GET /api/users/:id`, `/api/users/username/:username`), edited with `PATCH /api/users/me` and deleted with `DELETE /api/users/:id`, which is only allowed on your own account. A deletion is propagated to every service through the `user.deleted` event.
+    - **Roles management:** each group has an owner, admins and members. The owner and admins add and remove members and promote or demote them (`PATCH /api/groups/:groupId/members/:targetUserId/role`); when the owner leaves, the longest-standing member becomes owner.
+    - **Actions and views by role:** NestJS guards enforce each action on the backend: `GroupMemberGuard` to view a group and its members, `GroupAdminGuard` to edit it and manage members and roles, `GroupOwnerGuard` to delete it. The frontend shows management controls only to admins and deletion only to the owner.
 
 - Major: An organization system (rshin, abonifac, tfournie) + 2pts
   - **Why:** groups are the core of PEP: requests are only visible to the groups they're shared with.
-  - **How:** a `groups` microservice to create, edit and delete groups, add, remove or leave members, with ownership handed over when the owner leaves.
+  - **How:**
+    - **Manage organizations:** a `groups` microservice to create, edit and delete groups, add and remove members, and leave a group, with ownership handed over when the owner leaves.
+    - **Actions within an organization:** members create requests shared with their groups, read the feed of requests from their groups, update their own requests and answer others with an offer. The posts service checks membership with the groups service, so a request is only visible to members of the groups it is shared with.
 
 - Minor: User activity analytics and insights dashboard (rshin, abonifac) + 1pt
   - **Why:** shows users how they take part in their community.
@@ -459,7 +469,12 @@ Every table has an `id SERIAL PRIMARY KEY`, and most have `created_at` / `update
 
 - Major: Monitoring system with Prometheus and Grafana (rshin) + 2pts
   - **Why:** one place to check that every microservice is up and responsive, with alerts when it isn't.
-  - **How:** Prometheus scrapes the gateway and Node Exporter; Grafana is provisioned with a dashboard and 3 alert rules (target down, high P95 latency, failed login spike), reachable only through Caddy over HTTPS with a login.
+  - **How:**
+    - **Metrics collection:** Prometheus scrapes three targets every 15 seconds: the gateway, instrumented with `express-prom-bundle` (request count and latency, labelled by service and status code), Node Exporter, and Prometheus itself.
+    - **Exporters and integrations:** Node Exporter exports the host's CPU, memory and disk metrics. Grafana uses Prometheus as a provisioned data source, and sends alert notifications to a configurable contact point.
+    - **Custom dashboard:** a provisioned *PEP Server Overview* dashboard with request rate, P95 latency and 5xx error rate per service, plus host CPU and memory usage.
+    - **Alerting rules:** 3 provisioned rules: target down, high P95 latency and failed login spike.
+    - **Secure access:** Grafana publishes no port and is only reachable through Caddy over HTTPS, with a login (admin password generated randomly into `.env`; anonymous access and sign-up disabled).
 
 - Major: Backend as microservices (lgirerd) + 2pts
   - **Why:** each domain can be developed, deployed and restarted independently, which fits a team where each member owns services. Very heavy decision if you already have a working monolith infrastructure
@@ -478,7 +493,7 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
   - **Value:** both sides always know where a loan stands, the owner confirms the item is really back before the loan closes, and late returns are flagged automatically.
   - **Why Major:** it goes well beyond CRUD. It spans the database (status enum, exclusion constraints), a dedicated microservice with 8 statuses and 7 actions, a scheduled job, events and calls between services, concurrency handling, and several frontend pages.
 
-- Minor: Figma design system (abonifac) + 1pt
+- Minor (Module of choice): Figma design system (abonifac) + 1pt
   - **Why:** 3 people building the frontend need one source of truth for spacing, colors, fonts and components, so pages look consistent without asking the designer.
   - **How:** a Figma file organised as a design system: color and typography variables with contrast checked for accessibility, reusable components with variants (buttons, cards, inputs, headers) mirrored by the Angular components, vectorised logo and icons, and mobile and desktop frames for every page. The team used Dev Mode to read exact values and CSS during integration, and an interactive prototype validated the flows before coding.
 
@@ -529,8 +544,6 @@ The modules above total 19 points: 14 required + 5 bonus, the maximum. Any modul
 
 **Challenges**
 - **Mastering figma.** Learning the good practices: building with frames, auto-layout, components and variables. Writing down explicit design rules so the mock-ups leave no room for doubt. Choosing colors and fonts, creating and vectorising the logo. Prototyping the flows to show how the app would be used before writing any code. Thinking the design for mobile and desktop at the same time: deciding which screens could share a layout and which needed their own (bottom navigation vs. header on desktop), while keeping a single set of components. 
-
-
 - **Angular components.** Learning how Angular and TypeScript work together, and what belongs to the template, the component class or the styles. Combining CSS and TypeScript to build dynamic components that open and close (modal, date-picker, select-pill), and wrapping native elements like `input` or `select` to apply our own design without losing their behaviour. Switching between the decorator-based API (`@Input`) and the newer Signals API (`input()`) as the project evolved. *Solution:* starting from small presentational components (button, avatar, chip) before working on stateful ones.
 
 ### Tom (tfournie)
