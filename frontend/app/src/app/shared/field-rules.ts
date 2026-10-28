@@ -8,3 +8,9 @@ export const EMAIL_MAX_LENGTH = 320;
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,128}$/;
+
+// Group and object names (checked after trim, like the backend)
+export const NAME_MAX_LENGTH = 30;
+export const NAME_PATTERN = /^[a-zA-Z0-9 ]+$/;
+
+export const DESCRIPTION_MAX_LENGTH = 500;

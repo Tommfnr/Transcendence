@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { form, FormField, required, submit } from '@angular/forms/signals';
+import { form, FormField, required, maxLength, validate, submit } from '@angular/forms/signals';
 import { ObjectService } from '../../services/object.service';
 import { ObjectInput, OBJECT_TYPES, ObjectCondition, ObjectType } from '../../models/object.model';
 import { ButtonDirective } from '../../components/button/button.directive';
@@ -10,6 +10,7 @@ import { ErrorBannerComponent } from '../../components/error-banner/error-banner
 import { ChipComponent } from "../../components/chip/chip";
 import { firstValueFrom } from 'rxjs';
 import { isZodValidationError, mapZodErrorsToFieldTree } from '../../shared/zod-signal-errors';
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, NAME_PATTERN } from '../../shared/field-rules';
 
 @Component({
   selector: 'app-editAddObject',
@@ -50,7 +51,20 @@ export class EditAddObject implements OnInit {
 
   objectForm = form(this.object, (fieldPath) => {
     required(fieldPath.name, { message: 'Name is required' });
+    validate(fieldPath.name, ({ value }) => {
+      const name = value().trim();
+      if (value() === '')
+        return (undefined);
+      if (name === '')
+        return ({ kind: 'name', message: 'Name is required' });
+      if (name.length > NAME_MAX_LENGTH)
+        return ({ kind: 'name', message: `Max ${NAME_MAX_LENGTH} characters` });
+      if (!NAME_PATTERN.test(name))
+        return ({ kind: 'name', message: 'Only letters, digits, and spaces allowed' });
+      return (undefined);
+    });
     required(fieldPath.type, { message: 'Type is required' });
+    maxLength(fieldPath.description, DESCRIPTION_MAX_LENGTH, { message: `Max ${DESCRIPTION_MAX_LENGTH} characters` });
   });
 
 	ngOnInit(): void {
