@@ -39,4 +39,4 @@ hclean: down fclean
 
 re: fclean all
 
-.PHONY: all down fclean hclean re dev logs
+.PHONY: all down fclean hclean re logs

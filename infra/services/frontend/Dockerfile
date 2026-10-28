@@ -1,4 +1,5 @@
-FROM node:lts-alpine3.24
+# Build: production bundle, optimized and without source maps
+FROM node:lts-alpine3.24 AS build
 
 WORKDIR /app
 
@@ -8,6 +9,21 @@ RUN npm ci
 
 COPY . .
 
-EXPOSE 4200
+RUN npm run build
 
-CMD ["npm", "run", "start", "--", "--host", "0.0.0.0", "--port", "4200"]
+# Runtime: only the built static files, served by Caddy
+FROM caddy:2.11.4-alpine
+
+COPY --from=build /app/dist/transcendence/browser /srv
+
+# Client-side routes (/app/dashboard...) have no file: they fall back to index.html so a refresh works
+COPY <<EOF /etc/caddy/Caddyfile
+:80 {
+	root * /srv
+	encode zstd gzip
+	try_files {path} /index.html
+	file_server
+}
+EOF
+
+EXPOSE 80
