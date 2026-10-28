@@ -59,13 +59,9 @@ export class Dashboard {
 		this.filteredPosts().filter((post) => post.ownerId !== this.currentUserId())
 	);
 
-	private filteredPosts = computed(() => {
-		const groupId = this.selectedGroupId();
-		if (groupId === null)
-			return (this.posts());
-		return (this.posts().filter((post) =>
-			this.groupsByPostId().get(post.id)?.some((group) => group.id === groupId) ?? false));
-	});
+	private filteredPosts = computed(() =>
+		this.posts().filter((post) => this.isInSelectedGroup(post.id))
+	);
 
 	readonly groupRequests = computed<HelpRequest[]>(() =>
 		this.otherPosts().map((post) => this.toHelpRequest(post))
@@ -261,7 +257,7 @@ export class Dashboard {
 		const me = this.currentUserId();
 
 		return (this.lendings()
-			.filter((l) => l.lenderId === me)
+			.filter((l) => l.lenderId === me && this.isInSelectedGroup(l.postId))
 			.map((l) => ({
 				id: `lending-${l.id}`,
 				kind: 'offer',
@@ -272,6 +268,14 @@ export class Dashboard {
 				tone: LENDING_STATUS_DISPLAY[l.status].tone,
 				lendingId: l.id,
 			})));
+	}
+
+	// True when the request is shared with the group picked in the filter, or when no group is picked
+	private isInSelectedGroup(postId: number): boolean {
+		const groupId = this.selectedGroupId();
+		if (groupId === null)
+			return (true);
+		return (this.groupsByPostId().get(postId)?.some((group) => group.id === groupId) ?? false);
 	}
 
 	// Adds a message to the banner once, even when several requests fail the same way
