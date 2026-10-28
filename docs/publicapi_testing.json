@@ -125,7 +125,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Cordless Drill\",\n  \"type\": \"Tools\",\n  \"description\": \"18V drill with two batteries\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
+              "raw": "{\n  \"name\": \"Cordless Drill\",\n  \"type\": \"DIY\",\n  \"description\": \"18V drill with two batteries\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -175,7 +175,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Camping Tent\",\n  \"type\": \"Outdoor & Recreation\",\n  \"description\": \"Four person tent, used once\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+              "raw": "{\n  \"name\": \"Camping Tent\",\n  \"type\": \"Leisure\",\n  \"description\": \"Four person tent, used once\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -365,7 +365,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Road Bike\",\n  \"type\": \"Vehicles\",\n  \"description\": \"Belongs to the second user\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
+              "raw": "{\n  \"name\": \"Road Bike\",\n  \"type\": \"Other\",\n  \"description\": \"Belongs to the second user\",\n  \"condition\": \"good\",\n  \"isAvailable\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -904,7 +904,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"Tools\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"DIY\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -924,7 +924,7 @@
                       "const object = Array.isArray(body) ? body[0] : body;",
                       "pm.test('Object is created with the submitted data', function () {",
                       "  pm.expect(object.name).to.eql('Public Hammer');",
-                      "  pm.expect(object.type).to.eql('Tools');",
+                      "  pm.expect(object.type).to.eql('DIY');",
                       "  pm.expect(object.condition).to.eql('new');",
                       "});",
                       "pm.test('Owner is the user the key belongs to', function () { pm.expect(object.ownerId).to.be.a('number'); });",
@@ -1050,7 +1050,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"Tools\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
+                  "raw": "{\n  \"name\": \"Public Hammer\",\n  \"type\": \"DIY\",\n  \"description\": \"Created through the public API\",\n  \"condition\": \"new\",\n  \"isAvailable\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1206,6 +1206,42 @@
                     "type": "text/javascript",
                     "exec": [
                       "pm.test('Status is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /objects/:objectId with another user's key (403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key_2}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/public/v1/objects/{{public_object_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "public",
+                    "v1",
+                    "objects",
+                    "{{public_object_id}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 403', function () { pm.response.to.have.status(403); });"
                     ]
                   }
                 }
